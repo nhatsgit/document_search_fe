@@ -3,6 +3,8 @@
 Trang tra cứu tài liệu số hoá CRCK2 / BHCK. Một file [index.html](index.html), không cần build, phong cách giống
 dashboard "Quản trị hợp nhất". Dữ liệu lấy từ API [document_search_api](https://github.com/nhatsgit/document_search_api).
 
+- **Mỗi tab là 1 phòng:** sidebar liệt kê Toàn bộ kho / TCHC / TCKT / KHĐT / KTNN kèm số văn bản; trong mỗi phòng có
+  3 trang con (tab ngang): Tìm kiếm · Bộ hồ sơ · Tổng quan. Địa chỉ dạng `#/tckt/tim?q=...` (link cũ `#/tim?...` vẫn mở được).
 - **Tìm kiếm văn bản:** gõ có dấu hay không dấu, số hiệu, tên đối tác… Bảng kết quả rộng hết màn hình; nút **Bộ lọc**
   mở popup (máy tính: nhiều cột; điện thoại: trượt từ dưới lên) có số đếm (phòng, công ty, loại, năm, cơ quan, tên hồ sơ,
   thùng / thư mục, pháp lý, đơn vị tiền), khoảng ngày, khoảng giá trị. Chọn tới đâu kết quả cập nhật tới đó. Sắp xếp, xuất Excel.
