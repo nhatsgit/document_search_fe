@@ -129,7 +129,7 @@ tbody tr{transition:background-color .12s}
 .hieu-chu{display:flex;flex-direction:column;line-height:1.2;min-width:0}
 .hieu b{font-weight:600;font-size:15px;letter-spacing:-.01em}
 .hieu-chu span{color:var(--sb-ink-2);font-size:12px}
-.tabs-nhom-doc{display:flex;flex-direction:column;gap:2px;margin:0 -4px;padding:0 4px;flex:1 1 auto;min-height:0}
+.tabs-nhom-doc{display:flex;flex-direction:column;gap:2px;margin:0 -4px;padding:0 4px;flex:none}  /* sidebar tự cuộn cả khối, danh sách không bị co đè lên phần cuối */
 .nhan-muc{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--sb-ink-2);padding:14px 12px 6px}
 .tab{padding:11px 16px;border:none;background:none;color:var(--ink-3);border-bottom:2px solid transparent;font-weight:500;white-space:nowrap}
 .tabs-nhom-doc .tab{width:100%;text-align:left;border-radius:8px;border-bottom:none;padding:9px 12px;font-size:13.5px;color:var(--sb-ink-2);
@@ -524,6 +524,10 @@ button.kpi:hover{border-color:var(--leaf)}
   .tabs-con .tab{flex:1 1 0;justify-content:center;padding:12px 6px;font-size:13.5px;min-width:max-content}
 }
 @media (max-width:420px){.tabs-con .tab svg{display:none}}
+.nhan-cty{display:flex;flex-direction:column;gap:1px;padding-top:16px}
+.nhan-cty span{color:var(--sb-ink)}
+.nhan-cty small{font-size:10.5px;font-weight:400;letter-spacing:0;text-transform:none;color:var(--sb-ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#dsPhong .nhan-cty:first-child{padding-top:6px}
 @media print{.thanh-ben,.nut-mo-ben,.nut-theme,.cot-loc,.thanh-tim{display:none !important}.noi-dung-chinh{margin-left:0}}
 </style>
 </head>
@@ -817,7 +821,7 @@ function choLau(d) {
 var META = null;          // meta của phạm vi đang xem (bộ lọc, sắp xếp, nguồn…)
 var META_GOC = null;      // meta toàn kho: danh sách phòng + số đếm cho sidebar
 var TT = {
-  pv: '',                 // phạm vi phòng (khoá bỏ dấu, vd 'tckt'); '' = toàn bộ kho. Mỗi tab sidebar = 1 phòng
+  pv: '',                 // phạm vi 'congty.phong' (vd 'crck2.tckt'); '' = toàn bộ kho. Mỗi tab sidebar = 1 phòng của 1 công ty
   trang: 'tim',
   tim: { q: '', loc: {}, tu: '', den: '', dv: '', giaTu: '', giaDen: '', sx: '', bo: '', trang: 1, co: 50 },
   bo: { q: '', congTy: '', sx: 'so_luong', coGoc: '', trang: 1, ma: '' },
@@ -832,7 +836,8 @@ function docDiaChi() {
   var phan = h.split('?'), duong = phan[0] || 'tim', p = new URLSearchParams(phan[1] || '');
   var seg = duong.split('/');
   // #/<phòng>/<trang>[/mã bộ]; link cũ #/<trang> = toàn bộ kho
-  if (!{ tim: 1, bo: 1, tong: 1 }[seg[0]]) { TT.pv = seg[0] === 'tat-ca' ? '' : decodeURIComponent(seg[0] || ''); seg = seg.slice(1); }
+  if (!h) TT.pv = pvMacDinh();                      // mở trang không kèm địa chỉ: tab dùng lần trước
+  else if (!{ tim: 1, bo: 1, tong: 1 }[seg[0]]) { TT.pv = seg[0] === 'tat-ca' ? '' : decodeURIComponent(seg[0] || ''); seg = seg.slice(1); }
   else TT.pv = '';
   TT.trang = { tim: 'tim', bo: 'bo', tong: 'tong' }[seg[0]] || 'tim';
   TT.vb = p.get('vb') || '';
@@ -879,9 +884,20 @@ function vietDiaChi(them) {
 
 /* ===================================================================== Điều hướng trang */
 var TEN_TRANG = { tim: 'Tìm kiếm văn bản', bo: 'Bộ hồ sơ liên quan', tong: 'Tổng quan kho' };
+var PV_DAU = 'crck2.tchc';   // tab mặc định lần đầu (tab đầu tiên của sidebar)
+function pvMacDinh() { try { var v = localStorage.getItem('tclt_pv'); if (v !== null) return v; } catch (e) {} return PV_DAU; }
+function nhoPv() { try { localStorage.setItem('tclt_pv', TT.pv); } catch (e) {} }
+/** Tên phạm vi đang xem: { nhan: 'CRCK2 · TCKT', ten: 'Phòng Tài chính Kế toán — CRCK2' } hoặc null (toàn kho / không rõ). */
 function phongDangXem() {
-  var ds = META_GOC ? META_GOC.phongBan : [];
-  for (var i = 0; i < ds.length; i++) if (ds[i].gt === TT.pv) return ds[i];
+  if (!META_GOC || !TT.pv) return null;
+  var ds = META_GOC.congTyBan || [];
+  for (var i = 0; i < ds.length; i++) for (var j = 0; j < ds[i].phong.length; j++) {
+    var x = ds[i].phong[j];
+    if (x.pv === TT.pv) return { nhan: ds[i].nhan + ' · ' + x.nhan, ten: x.ten + ' — ' + ds[i].nhan, ct: ds[i], ph: x };
+  }
+  for (var k = 0; k < ds.length; k++) if (ds[k].gt === TT.pv) return { nhan: ds[k].nhan, ten: ds[k].ten };
+  var pb = META_GOC.phongBan || [];
+  for (var m = 0; m < pb.length; m++) if (pb[m].gt === TT.pv) return { nhan: pb[m].nhan + ' (2 công ty)', ten: pb[m].ten + ' — cả 2 công ty' };
   return null;
 }
 function veTrang() {
@@ -891,7 +907,7 @@ function veTrang() {
   $('#pBo').hidden = TT.trang !== 'bo';
   $('#pTong').hidden = TT.trang !== 'tong';
   var ph = phongDangXem(), tenPv = ph ? ph.nhan : 'Toàn bộ kho';
-  $('#tenPv').textContent = ph ? ph.ten : 'Toàn bộ kho lưu trữ';
+  $('#tenPv').textContent = ph ? ph.ten : 'Toàn bộ kho lưu trữ (2 công ty)';
   $('#tieuDeDt').textContent = tenPv + ' · ' + TEN_TRANG[TT.trang];
   document.title = tenPv + ' · ' + TEN_TRANG[TT.trang] + ' - Tra cứu lưu trữ';
   if (META) { $('#demTong').textContent = so(META.tong); $('#demBo').textContent = so(META.soBo); }
@@ -916,8 +932,16 @@ function chonPhong(pv) {
   TT.tong.loc = {};
   kqHienTai = []; TIM_TRONG_LOC = {}; MO_RONG_LOC = {};
   $('#luoiBo').innerHTML = ''; $('#noiDungTong').innerHTML = '';
-  vietDiaChi(true);
+  vietDiaChi(true); nhoPv();
+  goiTruocTrangTim();
   napMetaPhamVi().then(function () { veTrang(); window.scrollTo(0, 0); }, function (e) { baoLoi(e.message); });
+}
+/** Gọi sẵn trang tìm kiếm của phạm vi mới, song song với meta (đỡ 1 lượt chờ mạng); timKiem() dùng lại kết quả. */
+function goiTruocTrangTim() {
+  if (TT.trang !== 'tim') return;
+  var p = thamSoTim(TT.tim); p.trang = TT.tim.trang; p.co = TT.tim.co;
+  timTruoc = { khoa: JSON.stringify(p) + '|' + TT.pv, hua: goi('timKiem', p) };
+  timTruoc.hua.catch(function () {});
 }
 /** Meta của phạm vi đang xem (bộ lọc ban đầu, sắp xếp, nguồn) — máy chủ tính sẵn, trả gần như tức thì. */
 function napMetaPhamVi() {
@@ -934,8 +958,12 @@ function veDsPhong() {
       '<span class="icon-phong" aria-hidden="true">' + esc(viet) + '</span>' +
       '<span class="nhom-ten">' + esc(ten) + '<small>' + esc(phu) + '</small></span><span class="huy-hieu">' + so(n) + '</span></button>';
   };
-  $('#dsPhong').innerHTML = o('', 'ALL', 'Toàn bộ kho', 'Tất cả phòng ban', m.tongKho) +
-    m.phongBan.map(function (p) { return o(p.gt, p.nhan, p.nhan, String(p.ten).replace(/^Phòng /, ''), p.n); }).join('');
+  // Mỗi công ty 1 nhóm, mỗi phòng của công ty là 1 tab; "Toàn bộ kho" (tìm chéo 2 công ty) để cuối
+  $('#dsPhong').innerHTML = (m.congTyBan || []).map(function (c) {
+    return '<div class="nhan-muc nhan-cty"><span>' + esc(c.nhan) + '</span><small>' + esc(c.ten) + ' · ' + so(c.n) + '</small></div>' +
+      c.phong.map(function (x) { return o(x.pv, x.nhan, x.nhan, String(x.ten).replace(/^Phòng /, ''), x.n); }).join('');
+  }).join('') +
+    '<div class="nhan-muc nhan-cty"><span>Tìm chung</span></div>' + o('', 'ALL', 'Toàn bộ kho', 'Cả 2 công ty, mọi phòng', m.tongKho);
   $$('#dsPhong .tab').forEach(function (b) { b.classList.toggle('on', b.dataset.pv === TT.pv); });
 }
 
@@ -1420,6 +1448,7 @@ function tongQuan() {
     if (daCo[k]) return; daCo[k] = 1;
     chip.push([khoa(n.phong), khoa(n.congTy), n.phong + ' · ' + n.congTy]);
   });
+  $('#gatTong').hidden = chip.length <= 2;          // tab chỉ có 1 nguồn (1 phòng của 1 công ty): chip thừa
   $('#gatTong').innerHTML = chip.map(function (x) {
     var on = x[0] === chonPh && x[1] === chonCt;
     return '<button type="button" class="chip' + (on ? ' on' : '') + '" data-tong-ph="' + x[0] + '" data-tong-ct="' + x[1] + '">' + esc(x[2]) + '</button>';
@@ -1555,7 +1584,7 @@ function ganSuKien() {
   window.addEventListener('popstate', function () {
     var pvCu = TT.pv;
     docDiaChi();
-    if (TT.pv !== pvCu) { kqHienTai = []; napMetaPhamVi().then(veTrang); } else veTrang();
+    if (TT.pv !== pvCu) { kqHienTai = []; nhoPv(); goiTruocTrangTim(); napMetaPhamVi().then(veTrang); } else veTrang();
   });
 
   // Tìm kiếm: gõ tới đâu tìm tới đó (dừng gõ 300 ms), Enter tìm ngay
@@ -1694,7 +1723,14 @@ function batDau() {
     var m = r[0];
     if (m.canDangNhap) { META = m; hienDangNhap(); return; }
     META_GOC = m; META = r[1];
-    if (TT.pv && !phongDangXem()) { TT.pv = ''; META = m; vietDiaChi(); }   // link tới phòng không còn
+    if (TT.pv && !phongDangXem()) {
+      // tab đã nhớ / link không còn: về tab đầu tiên của sidebar
+      var dau = m.congTyBan && m.congTyBan[0] && m.congTyBan[0].phong[0];
+      TT.pv = dau ? dau.pv : ''; vietDiaChi(); nhoPv();
+      return napMetaPhamVi().then(function () { $('#loiChung').hidden = true; veDsPhong(); veTrang(); });
+    }
+    if (!location.hash || location.hash === '#') vietDiaChi();
+    nhoPv();
     $('#loiChung').hidden = true;
     veDsPhong();
     $('#benNguon').innerHTML = '<b>' + so(m.tongKho) + '</b> văn bản · <b>' + so(m.soBoKho) + '</b> bộ hồ sơ<br>' +
