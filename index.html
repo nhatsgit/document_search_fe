@@ -74,9 +74,6 @@ mark{background:var(--mark);color:inherit;border-radius:2px;padding:0 1px}
 .btn.chinh:hover{opacity:.9;background:var(--leaf)}
 .btn:disabled{opacity:.45;cursor:not-allowed}
 .btn.nho{padding:5px 10px;font-size:13px}
-.nut-theme{position:fixed;top:14px;right:14px;z-index:100;width:36px;height:36px;border:1px solid var(--line-2);background:var(--card);
-  color:var(--ink);border-radius:50%;font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow)}
-.nut-theme:hover{border-color:var(--leaf)}
 label.nhan{display:block;font-size:12px;color:var(--ink-3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em}
 .o{width:100%;padding:8px 10px;border:1px solid var(--line-2);background:var(--card);color:var(--ink);border-radius:2px;outline:none}
 .o:focus{border-color:var(--leaf);box-shadow:0 0 0 3px var(--leaf-soft)}
@@ -114,50 +111,92 @@ tbody tr{transition:background-color .12s}
 .vi.tap{background:var(--line);color:var(--ink-2)}
 .ma{font-family:ui-monospace,'Cascadia Mono',Consolas,monospace;font-size:.92em}
 
-/* ---------- Khung ứng dụng: sidebar trái (màu thương hiệu cố định) + nội dung ---------- */
-.khung-ung-dung{display:flex;align-items:flex-start;min-height:100vh}
-.thanh-ben{
-  --sb-bg:#157A5A; --sb-ink:#FFFFFF; --sb-ink-2:rgba(255,255,255,.68);
-  --sb-line:rgba(255,255,255,.2); --sb-hover:rgba(255,255,255,.12);
+/* ---------- Khung ứng dụng: thanh đầu trang (màu thương hiệu cố định) chọn công ty + phòng, dưới là tab trang con ----------
+   Nội dung chiếm hết bề ngang. Lề hai bên của thanh đầu / tab / nội dung thẳng hàng (cùng tối đa 1400px). */
+:root{--le-ngang:max(24px,calc((100% - 1352px) / 2))}
+.dau-ud{
+  --sb-bg:#157A5A; --sb-ink:#FFFFFF; --sb-ink-2:rgba(255,255,255,.72);
+  --sb-line:rgba(255,255,255,.22); --sb-hover:rgba(255,255,255,.13);
   --sb-active-bg:#FFFFFF; --sb-active-ink:#0F5A40;
-  width:250px;flex:none;background:var(--sb-bg);color:var(--sb-ink);padding:20px 16px;display:flex;flex-direction:column;gap:16px;
-  position:fixed;top:0;left:0;bottom:0;height:100vh;overflow-y:auto;z-index:40}
-.noi-dung-chinh{margin-left:250px;flex:1;min-width:0}
-.hieu{display:flex;align-items:center;gap:10px}
-.hieu-logo{flex:none;width:38px;height:38px;border-radius:50%;background:#fff;color:#157A5A;display:flex;align-items:center;justify-content:center;
+  background:var(--sb-bg);color:var(--sb-ink);position:relative;z-index:40}
+.dau-ud-trong{display:flex;align-items:center;gap:18px;min-height:60px;padding:8px var(--le-ngang)}
+.hieu{display:flex;align-items:center;gap:10px;flex:none;color:inherit;text-decoration:none}
+.hieu-logo{flex:none;width:36px;height:36px;border-radius:50%;background:#fff;color:#157A5A;display:flex;align-items:center;justify-content:center;
   box-shadow:0 0 0 2px rgba(255,255,255,.18)}
 .hieu-chu{display:flex;flex-direction:column;line-height:1.2;min-width:0}
-.hieu b{font-weight:600;font-size:15px;letter-spacing:-.01em}
-.hieu-chu span{color:var(--sb-ink-2);font-size:12px}
-.tabs-nhom-doc{display:flex;flex-direction:column;gap:2px;margin:0 -4px;padding:0 4px;flex:none}  /* sidebar tự cuộn cả khối, danh sách không bị co đè lên phần cuối */
-.nhan-muc{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--sb-ink-2);padding:14px 12px 6px}
-.tab{padding:11px 16px;border:none;background:none;color:var(--ink-3);border-bottom:2px solid transparent;font-weight:500;white-space:nowrap}
-.tabs-nhom-doc .tab{width:100%;text-align:left;border-radius:8px;border-bottom:none;padding:9px 12px;font-size:13.5px;color:var(--sb-ink-2);
-  display:flex;align-items:center;gap:10px}
-.tabs-nhom-doc .tab:hover{color:var(--sb-ink);background:var(--sb-hover)}
-.tabs-nhom-doc .tab.on{background:var(--sb-active-bg);color:var(--sb-active-ink);font-weight:600}
-.huy-hieu{flex:none;min-width:20px;padding:1px 6px;border-radius:999px;background:var(--sb-active-bg);color:var(--sb-active-ink);
-  font-size:11px;font-weight:700;text-align:center;line-height:1.5}
-.tabs-nhom-doc .tab.on .huy-hieu{background:var(--sb-bg);color:var(--sb-ink)}
-.nhom-icon{display:inline-flex;flex:none}
-.nhom-ten{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
-.ben-duoi{margin-top:auto;display:flex;flex-direction:column;gap:8px;padding-top:14px;border-top:1px solid var(--sb-line);font-size:12px;color:var(--sb-ink-2)}
-.thanh-ben .btn.nho{background:rgba(255,255,255,.08);border-color:var(--sb-line);color:var(--sb-ink);justify-content:center}
-.thanh-ben .btn.nho:hover{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.45)}
-.ben-nguon b{color:var(--sb-ink);font-weight:600}
+.hieu b{font-weight:600;font-size:15px;letter-spacing:-.01em;white-space:nowrap}
+.hieu-chu span{color:var(--sb-ink-2);font-size:11.5px;white-space:nowrap}
+/* Chọn phạm vi trên máy tính: [CRCK2 | BHCK | Cả 2 công ty]  ·  [Tất cả phòng] TCHC TCKT KHĐT KTNN */
+.chon-pv{display:flex;align-items:center;gap:14px;flex:1;min-width:0}
+.seg-cty{display:inline-flex;flex:none;padding:3px;gap:2px;border-radius:10px;background:rgba(0,0,0,.16)}
+.seg-cty button{border:none;background:none;color:var(--sb-ink-2);padding:6px 13px;border-radius:7px;font-weight:600;font-size:13.5px;white-space:nowrap;line-height:1.3}
+.seg-cty button:hover{color:var(--sb-ink);background:var(--sb-hover)}
+.seg-cty button.on{background:var(--sb-active-bg);color:var(--sb-active-ink);box-shadow:0 1px 3px rgba(0,0,0,.18)}
+.vach-doc{flex:none;width:1px;align-self:stretch;margin:6px 0;background:var(--sb-line)}
+.ds-phong{display:flex;align-items:center;gap:2px;min-width:0;overflow-x:auto;scrollbar-width:none}
+.ds-phong::-webkit-scrollbar{display:none}
+.ds-phong button{flex:none;display:inline-flex;align-items:center;gap:7px;border:none;background:none;color:var(--sb-ink-2);padding:7px 11px;border-radius:8px;
+  font-size:13.5px;font-weight:500;white-space:nowrap;line-height:1.3}
+.ds-phong button:hover{color:var(--sb-ink);background:var(--sb-hover)}
+.ds-phong button.on{background:var(--sb-active-bg);color:var(--sb-active-ink);font-weight:700}
+.ds-phong .so-p{font-size:11px;font-weight:600;padding:0 6px;border-radius:99px;background:rgba(255,255,255,.16);color:var(--sb-ink);line-height:1.6}
+.ds-phong button.on .so-p{background:var(--sb-bg);color:var(--sb-ink)}
+.thong-tin-kho{flex:none;font-size:12px;line-height:1.35;color:var(--sb-ink-2);text-align:right;white-space:nowrap}
+.thong-tin-kho b{color:var(--sb-ink);font-weight:600}
+.nut-theme{flex:none;width:36px;height:36px;border:1px solid var(--sb-line);background:rgba(255,255,255,.08);color:var(--sb-ink);border-radius:50%;
+  font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center}
+.nut-theme:hover{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.5)}
+/* Nút chọn phạm vi (màn hẹp): mở tấm chọn */
+.nut-pv{display:none;flex:1;min-width:0;align-items:center;gap:8px;padding:7px 12px;border:1px solid var(--sb-line);border-radius:10px;
+  background:rgba(0,0,0,.14);color:var(--sb-ink);text-align:left;line-height:1.25}
+.nut-pv:hover{background:rgba(0,0,0,.22)}
+.nut-pv .chu-pv{flex:1;min-width:0;display:flex;flex-direction:column}
+.nut-pv .chu-pv b{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nut-pv .chu-pv small{font-size:11.5px;color:var(--sb-ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nut-pv svg{flex:none;opacity:.85}
 .wrap{max-width:1400px;margin:0 auto;padding:20px 24px 80px}
-.nut-mo-ben{display:none;position:fixed;top:14px;left:14px;z-index:50;width:36px;height:36px;border:1px solid var(--line-2);background:var(--card);
-  color:var(--ink);border-radius:50%;font-size:16px;line-height:1;box-shadow:var(--shadow)}
-.nen-ben{display:none}
-.thanh-tren-dt{display:none}
+@media (max-width:1280px){.thong-tin-kho{display:none}}
+@media (max-width:1080px){
+  .chon-pv{display:none}
+  .nut-pv{display:flex}
+  .dau-ud-trong{gap:12px}
+}
 @media (max-width:900px){
-  .noi-dung-chinh{margin-left:0}
-  .nut-mo-ben{display:flex;align-items:center;justify-content:center}
-  .thanh-ben{transform:translateX(-100%);transition:transform .2s ease;z-index:90;box-shadow:var(--shadow)}
-  .thanh-ben.mo{transform:translateX(0)}
-  .nen-ben.mo{display:block;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:85}
-  .thanh-tren-dt{display:flex;align-items:center;justify-content:center;height:64px;padding:0 60px;font-size:15px;background:var(--card);border-bottom:1px solid var(--line)}
+  .dau-ud-trong{padding:8px 12px;min-height:56px;gap:10px}
+  .hieu-chu{display:none}
   .wrap{padding:14px 12px 80px}
+}
+/* Tấm chọn phạm vi: hộp giữa màn (màn vừa) / trượt từ dưới lên (điện thoại) */
+.nen-pv{position:fixed;inset:0;background:rgba(21,35,28,.5);z-index:95;opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s}
+.nen-pv.mo{opacity:1;visibility:visible}
+.tam-pv{position:fixed;z-index:96;left:0;right:0;margin:0 auto;top:8vh;width:min(560px,calc(100% - 32px));max-height:84vh;display:flex;flex-direction:column;
+  background:var(--card);color:var(--ink);border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.35);
+  opacity:0;visibility:hidden;transform:translateY(12px) scale(.98);transition:opacity .2s,transform .2s,visibility .2s}
+.tam-pv.mo{opacity:1;visibility:visible;transform:none}
+.tam-pv .dau-tam{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line);flex:none}
+.tam-pv .dau-tam b{font-size:16px;margin-right:auto}
+.tam-pv .than-tam{overflow-y:auto;padding:6px 16px 16px;overscroll-behavior:contain}
+.tam-pv .nhom-pv{margin-top:12px}
+.tam-pv .nhom-pv h4{margin:0 0 8px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);display:flex;gap:8px;align-items:baseline}
+.tam-pv .nhom-pv h4 small{font-weight:400;text-transform:none;letter-spacing:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.luoi-pv{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.luoi-pv button{display:flex;flex-direction:column;align-items:flex-start;gap:1px;padding:10px 12px;border:1px solid var(--line-2);border-radius:10px;
+  background:var(--card);color:var(--ink);text-align:left;line-height:1.3;min-width:0}
+.luoi-pv button:hover{border-color:var(--leaf);background:var(--leaf-soft)}
+.luoi-pv button.on{border-color:var(--leaf);background:var(--leaf-soft);box-shadow:inset 0 0 0 1px var(--leaf)}
+.luoi-pv button b{font-size:14px}
+.luoi-pv button.on b{color:var(--leaf)}
+.luoi-pv button:first-child{grid-column:1/-1;flex-direction:row;flex-wrap:wrap;align-items:baseline;column-gap:10px}
+.luoi-pv button:first-child .n{margin-left:auto}
+.luoi-pv button small{font-size:12px;color:var(--ink-3);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.luoi-pv button .n{font-size:12px;color:var(--ink-2);font-weight:600}
+.tam-pv .chan-tam{flex:none;padding:10px 16px calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--line);font-size:12.5px;color:var(--ink-3)}
+.tam-pv .chan-tam b{color:var(--ink-2)}
+@media (max-width:760px){
+  .tam-pv{top:auto;bottom:0;width:100%;max-height:88vh;border-radius:18px 18px 0 0;transform:translateY(100%)}
+  .tam-pv.mo{transform:none}
+  .tam-pv::before{content:'';display:block;width:40px;height:4px;border-radius:2px;background:var(--line-2);margin:8px auto 0;flex:none}
+  .tam-pv .dau-tam{padding:8px 16px 10px}
 }
 .dau-trang{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:0 0 14px}
 .dau-trang h1{font-size:22px;margin:0;letter-spacing:-.02em}
@@ -453,7 +492,8 @@ button.kpi:hover{border-color:var(--leaf)}
   .thanh-tim #nutXuat span,.nut-chi-icon{display:none}
 }
 /* ---------- Hiệu ứng tìm kiếm / bộ lọc ---------- */
-#khungKq{position:relative;overflow:hidden}
+#khungKq{position:relative;overflow:clip}   /* clip (không phải hidden): vẫn cắt thanh tải nhưng để tiêu đề bảng dính được */
+.bang-kq th{top:var(--cao-tab,46px)}   /* dính ngay dưới thanh tab trang con */
 #khungKq::before{content:'';position:absolute;left:0;top:0;height:3px;width:100%;z-index:3;pointer-events:none;
   background:linear-gradient(90deg,transparent,var(--leaf),transparent);transform:translateX(-100%);opacity:0}
 #khungKq.dang-tai::before{opacity:1;animation:thanh-tai 1s ease-in-out infinite}
@@ -502,18 +542,16 @@ button.kpi:hover{border-color:var(--leaf)}
   .thanh-tim select.o{max-width:170px}
   .thanh-tim #nutXuat .chu-nut{display:none}
 }
-/* ---------- Phòng ban (sidebar) + trang con (tab ngang, giống tabs-con của dashboard) ---------- */
-.tab-phong .nhom-ten{display:flex;flex-direction:column;line-height:1.25}
-.tab-phong .nhom-ten small{font-size:11px;font-weight:400;opacity:.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tab-phong .icon-phong{flex:none;width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;
-  font-size:10.5px;font-weight:700;letter-spacing:.02em;background:rgba(255,255,255,.14);color:var(--sb-ink)}
-.tabs-nhom-doc .tab-phong.on .icon-phong{background:var(--sb-bg);color:var(--sb-ink)}
-.tabs.tabs-con{position:sticky;top:0;z-index:30;display:flex;align-items:stretch;gap:2px;padding:0 24px;background:var(--card);
+/* ---------- Trang con (tab ngang, giống tabs-con của dashboard) ---------- */
+.tabs.tabs-con{position:sticky;top:0;z-index:30;display:flex;align-items:stretch;gap:2px;padding:0 var(--le-ngang);box-shadow:var(--shadow);background:var(--card);
   border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
 .tabs.tabs-con::-webkit-scrollbar{display:none}
 .tabs-con .ten-pv{display:flex;align-items:center;margin-right:14px;padding-right:14px;border-right:1px solid var(--line);
   font-weight:700;font-size:14px;color:var(--ink);white-space:nowrap}
-.tabs-con .tab{display:inline-flex;align-items:center;gap:7px;padding:13px 14px;font-size:14px}
+.tab{padding:11px 16px;border:none;background:none;color:var(--ink-3);border-bottom:2px solid transparent;font-weight:500;white-space:nowrap}
+.tabs-con .tab{display:inline-flex;align-items:center;gap:7px;padding:13px 14px;font-size:14px;margin-bottom:-1px}
+.tabs-con .tab:hover{color:var(--ink)}
+.tabs-con .tab.on{color:var(--leaf);border-bottom-color:var(--leaf);font-weight:600}
 .tabs-con .so-tab{font-size:11.5px;font-weight:600;color:var(--ink-3);background:var(--paper);border:1px solid var(--line);border-radius:99px;padding:0 7px}
 .tabs-con .so-tab:empty{display:none}
 .tabs-con .tab.on .so-tab{color:var(--leaf);border-color:color-mix(in srgb,var(--leaf) 40%,var(--line))}
@@ -524,10 +562,6 @@ button.kpi:hover{border-color:var(--leaf)}
   .tabs-con .tab{flex:1 1 0;justify-content:center;padding:12px 6px;font-size:13.5px;min-width:max-content}
 }
 @media (max-width:420px){.tabs-con .tab svg{display:none}}
-.nhan-cty{display:flex;flex-direction:column;gap:1px;padding-top:16px}
-.nhan-cty span{color:var(--sb-ink)}
-.nhan-cty small{font-size:10.5px;font-weight:400;letter-spacing:0;text-transform:none;color:var(--sb-ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#dsPhong .nhan-cty:first-child{padding-top:6px}
 .khong-tien .cot-gia{display:none}
 .vi-tri{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;margin:-4px 0 16px;padding:10px 12px;background:var(--paper);border:1px solid var(--line);border-radius:8px}
 .vi-tri .tieu-vt{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);margin-right:4px}
@@ -538,50 +572,54 @@ button.kpi:hover{border-color:var(--leaf)}
 .nhom-tq small{font-size:12.5px;font-weight:400;color:var(--ink-3)}
 .luoi-2.mot{grid-template-columns:1fr}
 #pTim .dau-trang{margin-bottom:10px}
-@media print{.thanh-ben,.nut-mo-ben,.nut-theme,.cot-loc,.thanh-tim{display:none !important}.noi-dung-chinh{margin-left:0}}
+@media print{.dau-ud,.tabs-con,.cot-loc,.thanh-tim,.tam-pv,.nen-pv{display:none !important}}
 </style>
 </head>
 <body>
-<button class="nut-theme" id="nutTheme" type="button" title="Đổi giao diện sáng / tối" aria-label="Đổi giao diện sáng / tối">◐</button>
-
-<div class="khung-ung-dung">
-  <button class="nut-mo-ben" id="nutMoBen" type="button" aria-label="Mở menu">☰</button>
-  <div class="nen-ben" id="nenBen"></div>
-
-  <aside class="thanh-ben" id="thanhBen">
-    <div class="hieu">
+<header class="dau-ud">
+  <div class="dau-ud-trong">
+    <a class="hieu" href="#" id="veDau" title="Về trang tìm kiếm">
       <span class="hieu-logo" aria-hidden="true">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M3 5h18v4H3z"/><path d="M5 9v10h14V9"/><path d="M10 13h4"/></svg>
       </span>
-      <div class="hieu-chu">
-        <b>Tra cứu lưu trữ</b>
-        <span>Tài liệu số hoá CRCK2 · BHCK</span>
-      </div>
+      <span class="hieu-chu"><b>Tra cứu lưu trữ</b><span>Tài liệu số hoá CRCK2 · BHCK</span></span>
+    </a>
+    <div class="chon-pv">
+      <div class="seg-cty" id="segCty" role="tablist" aria-label="Công ty"></div>
+      <span class="vach-doc" aria-hidden="true"></span>
+      <nav class="ds-phong" id="dsPhong" aria-label="Phòng ban"></nav>
     </div>
-    <nav class="tabs-nhom-doc" id="tabsNhom" aria-label="Phòng ban">
-      <div class="nhan-muc">Phòng ban</div>
-      <div id="dsPhong"><div class="skeleton" style="height:36px;margin:4px 0;opacity:.3"></div></div>
-    </nav>
-    <div class="ben-duoi">
-      <div class="ben-nguon" id="benNguon">Đang kết nối API…</div>
-      <button class="btn nho" id="nutTaiLai" type="button">Tải lại trang</button>
-    </div>
-  </aside>
+    <button class="nut-pv" id="nutPv" type="button" aria-haspopup="dialog" aria-controls="tamPv">
+      <span class="chu-pv"><b id="nutPvTen">Đang tải…</b><small id="nutPvPhu">Chọn công ty / phòng</small></span>
+      <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 8 5 5 5-5"/></svg>
+    </button>
+    <div class="thong-tin-kho" id="benNguon">Đang kết nối API…</div>
+    <button class="nut-theme" id="nutTheme" type="button" title="Đổi giao diện sáng / tối" aria-label="Đổi giao diện sáng / tối">◐</button>
+  </div>
+</header>
 
-  <main class="noi-dung-chinh">
-    <div class="thanh-tren-dt"><b id="tieuDeDt">Tra cứu lưu trữ</b></div>
-    <div class="tabs tabs-con" id="tabsCon" role="tablist">
-      <span class="ten-pv" id="tenPv"></span>
-      <button class="tab" data-trang="tim" type="button" role="tab">
-        <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="8.5" cy="8.5" r="5.5"/><path d="m13 13 4 4"/></svg>
-        Tìm kiếm<span class="so-tab" id="demTong"></span></button>
-      <button class="tab" data-trang="bo" type="button" role="tab">
-        <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M2.5 6.5h5l1.5 2h8.5v8h-15z"/><path d="M4.5 6.5V4h4l1.5 2"/></svg>
-        Bộ hồ sơ<span class="so-tab" id="demBo"></span></button>
-      <button class="tab" data-trang="tong" type="button" role="tab">
-        <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 17h14"/><path d="M5.5 14V9M10 14V5M14.5 14v-3"/></svg>
-        Tổng quan</button>
-    </div>
+<div class="tabs tabs-con" id="tabsCon" role="tablist">
+  <span class="ten-pv" id="tenPv"></span>
+  <button class="tab" data-trang="tim" type="button" role="tab">
+    <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="8.5" cy="8.5" r="5.5"/><path d="m13 13 4 4"/></svg>
+    Tìm kiếm<span class="so-tab" id="demTong"></span></button>
+  <button class="tab" data-trang="bo" type="button" role="tab">
+    <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M2.5 6.5h5l1.5 2h8.5v8h-15z"/><path d="M4.5 6.5V4h4l1.5 2"/></svg>
+    Bộ hồ sơ<span class="so-tab" id="demBo"></span></button>
+  <button class="tab" data-trang="tong" type="button" role="tab">
+    <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 17h14"/><path d="M5.5 14V9M10 14V5M14.5 14v-3"/></svg>
+    Tổng quan</button>
+</div>
+
+<!-- Tấm chọn phạm vi (màn hẹp) -->
+<div class="nen-pv" id="nenPv"></div>
+<div class="tam-pv" id="tamPv" role="dialog" aria-modal="true" aria-label="Chọn công ty và phòng">
+  <div class="dau-tam"><b>Chọn công ty / phòng</b><button class="nut-dong-sheet" id="dongPv" type="button" aria-label="Đóng">✕</button></div>
+  <div class="than-tam" id="thanPv"></div>
+  <div class="chan-tam" id="chanPv"></div>
+</div>
+
+<main class="noi-dung-chinh">
     <div class="wrap">
       <div id="loiChung" class="bao-loi" hidden></div>
 
@@ -669,8 +707,7 @@ button.kpi:hover{border-color:var(--leaf)}
         <div id="noiDungTong"></div>
       </section>
     </div>
-  </main>
-</div>
+</main>
 
 <!-- Ngăn chi tiết văn bản -->
 <div class="nen-ngan" id="nenNgan"></div>
@@ -829,9 +866,9 @@ function choLau(d) {
 
 /* ===================================================================== Trạng thái + địa chỉ trang */
 var META = null;          // meta của phạm vi đang xem (bộ lọc, sắp xếp, nguồn…)
-var META_GOC = null;      // meta toàn kho: danh sách phòng + số đếm cho sidebar
+var META_GOC = null;      // meta toàn kho: danh sách công ty / phòng + số đếm cho thanh đầu trang
 var TT = {
-  pv: '',                 // phạm vi 'congty.phong' (vd 'crck2.tckt'); '' = toàn bộ kho. Mỗi tab sidebar = 1 phòng của 1 công ty
+  pv: '',                 // phạm vi 'congty.phong' (vd 'crck2.tckt'), 'congty', 'phong' (cả 2 công ty); '' = toàn bộ kho
   trang: 'tim',
   tim: { q: '', loc: {}, tu: '', den: '', dv: '', giaTu: '', giaDen: '', sx: '', bo: '', trang: 1, co: 50 },
   bo: { q: '', congTy: '', sx: 'so_luong', coGoc: '', trang: 1, ma: '' },
@@ -894,7 +931,7 @@ function vietDiaChi(them) {
 
 /* ===================================================================== Điều hướng trang */
 var TEN_TRANG = { tim: 'Tìm kiếm văn bản', bo: 'Bộ hồ sơ liên quan', tong: 'Tổng quan kho' };
-var PV_DAU = 'crck2.tchc';   // tab mặc định lần đầu (tab đầu tiên của sidebar)
+var PV_DAU = 'crck2.tchc';   // phạm vi mặc định lần đầu (phòng đầu tiên của công ty đầu tiên)
 function pvMacDinh() { try { var v = localStorage.getItem('tclt_pv'); if (v !== null) return v; } catch (e) {} return PV_DAU; }
 function nhoPv() { try { localStorage.setItem('tclt_pv', TT.pv); } catch (e) {} }
 /** Tên phạm vi đang xem: { nhan: 'CRCK2 · TCKT', ten: 'Phòng Tài chính Kế toán — CRCK2' } hoặc null (toàn kho / không rõ). */
@@ -905,20 +942,19 @@ function phongDangXem() {
     var x = ds[i].phong[j];
     if (x.pv === TT.pv) return { nhan: ds[i].nhan + ' · ' + x.nhan, ten: x.ten + ' — ' + ds[i].nhan, ct: ds[i], ph: x };
   }
-  for (var k = 0; k < ds.length; k++) if (ds[k].gt === TT.pv) return { nhan: ds[k].nhan, ten: ds[k].ten };
+  for (var k = 0; k < ds.length; k++) if (ds[k].gt === TT.pv) return { nhan: ds[k].nhan + ' · Tất cả phòng', ten: 'Mọi phòng — ' + ds[k].nhan + ' (' + ds[k].ten + ')' };
   var pb = META_GOC.phongBan || [];
-  for (var m = 0; m < pb.length; m++) if (pb[m].gt === TT.pv) return { nhan: pb[m].nhan + ' (2 công ty)', ten: pb[m].ten + ' — cả 2 công ty' };
+  for (var m = 0; m < pb.length; m++) if (pb[m].gt === TT.pv) return { nhan: 'Cả 2 công ty · ' + pb[m].nhan, ten: pb[m].ten + ' — cả 2 công ty' };
   return null;
 }
 function veTrang() {
   $$('#tabsCon .tab').forEach(function (b) { var on = b.dataset.trang === TT.trang; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
-  $$('#dsPhong .tab').forEach(function (b) { b.classList.toggle('on', b.dataset.pv === TT.pv); });
+  veChonPv();
   $('#pTim').hidden = TT.trang !== 'tim';
   $('#pBo').hidden = TT.trang !== 'bo';
   $('#pTong').hidden = TT.trang !== 'tong';
   var ph = phongDangXem(), tenPv = ph ? ph.nhan : 'Toàn bộ kho';
   $('#tenPv').textContent = ph ? ph.ten : 'Toàn bộ kho lưu trữ (2 công ty)';
-  $('#tieuDeDt').textContent = tenPv + ' · ' + TEN_TRANG[TT.trang];
   document.title = tenPv + ' · ' + TEN_TRANG[TT.trang] + ' - Tra cứu lưu trữ';
   if (META) { $('#demTong').textContent = so(META.tong); $('#demBo').textContent = so(META.soBo); }
   if (TT.trang === 'tim') { dongBoOTim(); timKiem(); }
@@ -929,12 +965,12 @@ function veTrang() {
 function chuyenTrang(t) {
   TT.trang = t; TT.vb = '';
   if (t === 'bo') TT.bo.ma = '';
-  vietDiaChi(true); veTrang(); dongBen();
+  vietDiaChi(true); veTrang(); dongChonPv();
   window.scrollTo(0, 0);
 }
-/** Đổi phòng (tab sidebar): bộ lọc của phòng cũ không còn nghĩa nên xoá, giữ từ khoá và trang con đang xem. */
+/** Đổi phạm vi (công ty / phòng): bộ lọc của phòng cũ không còn nghĩa nên xoá, giữ từ khoá và trang con đang xem. */
 function chonPhong(pv) {
-  dongBen();
+  dongChonPv();
   if (pv === TT.pv) return;
   TT.pv = pv; TT.vb = '';
   TT.tim.loc = {}; TT.tim.trang = 1; TT.tim.bo = ''; TT.tim.tu = TT.tim.den = TT.tim.dv = TT.tim.giaTu = TT.tim.giaDen = '';
@@ -961,21 +997,59 @@ function napMetaPhamVi() {
     return m;
   });
 }
-function veDsPhong() {
-  var m = META_GOC; if (!m) return;
-  var o = function (pv, viet, ten, phu, n) {
-    return '<button class="tab tab-phong" type="button" data-pv="' + esc(pv) + '">' +
-      '<span class="icon-phong" aria-hidden="true">' + esc(viet) + '</span>' +
-      '<span class="nhom-ten">' + esc(ten) + '<small>' + esc(phu) + '</small></span><span class="huy-hieu">' + so(n) + '</span></button>';
-  };
-  // Mỗi công ty 1 nhóm, mỗi phòng của công ty là 1 tab; "Toàn bộ kho" (tìm chéo 2 công ty) để cuối
-  $('#dsPhong').innerHTML = (m.congTyBan || []).map(function (c) {
-    return '<div class="nhan-muc nhan-cty"><span>' + esc(c.nhan) + '</span><small>' + esc(c.ten) + ' · ' + so(c.n) + '</small></div>' +
-      c.phong.map(function (x) { return o(x.pv, x.nhan, x.nhan, String(x.ten).replace(/^Phòng /, ''), x.n); }).join('');
-  }).join('') +
-    '<div class="nhan-muc nhan-cty"><span>Tìm chung</span></div>' + o('', 'ALL', 'Toàn bộ kho', 'Cả 2 công ty, mọi phòng', m.tongKho);
-  $$('#dsPhong .tab').forEach(function (b) { b.classList.toggle('on', b.dataset.pv === TT.pv); });
+/* Phạm vi = công ty × phòng. TT.pv: 'crck2.tckt' (1 phòng của 1 công ty), 'crck2' (cả công ty), 'tckt' (phòng đó ở cả 2 công ty), '' (toàn kho). */
+function ctCuaPv(pv) {
+  if (pv.indexOf('.') > 0) return pv.split('.')[0];
+  return (META_GOC && (META_GOC.congTyBan || []).some(function (c) { return c.gt === pv; })) ? pv : '';
 }
+function phongCuaPv(pv) {
+  if (pv.indexOf('.') > 0) return pv.split('.')[1];
+  return pv && pv !== ctCuaPv(pv) ? pv : '';
+}
+function pvTu(ct, ph) { return ct && ph ? ct + '.' + ph : (ct || ph || ''); }
+/** Các lựa chọn phòng của 1 công ty ('' = cả 2 công ty): "Tất cả phòng" rồi từng phòng. */
+function luaChonPhong(ct) {
+  var m = META_GOC; if (!m) return [];
+  var c = (m.congTyBan || []).filter(function (x) { return x.gt === ct; })[0];
+  var ds = c ? c.phong.map(function (x) { return { pv: x.pv, nhan: x.nhan, ten: x.ten, n: x.n }; })
+    : (m.phongBan || []).map(function (x) { return { pv: x.gt, nhan: x.nhan, ten: x.ten, n: x.n }; });
+  return [{ pv: ct, nhan: 'Tất cả phòng', ten: c ? 'Mọi phòng của ' + c.nhan : 'Mọi phòng, cả 2 công ty', n: c ? c.n : m.tongKho }].concat(ds);
+}
+/** Đổi công ty: giữ phòng đang xem nếu công ty kia cũng có, không thì xem cả công ty. */
+function chonCongTy(ct) {
+  var ph = phongCuaPv(TT.pv);
+  var co = luaChonPhong(ct).some(function (x) { return x.pv === pvTu(ct, ph); });
+  chonPhong(pvTu(ct, co ? ph : ''));
+}
+/** Vẽ phần chọn phạm vi: thanh đầu trang (máy tính) + tấm chọn (màn hẹp) + nút mở tấm. */
+function veChonPv() {
+  var m = META_GOC; if (!m) return;
+  var ct = ctCuaPv(TT.pv), cts = (m.congTyBan || []).map(function (c) { return { gt: c.gt, nhan: c.nhan, ten: c.ten }; })
+    .concat([{ gt: '', nhan: 'Cả 2 công ty', ten: 'Tìm chung toàn kho' }]);
+  $('#segCty').innerHTML = cts.map(function (c) {
+    var on = c.gt === ct;
+    return '<button type="button" role="tab" data-ct="' + esc(c.gt) + '" class="' + (on ? 'on' : '') + '" aria-selected="' + on + '" title="' + esc(c.ten) + '">' + esc(c.nhan) + '</button>';
+  }).join('');
+  $('#dsPhong').innerHTML = luaChonPhong(ct).map(function (x) {
+    return '<button type="button" data-pv="' + esc(x.pv) + '" class="' + (x.pv === TT.pv ? 'on' : '') + '" title="' + esc(x.ten + ' · ' + so(x.n) + ' văn bản') + '">' +
+      esc(x.nhan) + '<span class="so-p">' + soGon(x.n) + '</span></button>';
+  }).join('');
+  // Tấm chọn: mỗi công ty 1 nhóm, mỗi lựa chọn 1 ô (tên tắt + tên đầy đủ + số văn bản)
+  $('#thanPv').innerHTML = cts.map(function (c) {
+    return '<div class="nhom-pv"><h4>' + esc(c.nhan) + '<small>' + esc(c.ten) + '</small></h4><div class="luoi-pv">' +
+      luaChonPhong(c.gt).map(function (x) {
+        return '<button type="button" data-pv="' + esc(x.pv) + '" class="' + (x.pv === TT.pv ? 'on' : '') + '"><b>' + esc(x.nhan) + '</b>' +
+          '<small>' + esc(String(x.ten).replace(/^Phòng /, '')) + '</small><span class="n">' + so(x.n) + ' văn bản</span></button>';
+      }).join('') + '</div></div>';
+  }).join('');
+  var ph = phongDangXem();
+  $('#nutPvTen').textContent = ph ? ph.nhan : 'Toàn bộ kho';
+  $('#nutPvPhu').textContent = ph ? ph.ten : 'Cả 2 công ty, mọi phòng';
+}
+/** Số gọn cho huy hiệu: 24257 → 24,3k */
+function soGon(n) { return n >= 10000 ? (n / 1000).toFixed(n >= 100000 ? 0 : 1).replace('.', ',') + 'k' : so(n); }
+function moChonPv() { $('#tamPv').classList.add('mo'); $('#nenPv').classList.add('mo'); var on = $('#thanPv .on'); if (on) on.focus(); }
+function dongChonPv() { $('#tamPv').classList.remove('mo'); $('#nenPv').classList.remove('mo'); }
 
 /* ===================================================================== Phạm vi có gì */
 /** Phạm vi đang xem có văn bản mang giá trị tiền / khối lượng không (phòng TCHC, KTNN thường không có). */
@@ -1504,7 +1578,7 @@ function moBo(ma) {
 var MAU_NGUON = ['var(--leaf)', 'var(--latex)', 'var(--sky)', 'var(--clay)', 'var(--ink-3)'];
 function tongQuan() {
   var loc = TT.tong.loc;
-  // Chọn phạm vi bằng sidebar (mỗi tab 1 phòng của 1 công ty) — không lặp dãy chip nguồn ở đây
+  // Chọn phạm vi ở thanh đầu trang — không lặp dãy chip nguồn ở đây
   $('#gatTong').hidden = true; $('#gatTong').innerHTML = '';
   var el = $('#noiDungTong');
   if (!el.innerHTML) el.innerHTML = '<div class="kpis">' + [1, 2, 3, 4, 5, 6].map(function () { return '<div class="skeleton" style="height:84px"></div>'; }).join('') + '</div><div class="skeleton" style="height:280px"></div>';
@@ -1625,18 +1699,25 @@ function hienDangNhap() {
 }
 
 /* ===================================================================== Sự kiện */
-function dongBen() { $('#thanhBen').classList.remove('mo'); $('#nenBen').classList.remove('mo'); }
 function ganSuKien() {
-  $('#nutMoBen').onclick = function () { $('#thanhBen').classList.add('mo'); $('#nenBen').classList.add('mo'); };
-  $('#nenBen').onclick = dongBen;
-  $('#nutTaiLai').onclick = function () { location.reload(); };
+  $('#nutPv').onclick = moChonPv;
+  $('#nenPv').onclick = dongChonPv;
+  $('#dongPv').onclick = dongChonPv;
+  $('#veDau').onclick = function (e) { e.preventDefault(); chuyenTrang('tim'); };
+  // Tiêu đề bảng kết quả dính ngay dưới thanh tab trang con (chiều cao thanh đổi theo cỡ chữ / màn)
+  var doCaoTab = function () { document.documentElement.style.setProperty('--cao-tab', $('#tabsCon').offsetHeight + 'px'); };
+  doCaoTab(); window.addEventListener('resize', chongDoi(doCaoTab, 150));
+  if (document.fonts) document.fonts.ready.then(doCaoTab);
   $('#nutTheme').onclick = function () {
     var r = document.documentElement, toi = r.getAttribute('data-theme') === 'dark';
     r.setAttribute('data-theme', toi ? 'light' : 'dark');
     try { localStorage.setItem('tclt_theme', toi ? 'light' : 'dark'); } catch (e) {}
   };
   $$('#tabsCon .tab').forEach(function (b) { b.onclick = function () { chuyenTrang(b.dataset.trang); }; });
-  $('#dsPhong').addEventListener('click', function (e) { var b = e.target.closest('[data-pv]'); if (b) chonPhong(b.dataset.pv); });
+  $('#segCty').addEventListener('click', function (e) { var b = e.target.closest('[data-ct]'); if (b) chonCongTy(b.dataset.ct); });
+  ['#dsPhong', '#thanPv'].forEach(function (k) {
+    $(k).addEventListener('click', function (e) { var b = e.target.closest('[data-pv]'); if (b) chonPhong(b.dataset.pv); });
+  });
   // popstate chạy cả khi bấm Lùi/Tiến lẫn khi sửa tay phần # trên thanh địa chỉ
   window.addEventListener('popstate', function () {
     var pvCu = TT.pv;
@@ -1755,7 +1836,7 @@ function ganSuKien() {
     if (e.key === 'Escape') {
       if ($('#ngan').classList.contains('mo')) dongNgan();
       else if ($('#cotLoc').classList.contains('mo')) window.dongLocPopup();
-      else dongBen();
+      else dongChonPv();
     }
     if (e.key === '/' && !/^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement.tagName)) {
       e.preventDefault();
@@ -1766,9 +1847,16 @@ function ganSuKien() {
 }
 
 /* ===================================================================== Khởi động */
+/** Tổng kho + ngày cập nhật: góc phải thanh đầu trang (màn rộng) và chân tấm chọn phạm vi (màn hẹp). */
+function veNguon(m) {
+  var h = '<b>' + so(m.tongKho) + '</b> văn bản · <b>' + so(m.soBoKho) + '</b> bộ hồ sơ<br>' +
+    '<span title="' + esc(m.nguonDuLieu + ' · ' + m.nguon.length + ' sheet') + '">Dữ liệu cập nhật ' + new Date(m.napLuc).toLocaleDateString('vi-VN') + '</span>';
+  $('#benNguon').innerHTML = h;
+  $('#chanPv').innerHTML = h.replace('<br>', ' · ');
+}
 function batDau() {
   docDiaChi();
-  // Gọi song song: meta toàn kho (sidebar), meta phạm vi đang xem, trang tìm kiếm đầu tiên — máy chủ đã tính sẵn cả ba
+  // Gọi song song: meta toàn kho (thanh đầu trang), meta phạm vi đang xem, trang tìm kiếm đầu tiên — máy chủ đã tính sẵn cả ba
   if (TT.trang === 'tim') {
     var p = thamSoTim(TT.tim); p.trang = TT.tim.trang; p.co = TT.tim.co;
     timTruoc = { khoa: JSON.stringify(p) + '|' + TT.pv, hua: goi('timKiem', p) };
@@ -1781,17 +1869,15 @@ function batDau() {
     if (m.canDangNhap) { META = m; hienDangNhap(); return; }
     META_GOC = m; META = r[1];
     if (TT.pv && !phongDangXem()) {
-      // tab đã nhớ / link không còn: về tab đầu tiên của sidebar
+      // phạm vi đã nhớ / link không còn: về phòng đầu tiên
       var dau = m.congTyBan && m.congTyBan[0] && m.congTyBan[0].phong[0];
       TT.pv = dau ? dau.pv : ''; vietDiaChi(); nhoPv();
-      return napMetaPhamVi().then(function () { $('#loiChung').hidden = true; veDsPhong(); veTrang(); });
+      return napMetaPhamVi().then(function () { $('#loiChung').hidden = true; veNguon(m); veTrang(); });
     }
     if (!location.hash || location.hash === '#') vietDiaChi();
     nhoPv();
     $('#loiChung').hidden = true;
-    veDsPhong();
-    $('#benNguon').innerHTML = '<b>' + so(m.tongKho) + '</b> văn bản · <b>' + so(m.soBoKho) + '</b> bộ hồ sơ<br>' +
-      '<span title="' + esc(m.nguonDuLieu + ' · ' + m.nguon.length + ' sheet') + '">Dữ liệu cập nhật ' + new Date(m.napLuc).toLocaleDateString('vi-VN') + '</span>';
+    veNguon(m);
     veSapXep();
     veTrang();
   }).catch(function (e) {
