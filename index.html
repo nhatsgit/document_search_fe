@@ -239,7 +239,8 @@ tbody tr{transition:background-color .12s}
 .cot-loc .dau-loc{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line);flex:none}
 .cot-loc .dau-loc b{font-size:16px}
 .cot-loc .dau-loc .so-dk{color:var(--ink-3);font-size:13px;margin-right:auto}
-.cot-loc .than-loc{overflow-y:auto;padding:6px 6px 10px;scrollbar-width:thin;columns:270px 4;column-gap:6px;overscroll-behavior:contain}
+.cot-loc .than-loc{overflow-y:auto;padding:6px 6px 10px;scrollbar-width:thin;overscroll-behavior:contain;display:flex;gap:6px;align-items:flex-start}
+.cot-loc .cot-nhom{flex:1 1 0;min-width:0;display:flex;flex-direction:column}  /* mỗi nhóm lọc ở yên cột của nó; mở rộng chỉ làm cột đó dài ra */
 .cot-loc .chan-loc{display:flex;gap:10px;align-items:center;padding:12px 18px;border-top:1px solid var(--line);flex:none;background:var(--card);border-radius:0 0 14px 14px}
 .cot-loc .chan-loc .goi-y-chan{color:var(--ink-3);font-size:12.5px;margin-right:auto}
 .cot-loc .chan-loc .btn.chinh{min-width:200px;justify-content:center;padding:10px 18px}
@@ -266,14 +267,14 @@ tbody tr{transition:background-color .12s}
 .them-loc{border:none;background:none;color:var(--leaf);font-size:12.5px;padding:2px 14px 8px;font-weight:600}
 .ghi-loc{font-size:12px;color:var(--ink-3);padding:0 14px 8px}
 .o-khoang{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:2px 12px 12px}
-.o-khoang .o{padding:6px 8px;font-size:13px}
+.o-khoang .o{padding:6px 8px;font-size:13px;min-width:0}
 .o-khoang .ca{grid-column:1/-1}
 @media (max-width:760px){
   .cot-loc{top:auto;bottom:0;width:100%;max-height:88vh;border-radius:18px 18px 0 0;transform:translateY(100%)}
   .cot-loc.mo{transform:none}
   .cot-loc::before{content:'';display:block;width:40px;height:4px;border-radius:2px;background:var(--line-2);margin:8px auto 0;flex:none}
   .cot-loc .dau-loc{padding:8px 14px 10px}
-  .cot-loc .than-loc{columns:auto;padding:6px 8px 10px}
+  .cot-loc .than-loc{padding:6px 8px 10px}
   .cot-loc .chan-loc{padding:10px 14px calc(10px + env(safe-area-inset-bottom));border-radius:0}
   .cot-loc .chan-loc .goi-y-chan{display:none}
   .cot-loc .chan-loc .btn.chinh{flex:1;min-width:0}
@@ -1219,6 +1220,7 @@ function vePhanTrang(sel, trang, soTrang, tong, chon, co, doiCo) {
 var MO_RONG_LOC = {};     // nhóm đang "xem thêm"
 var TIM_TRONG_LOC = {};   // chữ đang gõ trong ô tìm của nhóm
 var BO_LOC_GAN = null;
+var COT_LOC = { meta: null, so: 0, cot: {} };   // nhóm lọc -> cột (gán 1 lần cho mỗi phạm vi + số cột, không đổi khi mở rộng / chọn)
 // Thứ tự nhóm lọc theo mức hay dùng; '#ngay', '#gia' là ô khoảng ngày / khoảng giá trị (giá trị đứng cạnh đơn vị tiền,
 // thùng / thư mục đứng cạnh nhau = vị trí lưu trữ). Phòng / công ty chỉ hiện khi xem nhiều nguồn.
 var THU_TU_LOC = ['phong', 'cong_ty', 'loai_vb', 'nam', '#ngay', 'co_quan', 'ten_ho_so', '#gia', 'tien_te', 'thung', 'thu_muc_2', 'thu_muc_3', 'phap_ly', 'tinh_trang'];
@@ -1263,9 +1265,25 @@ function veBoLoc(boLoc) {
       (nhom.tong > nhom.ds.length ? '<div class="ghi-loc">Hiện ' + so(nhom.ds.length) + '/' + so(nhom.tong) + ' mục nhiều nhất — gõ để tìm</div>' : '') +
       '</div>';
   });
-  THU_TU_LOC.forEach(function (k) { if (khoi[k]) { h += khoi[k]; delete khoi[k]; } });
-  Object.keys(khoi).forEach(function (k) { h += khoi[k]; });
+  var thuTu = THU_TU_LOC.filter(function (k) { return khoi[k]; });
+  Object.keys(khoi).forEach(function (k) { if (thuTu.indexOf(k) < 0) thuTu.push(k); });
   var than = $('#thanLoc'), cuon = than.scrollTop;
+  // Chia nhóm vào cột cố định: gán theo chiều cao ước lượng lúc thu gọn, nhớ lại để lần vẽ sau (xem thêm, tích chọn) không xếp lại
+  var soCot = soCotLoc();
+  if (COT_LOC.meta !== META || COT_LOC.so !== soCot) COT_LOC = { meta: META, so: soCot, cot: {} };
+  var cao = [];
+  for (var c = 0; c < soCot; c++) cao.push(0);
+  Object.keys(COT_LOC.cot).forEach(function (k) { if (khoi[k]) cao[COT_LOC.cot[k]] += caoUocLuong(k, boLoc); });
+  thuTu.forEach(function (k) {
+    if (COT_LOC.cot[k] == null) {
+      var ngan = 0;
+      for (var i = 1; i < soCot; i++) if (cao[i] < cao[ngan]) ngan = i;
+      COT_LOC.cot[k] = ngan; cao[ngan] += caoUocLuong(k, boLoc);
+    }
+  });
+  var cot = cao.map(function () { return ''; });
+  thuTu.forEach(function (k) { cot[COT_LOC.cot[k]] += khoi[k]; });
+  h = cot.map(function (x) { return '<div class="cot-nhom">' + x + '</div>'; }).join('');
   var dangGo = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.timLoc : null;
   var viTri = dangGo ? document.activeElement.selectionStart : 0;
   than.innerHTML = h;
@@ -1275,6 +1293,19 @@ function veBoLoc(boLoc) {
   if (String(soDk) !== dem.textContent) nayLen(dem);
   dem.hidden = !soDk; dem.textContent = soDk;
   $('#soDk').textContent = soDk ? soDk + ' điều kiện đang áp dụng' : '';
+}
+/** Số cột của popup lọc theo bề ngang (mỗi cột tối thiểu ~270px, tối đa 4; điện thoại 1 cột). */
+function soCotLoc() {
+  var w = $('#thanLoc').clientWidth || $('#cotLoc').clientWidth || innerWidth;
+  return Math.max(1, Math.min(4, Math.floor((w + 6) / 276)));
+}
+/** Chiều cao ước lượng của 1 nhóm lọc khi thu gọn — chỉ dùng để chia cột cho cân. */
+function caoUocLuong(k, boLoc) {
+  if (k === '#ngay') return 90;
+  if (k === '#gia') return 130;
+  var n = boLoc[k]; if (!n) return 44;
+  if (DONG_NHOM_LOC[k]) return 44;
+  return 44 + (n.tong > 10 ? 36 : 0) + Math.min(n.ds.length, 7) * 28 + (n.ds.length > 7 ? 30 : 0) + (n.tong > n.ds.length ? 22 : 0);
 }
 /** Chạy lại 1 hiệu ứng CSS trên phần tử (gỡ lớp, ép vẽ lại, gắn lại). */
 function chayHieuUng(el, lop) { if (!el) return; el.classList.remove(lop); void el.offsetWidth; el.classList.add(lop); }
@@ -1708,6 +1739,8 @@ function ganSuKien() {
   var doCaoTab = function () { document.documentElement.style.setProperty('--cao-tab', $('#tabsCon').offsetHeight + 'px'); };
   doCaoTab(); window.addEventListener('resize', chongDoi(doCaoTab, 150));
   if (document.fonts) document.fonts.ready.then(doCaoTab);
+  // Đổi cỡ cửa sổ làm đổi số cột của popup lọc: chia cột lại
+  window.addEventListener('resize', chongDoi(function () { if (BO_LOC_GAN && soCotLoc() !== COT_LOC.so) veBoLoc(BO_LOC_GAN); }, 200));
   $('#nutTheme').onclick = function () {
     var r = document.documentElement, toi = r.getAttribute('data-theme') === 'dark';
     r.setAttribute('data-theme', toi ? 'light' : 'dark');
