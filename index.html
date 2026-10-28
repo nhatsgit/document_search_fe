@@ -641,6 +641,9 @@ button.kpi:hover{border-color:var(--leaf)}
 .ai-bang tbody tr:hover{background:none}
 .ai-bang .cu{display:block;color:var(--ink-3);font-size:12px;margin-top:2px}
 .ai-bang .cb{color:var(--clay);font-size:12px}
+.ai-bang td.stt{color:var(--ink-3);text-align:center;font-variant-numeric:tabular-nums}
+.ai-bang tr.dong-bo td{background:var(--leaf-soft)}
+.ai-bang tr.dong-bo .cb{display:block;margin-top:2px}
 .ai-bc{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
 .ai-bc>div{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:13.5px}
 .ai-bc h3{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-3)}
@@ -864,7 +867,7 @@ button.kpi:hover{border-color:var(--leaf)}
       <h2 id="aiTieuDeKq"></h2>
       <div class="ai-loc">
         <select id="aiLocTT" aria-label="Lọc trạng thái"><option value="">Mọi trạng thái</option><option value="can_soat_xet">Cần soát xét</option>
-          <option value="da_trich">Đã trích</option><option value="loi">Lỗi</option></select>
+          <option value="da_trich">Đã trích</option><option value="loi">Lỗi</option><option value="bo_ho_so">Dòng bộ hồ sơ</option></select>
         <select id="aiLocCB" aria-label="Lọc cảnh báo"><option value="">Mọi cảnh báo</option><option value="so_hieu_khong_ro">Số hiệu không rõ</option>
           <option value="doc_mot_phan">Đọc một phần</option><option value="nhieu_van_ban_trong_file">Nhiều văn bản trong file</option>
           <option value="ngay_khong_ro">Ngày không rõ</option><option value="so_tien_khong_ro">Số tiền không rõ</option>
@@ -874,7 +877,7 @@ button.kpi:hover{border-color:var(--leaf)}
         <button class="btn nho" id="aiDongKq" type="button">Đóng</button>
       </div>
       <div id="aiBaoCao"></div>
-      <div class="ai-bang"><table><thead><tr><th>File</th><th>Trang</th><th>Loại · chi tiết</th><th>Số ký hiệu</th><th>Ngày</th><th>Trích yếu</th><th>Cảnh báo</th><th>Trạng thái</th></tr></thead>
+      <div class="ai-bang"><table><thead><tr><th>STT file</th><th>File</th><th>Trang</th><th>Loại · chi tiết</th><th>Số ký hiệu</th><th>Ngày</th><th>Trích yếu</th><th>Cảnh báo</th><th>Trạng thái</th></tr></thead>
         <tbody id="aiThanKq"></tbody></table></div>
       <div class="phan-trang" id="aiPhanTrang"></div>
     </div>
@@ -2534,7 +2537,7 @@ function moKetQuaAi(r) {
 function veBaoCaoAi(b) {
   var tl = function (x) { return x ? x[0] + '/' + x[1] + ' (' + Math.round(x[0] / x[1] * 100) + '%)' : '—'; };
   $('#aiBaoCao').innerHTML = !b.soFile ? '' : '<div class="ai-bc">' +
-    '<div><h3>Tổng</h3>' + so(b.soFile) + ' file · ' + so(b.soVanBan) + ' văn bản<br>' + so(b.fileNhieuVanBan) + ' file chứa nhiều văn bản<br>' +
+    '<div><h3>Tổng</h3>' + so(b.soFile) + ' file · ' + so(b.soVanBan) + ' văn bản<br>' + so(b.fileNhieuVanBan) + ' file chứa nhiều văn bản' + (b.soBoHoSo ? ' (' + so(b.soBoHoSo) + ' dòng bộ hồ sơ)' : '') + '<br>' +
       so(b.canSoatXet) + ' văn bản cần soát xét · ' + so(b.fileLoi) + ' file lỗi</div>' +
     '<div><h3>Khớp dữ liệu cũ</h3>Số ký hiệu: ' + tl(b.khopSoHieuCu) + '<br>Ngày: ' + tl(b.khopNgayCu) + '</div>' +
     '<div><h3>Chi phí, thời gian</h3>' + usd(b.chiPhi) + ' · TB ' + usd(b.chiPhiTrungBinhFile) + '/file<br>TB ' + NF2.format(b.giayTrungBinhFile) + ' giây/file<br>' +
@@ -2544,12 +2547,20 @@ function veBaoCaoAi(b) {
 }
 function napKetQuaAi() {
   if (!AI.kq) return;
-  $('#aiThanKq').innerHTML = '<tr><td colspan="8" class="rong">Đang tải…</td></tr>';
+  $('#aiThanKq').innerHTML = '<tr><td colspan="9" class="rong">Đang tải…</td></tr>';
   goiAi('ketQua', { tab: AI.kq.tab, trang: AI.kq.trang, co: 50, trangThai: $('#aiLocTT').value, canhBao: $('#aiLocCB').value, q: $('#aiLocQ').value.trim() })
     .then(function (d) {
       var cu = function (moi, cu2) { return cu2 && String(cu2) !== String(moi) ? '<span class="cu">cũ: ' + esc(cu2) + '</span>' : ''; };
       $('#aiThanKq').innerHTML = d.dong.length ? d.dong.map(function (x) {
-        return '<tr><td><a href="' + esc(x.link) + '" target="_blank" rel="noopener">' + esc(x.ten_file) + '</a>' +
+        var sttf = '<td class="stt">' + esc(x.stt_file) + '</td>';
+        if (x.loai_dong === 'Bộ hồ sơ') {   // dòng thông tin chung của bộ hồ sơ
+          return '<tr class="dong-bo">' + sttf + '<td><a href="' + esc(x.link) + '" target="_blank" rel="noopener">' + esc(x.ten_file) + '</a></td>' +
+            '<td colspan="7"><b>Bộ hồ sơ: ' + esc(x.ten_bo_ho_so) + '</b>' + (x.loai_vb_ten ? ' · ' + esc(x.loai_vb_ten) : '') +
+            ' · ' + so(x.so_van_ban_con) + ' văn bản' + (x.ngay_vb ? ' · ' + esc(x.ngay_vb) + (x.ngay_den && x.ngay_den !== x.ngay_vb ? ' → ' + esc(x.ngay_den) : '') : '') +
+            (x.so_ky_hieu ? ' · số hiệu bộ ' + esc(x.so_ky_hieu) : '') + (x.trich_yeu ? '<span class="cu">' + esc(x.trich_yeu) + '</span>' : '') +
+            (x.canh_bao ? '<span class="cb">' + esc(x.canh_bao) + '</span>' : '') + '</td></tr>';
+        }
+        return '<tr>' + sttf + '<td><a href="' + esc(x.link) + '" target="_blank" rel="noopener">' + esc(x.ten_file) + '</a>' +
           (x.so_van_ban_con > 1 ? '<span class="cu">văn bản ' + x.thu_tu_trong_file + '/' + x.so_van_ban_con + '</span>' : '') + '</td>' +
           '<td>' + esc(x.trang_tu ? x.trang_tu + '–' + x.trang_den : '') + '<span class="cu">' + esc(x.trang_da_gui ? 'gửi ' + x.trang_da_gui + ' / ' + x.so_trang : '') + '</span></td>' +
           '<td>' + esc(x.loai_vb_ten || x.loai_vb) + (x.loai_vb_chi_tiet ? ' · ' + esc(x.loai_vb_chi_tiet) : '') + cu(x.loai_vb_ten, x.loai_cu) + '</td>' +
@@ -2558,12 +2569,12 @@ function napKetQuaAi() {
           '<td>' + esc(x.trich_yeu) + cu(x.trich_yeu, x.trich_yeu_cu) + '</td>' +
           '<td class="cb">' + esc(x.canh_bao) + '</td>' +
           '<td>' + esc({ da_trich: 'Đã trích', can_soat_xet: 'Cần soát xét', loi: 'Lỗi' }[x.trang_thai] || x.trang_thai) + '</td></tr>';
-      }).join('') : '<tr><td colspan="8" class="rong">Chưa có kết quả nào khớp.</td></tr>';
+      }).join('') : '<tr><td colspan="9" class="rong">Chưa có kết quả nào khớp.</td></tr>';
       var soTrang = Math.max(1, Math.ceil(d.tong / d.co));
       $('#aiPhanTrang').innerHTML = '<span>' + so(d.tong) + ' dòng · trang ' + d.trang + '/' + soTrang + '</span>' +
         (d.trang > 1 ? '<button class="btn nho" data-ai-trang="' + (d.trang - 1) + '">‹ Trước</button>' : '') +
         (d.trang < soTrang ? '<button class="btn nho" data-ai-trang="' + (d.trang + 1) + '">Sau ›</button>' : '');
-    }, function (e) { $('#aiThanKq').innerHTML = '<tr><td colspan="8"><div class="bao-loi">' + esc(e.message) + '</div></td></tr>'; });
+    }, function (e) { $('#aiThanKq').innerHTML = '<tr><td colspan="9"><div class="bao-loi">' + esc(e.message) + '</div></td></tr>'; });
 }
 
 function ganSuKienAi() {
