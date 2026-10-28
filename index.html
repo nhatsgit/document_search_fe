@@ -579,7 +579,8 @@ button.kpi:hover{border-color:var(--leaf)}
   font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:6px;text-decoration:none}
 .nut-ai:hover{background:rgba(255,255,255,.2)}
 .che-do-ai .noi-dung-chinh,.che-do-ai #tabsCon,.che-do-ai .chon-pv,.che-do-ai #nutPv,.che-do-ai .thong-tin-kho{display:none !important}
-.man-ai{max-width:1400px;margin:0 auto;padding:20px var(--le-ngang) 80px;display:flex;flex-direction:column;gap:16px}
+.man-ai{box-sizing:border-box;width:100%;max-width:1400px;margin:0 auto;padding:20px 24px 80px;display:flex;flex-direction:column;gap:16px}
+@media (max-width:600px){.man-ai{padding:16px 16px 64px}}
 .man-ai[hidden]{display:none}
 .ai-dau{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
 .ai-dau h1{font-size:21px;margin:0;letter-spacing:-.02em}
@@ -796,7 +797,7 @@ button.kpi:hover{border-color:var(--leaf)}
 <section class="man-ai" id="manAi" hidden>
   <div id="aiKhoa" class="ai-khoa">
     <h2>Chạy AI trích xuất</h2>
-    <p>Nhập mã chạy để xem và điều khiển. Mã chỉ được nhớ trong thẻ trình duyệt này, đóng thẻ là phải nhập lại.</p>
+    <p>Nhập mã chạy một lần để xem và điều khiển. Trình duyệt này sẽ nhớ mã (bấm "Khoá" để quên).</p>
     <input class="o" id="aiMaVao" type="password" autocomplete="off" placeholder="Mã chạy" aria-label="Mã chạy">
     <div class="ai-loi" id="aiLoiKhoa"></div>
     <button class="btn chinh" id="aiMo" type="button">Mở</button>
@@ -2061,6 +2062,7 @@ function batDau() {
    Bấm Chạy / Thử 1 file phải nhập lại mã. Việc chạy diễn ra trên Cloud Run, đóng trình duyệt vẫn chạy tiếp. */
 var AI = { ma: '', du: null, hen: null, kq: null, cho: null };   // cho: lô vừa bấm chạy, đang chờ xong
 var API_AI = API.replace(/\/api\/exec.*$/, '/api/ai');
+var NHAP_LAI_MA = false;     // true: bấm Chạy / Thử phải nhập lại mã (tạm tắt theo yêu cầu, mã nhập 1 lần được nhớ trong trình duyệt)
 var UOC_TOKEN_RA = { 'gemini-2.5-flash': 4300 };   // gồm token suy nghĩ, đo trên file thử
 
 function laTrangAi() { return /^#\/?ai(\/|\?|$)/.test(location.hash); }
@@ -2096,7 +2098,7 @@ function hienTrangAi() {
   document.body.classList.add('che-do-ai');
   $('#manAi').hidden = false;
   document.title = 'Chạy AI - Tra cứu lưu trữ';
-  try { AI.ma = sessionStorage.getItem('tclt_ai_ma') || ''; } catch (e) {}
+  try { AI.ma = localStorage.getItem('tclt_ai_ma') || ''; } catch (e) {}
   if (AI.ma) moAi(); else khoaAi('');
 }
 function anTrangAi() {
@@ -2118,7 +2120,7 @@ function moAi() {
     clearInterval(AI.hen);
     AI.hen = setInterval(function () { if (!document.hidden && $('#aiNenHop').hidden) lamMoiAi().catch(function () {}); }, 30000);
   }).catch(function (e) {
-    if (e.saiMa) { try { sessionStorage.removeItem('tclt_ai_ma'); } catch (x) {} AI.ma = ''; khoaAi('Sai mã chạy'); }
+    if (e.saiMa) { try { localStorage.removeItem('tclt_ai_ma'); } catch (x) {} AI.ma = ''; khoaAi('Sai mã chạy'); }
     else khoaAi(e.message);
   });
 }
@@ -2233,7 +2235,7 @@ function hopChay(r, thu) {
     (thu ? '' : '<label class="chk"><input type="checkbox" id="hopTatCa"' + (r.tatCa ? ' checked' : '') + '> Chạy tất cả file trong Drive' +
       (r.tongDrive != null ? ' (' + so(r.tongDrive) + ' file)' : '') + (r.tatCa ? '' : ' — hiện đặt ' + so(r.soFile) + ' file') + '</label>') +
     '<div class="uoc"></div>' +
-    '<label>Nhập mã chạy để xác nhận<input class="o" id="hopMa" type="password" autocomplete="off" placeholder="Mã chạy"></label>' +
+    (NHAP_LAI_MA ? '<label>Nhập mã chạy để xác nhận<input class="o" id="hopMa" type="password" autocomplete="off" placeholder="Mã chạy"></label>' : '') +
     '<div class="ai-loi"></div>' +
     '<div class="hang"><button class="btn" data-hop="huy" type="button">Huỷ</button><button class="btn chinh" data-hop="ok" type="button">' + (thu ? 'Chạy thử' : '▶ Chạy') + '</button></div>',
     function (h) {
@@ -2241,7 +2243,7 @@ function hopChay(r, thu) {
       $('#hopModel', h).onchange = function () { veUoc(h); };
       if ($('#hopTatCa', h)) $('#hopTatCa', h).onchange = function () { veUoc(h); };
       var gui = function () {
-        var ma = $('#hopMa', h).value;
+        var ma = NHAP_LAI_MA ? $('#hopMa', h).value : AI.ma;
         if (!ma) return baoLoiHop(h, 'Nhập mã chạy');
         $('[data-hop="ok"]', h).disabled = true;
         var tc = !thu && $('#hopTatCa', h).checked;
@@ -2252,7 +2254,7 @@ function hopChay(r, thu) {
         }, function (e) { $('[data-hop="ok"]', h).disabled = false; baoLoiHop(h, e.message); });
       };
       $('[data-hop="ok"]', h).onclick = gui;
-      $('#hopMa', h).onkeydown = function (e) { if (e.key === 'Enter') gui(); };
+      if ($('#hopMa', h)) $('#hopMa', h).onkeydown = function (e) { if (e.key === 'Enter') gui(); };
     });
 }
 
@@ -2353,7 +2355,7 @@ function ganSuKienAi() {
     var ma = $('#aiMaVao').value;
     if (!ma) return khoaAi('Nhập mã chạy');
     AI.ma = ma;
-    try { sessionStorage.setItem('tclt_ai_ma', ma); } catch (e) {}
+    try { localStorage.setItem('tclt_ai_ma', ma); } catch (e) {}
     $('#aiMaVao').value = '';
     moAi();
   };
@@ -2361,7 +2363,7 @@ function ganSuKienAi() {
   $('#aiMaVao').onkeydown = function (e) { if (e.key === 'Enter') moKhoa(); };
   $('#aiLamMoi').onclick = function () { lamMoiAi().then(function () { thongBao('Đã làm mới'); }, function (e) { thongBao(e.message); }); };
   $('#aiThem').onclick = hopThem;
-  $('#aiDong').onclick = function () { try { sessionStorage.removeItem('tclt_ai_ma'); } catch (e) {} AI.ma = ''; khoaAi(''); };
+  $('#aiDong').onclick = function () { try { localStorage.removeItem('tclt_ai_ma'); } catch (e) {} AI.ma = ''; khoaAi(''); };
   $('#aiDongKq').onclick = function () { $('#aiMucKq').hidden = true; AI.kq = null; };
   $('#aiLocTT').onchange = $('#aiLocCB').onchange = function () { if (AI.kq) { AI.kq.trang = 1; napKetQuaAi(); } };
   $('#aiLocQ').addEventListener('input', chongDoi(function () { if (AI.kq) { AI.kq.trang = 1; napKetQuaAi(); } }, 400));
