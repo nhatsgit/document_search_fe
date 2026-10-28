@@ -669,6 +669,15 @@ button.kpi:hover{border-color:var(--leaf)}
 .ai-hop .tom-tat{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:13px;color:var(--ink-2)}
 .ai-hop .ai-bang table{min-width:860px}
 @media (prefers-reduced-motion:reduce){.ai-hop .dang-doc::before{animation:none}}
+.ai-muc-dau{display:flex;align-items:center;gap:10px}
+.ai-muc-dau h2{margin:0}
+.ai-khoa-ds>div{align-items:center}
+.ai-khoa-ds .ten-khoa{font-weight:700;color:var(--ink);min-width:110px}
+.ai-khoa-ds .nut-khoa{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
+.ai-khoa-ds .nghi{color:var(--clay);font-size:12.5px}
+.ai-khoa-ds .thu-tu{display:inline-flex;flex-direction:column;gap:2px}
+.ai-khoa-ds .thu-tu button{padding:0 6px;font-size:10px;line-height:1.3}
+.goi-y-khoa{font-size:12.5px;color:var(--ink-3)}
 .ai-hop .uoc{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--ink-2)}
 @media (max-width:900px){
   .ai-dong{grid-template-columns:minmax(0,1fr)}
@@ -852,6 +861,11 @@ button.kpi:hover{border-color:var(--leaf)}
       <div class="ai-bang"><table><thead><tr><th>File</th><th>Trang</th><th>Loại · chi tiết</th><th>Số ký hiệu</th><th>Ngày</th><th>Trích yếu</th><th>Cảnh báo</th><th>Trạng thái</th></tr></thead>
         <tbody id="aiThanKq"></tbody></table></div>
       <div class="phan-trang" id="aiPhanTrang"></div>
+    </div>
+    <div class="ai-muc">
+      <div class="ai-muc-dau"><h2>Khoá API Gemini</h2><button class="btn nho" id="aiThemKhoa" type="button">+ Thêm khoá</button></div>
+      <div class="ai-nk ai-khoa-ds" id="aiKhoaDs"><div>Đang tải…</div></div>
+      <div class="goi-y-khoa">Dùng khoá đứng đầu trước; khoá hết hạn mức hoặc không mở được model thì tự chuyển sang khoá sau. Khoá lưu mã hoá trong tab TN_KHOA_API, trang chỉ hiện 4 ký tự cuối.</div>
     </div>
     <div class="ai-muc">
       <h2>Nhật ký các lô gần nhất</h2>
@@ -2143,10 +2157,55 @@ function moAi() {
     AI.hen = setInterval(function () { if (!document.hidden && $('#aiNenHop').hidden) lamMoiAi().catch(function () {}); }, 30000);
   }).catch(function (e) {
     if (e.saiMa) { var coMa = !!AI.ma; try { localStorage.removeItem('tclt_ai_ma'); } catch (x) {} AI.ma = ''; khoaAi(coMa ? 'Sai mã chạy' : ''); }
-    else khoaAi(e.message);
+    else {   // lỗi khác (mạng, sheet): hiện ngay trên bảng, không đưa về màn nhập mã
+      $('#aiKhoa').hidden = true; $('#aiNoiDung').hidden = false;
+      $('#aiThe').innerHTML = '<div class="bao-loi" style="grid-column:1/-1">Không tải được dữ liệu: ' + esc(e.message) +
+        ' <button class="btn nho" type="button" onclick="moAi()">Thử lại</button></div>';
+    }
   });
 }
-function lamMoiAi() { return goiAi('tongQuan').then(veAi); }
+function lamMoiAi() { napKhoaAi(); return goiAi('tongQuan').then(veAi); }
+
+/* ---------- Khoá API ---------- */
+function napKhoaAi() { return goiAi('dsKhoa').then(veKhoaAi, function (e) { $('#aiKhoaDs').innerHTML = '<div class="loi">' + esc(e.message) + '</div>'; }); }
+function veKhoaAi(d) {
+  AI.khoa = d.khoa;
+  var gio = function (iso) { return new Date(iso).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' }); };
+  $('#aiKhoaDs').innerHTML = d.khoa.length ? d.khoa.map(function (k, i) {
+    var tt = !k.bat ? '<span class="ai-pill dung">Tắt</span>' : k.loiGiaiMa ? '<span class="ai-pill dung">Lỗi giải mã</span>'
+      : k.nghi.length ? '<span class="ai-pill dung">Nghỉ một phần</span>' : '<span class="ai-pill chay">Sẵn sàng</span>';
+    return '<div><span class="thu-tu"><button class="btn nho" data-khoa="len" data-ten="' + esc(k.ten) + '"' + (i ? '' : ' disabled') + ' title="Dùng trước">▲</button>' +
+      '<button class="btn nho" data-khoa="xuong" data-ten="' + esc(k.ten) + '"' + (i < d.khoa.length - 1 ? '' : ' disabled') + ' title="Dùng sau">▼</button></span>' +
+      '<span class="ten-khoa">' + (i + 1) + '. ' + esc(k.ten) + '</span><code>••••' + esc(k.cuoi) + '</code>' + tt +
+      k.nghi.map(function (n) { return '<span class="nghi">' + esc(n.model) + (n.model === '*' ? ' (mọi model)' : '') + ': ' + esc(n.lyDo) + ' tới ' + gio(n.den) + '</span>'; }).join('') +
+      (k.ghiChu ? '<span>' + esc(k.ghiChu) + '</span>' : '') +
+      '<span class="nut-khoa"><button class="btn nho" data-khoa="thu" data-ten="' + esc(k.ten) + '">Thử</button>' +
+      '<button class="btn nho" data-khoa="' + (k.bat ? 'tat' : 'bat') + '" data-ten="' + esc(k.ten) + '">' + (k.bat ? 'Tắt' : 'Bật') + '</button>' +
+      '<button class="btn nho" data-khoa="xoa" data-ten="' + esc(k.ten) + '">Xoá</button></span></div>';
+  }).join('') : '<div>Chưa có khoá nào.</div>';
+}
+function hopThemKhoa() {
+  moHopAi('<h3>Thêm khoá API Gemini</h3>' +
+    '<label>Khoá API<input class="o" id="hopKhoa" type="password" autocomplete="off" placeholder="AIza… hoặc AQ.…"></label>' +
+    '<div class="luoi2"><label>Tên gợi nhớ<input class="o" id="hopTenKhoa" placeholder="vd: Khoá TCKT"></label>' +
+    '<label>Ghi chú<input class="o" id="hopGhiChuKhoa"></label></div>' +
+    '<div class="goi-y">Máy chủ gọi thử khoá với từng model trước khi lưu. Khoá mới được dùng trước các khoá đang có (đổi thứ tự bằng nút ▲▼).</div>' +
+    '<div class="ai-loi"></div>' +
+    '<div class="hang"><button class="btn" data-hop="huy" type="button">Huỷ</button><button class="btn chinh" data-hop="ok" type="button">Thử và lưu</button></div>',
+    function (h) {
+      var gui = function () {
+        var k = $('#hopKhoa', h).value.trim();
+        if (!k) return baoLoiHop(h, 'Dán khoá API');
+        var nut = $('[data-hop="ok"]', h);
+        nut.disabled = true; nut.classList.add('dang-gui'); nut.textContent = 'Đang thử khoá…';
+        goiAi('themKhoa', { khoa: k, ten: $('#hopTenKhoa', h).value, ghiChu: $('#hopGhiChuKhoa', h).value })
+          .then(function (kq) { dongHopAi(); thongBao(kq.thongBao); napKhoaAi(); },
+            function (e) { nut.disabled = false; nut.classList.remove('dang-gui'); nut.textContent = 'Thử và lưu'; baoLoiHop(h, e.message); });
+      };
+      $('[data-hop="ok"]', h).onclick = gui;
+      $('#hopKhoa', h).onkeydown = function (e) { if (e.key === 'Enter') gui(); };
+    });
+}
 
 /** Sau khi bấm Chạy / Thử: làm mới 5 giây một lần tới khi nhật ký có lô mới của dòng đó (tối đa 6 phút). */
 function batDauCho(dong, thu) {
@@ -2446,6 +2505,18 @@ function ganSuKienAi() {
   $('#aiLamMoi').onclick = function () { lamMoiAi().then(function () { thongBao('Đã làm mới'); }, function (e) { thongBao(e.message); }); };
   $('#aiThem').onclick = hopThem;
   $('#aiThuLink').onclick = hopThuLink;
+  $('#aiThemKhoa').onclick = hopThemKhoa;
+  $('#aiKhoaDs').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-khoa]'); if (!b) return;
+    var ten = b.dataset.ten, v = b.dataset.khoa;
+    var xong = function (kq) { thongBao(kq.thongBao); napKhoaAi(); }, loi = function (er) { thongBao(er.message); napKhoaAi(); };
+    if (v === 'xoa') return hopXacNhan('Xoá khoá ' + ten, 'Khoá bị xoá khỏi tab TN_KHOA_API. Muốn dùng lại phải thêm lại.', 'Xoá',
+      function () { return goiAi('xoaKhoa', { ten: ten }).then(function (kq) { napKhoaAi(); return kq; }); });
+    b.disabled = true;
+    if (v === 'thu') { b.classList.add('dang-gui'); b.textContent = 'Đang thử'; goiAi('thuKhoa', { ten: ten }).then(xong, loi); }
+    else if (v === 'bat' || v === 'tat') goiAi('suaKhoa', { ten: ten, bat: v === 'bat' }).then(xong, loi);
+    else goiAi('suaKhoa', { ten: ten, len: v === 'len', xuong: v === 'xuong' }).then(xong, loi);
+  });
   $('#aiDong').onclick = function () { try { localStorage.removeItem('tclt_ai_ma'); } catch (e) {} AI.ma = ''; khoaAi(''); };
   $('#aiDongKq').onclick = function () { $('#aiMucKq').hidden = true; AI.kq = null; };
   $('#aiLocTT').onchange = $('#aiLocCB').onchange = function () { if (AI.kq) { AI.kq.trang = 1; napKetQuaAi(); } };
