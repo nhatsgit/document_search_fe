@@ -643,6 +643,11 @@ button.kpi:hover{border-color:var(--leaf)}
 .ai-hop .goi-y{font-size:12.5px;color:var(--ink-3)}
 .ai-hop .hang{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:4px}
 .ai-hop .luoi2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ai-hop label.chk{flex-direction:row;align-items:center;gap:8px;color:var(--ink)}
+.ai-hop .o-so-file{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.ai-hop .o-so-file .o{width:140px}
+.ai-hop .uoc .canh{color:var(--clay);margin-top:4px}
+.ai-dong .nut-dem{padding:1px 8px;font-size:12px}
 .ai-hop .uoc{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--ink-2)}
 @media (max-width:900px){
   .ai-dong{grid-template-columns:minmax(0,1fr)}
@@ -2076,6 +2081,15 @@ function uocPhiFile(model) {
 }
 var NF3 = new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 3 });
 function usd(n) { return NF3.format(n) + ' USD'; }
+/** Số file sẽ chạy của một dòng: "Tất cả" = cả thư mục Drive (cần đã đếm); số cụ thể thì không quá số file trong Drive. */
+function mucFile(r) { return r.tatCa ? (r.tongDrive || 0) : (r.tongDrive != null ? Math.min(r.soFile, r.tongDrive) : r.soFile); }
+function oSoFile(r, toiDa) {
+  var tc = r ? r.tatCa : false;
+  return '<label>Số file sẽ chạy<span class="o-so-file"><input class="o" id="hopSoFile" type="number" min="1" max="' + toiDa + '" value="' + (r && !tc ? r.soFile : 100) + '"' + (tc ? ' disabled' : '') + '>' +
+    '<label class="chk"><input type="checkbox" id="hopTatCa"' + (tc ? ' checked' : '') + '> Tất cả file trong Drive</label></span></label>';
+}
+function giaTriSoFile(h) { return $('#hopTatCa', h).checked ? 'Tất cả' : Number($('#hopSoFile', h).value); }
+function ganTatCa(h) { $('#hopTatCa', h).onchange = function () { $('#hopSoFile', h).disabled = this.checked; }; }
 function tok(n) { return n >= 1e6 ? NF2.format(Math.round(n / 1e4) / 100) + ' triệu' : so(n); }
 
 function hienTrangAi() {
@@ -2140,7 +2154,7 @@ function veAi(d) {
   AI.du = d;
   kiemCho(d);
   var tongMuc = 0, tongXong = 0, tongVb = 0, tongLoi = 0, tongPhi = 0, tongNs = 0, dangChay = 0, tongVao = 0, tongRa = 0;
-  d.dong.forEach(function (r) { tongMuc += r.soFile; tongXong += r.daXong; tongVb += r.soVb; tongLoi += r.soLoi; tongPhi += r.chiPhi; tongNs += r.nganSach; tongVao += r.tokVao; tongRa += r.tokRa; if (r.trangThai === 'Chạy') dangChay++; });
+  d.dong.forEach(function (r) { tongMuc += mucFile(r); tongXong += r.daXong; tongVb += r.soVb; tongLoi += r.soLoi; tongPhi += r.chiPhi; tongNs += r.nganSach; tongVao += r.tokVao; tongRa += r.tokRa; if (r.trangThai === 'Chạy') dangChay++; });
   $('#aiThe').innerHTML =
     '<div><span>File đã xong</span><b>' + so(tongXong) + '</b><small>/ ' + so(tongMuc) + '</small></div>' +
     '<div><span>Văn bản trích được</span><b>' + so(tongVb) + '</b></div>' +
@@ -2149,7 +2163,7 @@ function veAi(d) {
     '<div><span>Token vào / ra</span><b>' + tok(tongVao) + '</b><small>/ ' + tok(tongRa) + '</small></div>' +
     '<div><span>Đang chạy</span><b>' + dangChay + '</b><small>dòng</small></div>';
   $('#aiDs').innerHTML = d.dong.length ? d.dong.map(function (r) {
-    var tt = TEN_TT_AI[r.trangThai] || 'dung', pt = r.soFile ? Math.min(100, Math.round(r.daXong / r.soFile * 100)) : 0;
+    var tt = TEN_TT_AI[r.trangThai] || 'dung', muc = mucFile(r), pt = muc ? Math.min(100, Math.round(r.daXong / muc * 100)) : 0;
     var chon = d.modelChoPhep.map(function (m) { return '<option value="' + esc(m.ma) + '"' + (m.ma === r.model ? ' selected' : '') + '>' + esc(m.ma) + '</option>'; }).join('');
     if (!d.modelChoPhep.some(function (m) { return m.ma === r.model; })) chon = '<option value="' + esc(r.model) + '" selected>' + esc(r.model) + ' (không được phép)</option>' + chon;
     var nut = (tt === 'chay'
@@ -2164,9 +2178,13 @@ function veAi(d) {
         (AI.cho && AI.cho.dong === r.dong ? '<small class="dang-cho">' + (AI.cho.thu ? 'đang chạy thử 1 file' : 'đang chạy') + '… ' + Math.round((Date.now() - AI.cho.tu) / 1000) + ' giây</small>'
           : r.dangKhoa ? '<small>lô đang chạy…</small>' : '') + '</div>' +
         '<div class="tt-model">Model <select data-ai-model="' + r.dong + '"' + (tt === 'chay' ? ' disabled' : '') + ' aria-label="Model">' + chon + '</select>' +
-        '<span>tab ' + esc(r.tab) + '</span></div></div>' +
+        '<span>tab ' + esc(r.tab) + '</span></div>' +
+        '<div class="tt-model">Drive: ' + (r.tongDrive != null ? '<b>' + so(r.tongDrive) + '</b> file PDF' : 'chưa đếm') +
+        ' · chạy ' + (r.tatCa ? '<b>tất cả</b>' : so(r.soFile) + ' file') +
+        ' <button class="btn nho nut-dem" data-ai="dem" data-dong="' + r.dong + '" title="Đếm lại số PDF trong thư mục Drive (kể cả thư mục con)">Đếm</button>' +
+        (r.demLuc ? '<span>lúc ' + esc(r.demLuc.slice(5, 16)) + '</span>' : '') + '</div></div>' +
       '<div><div class="ai-tien' + (r.soLoi > r.daXong / 2 && r.soLoi ? ' loi' : '') + '"><i style="width:' + pt + '%"></i></div>' +
-        '<div class="so-lieu"><span><b>' + so(r.daXong) + '</b>/' + so(r.soFile) + ' file</span><span>' + so(r.soVb) + ' văn bản</span>' +
+        '<div class="so-lieu"><span><b>' + so(r.daXong) + '</b>/' + (r.tatCa && r.tongDrive == null ? 'tất cả' : so(muc)) + ' file</span><span>' + so(r.soVb) + ' văn bản</span>' +
         (r.soLoi ? '<span style="color:var(--clay)">' + so(r.soLoi) + ' lỗi</span>' : '') +
         '<span>' + usd(r.chiPhi) + ' / ' + NF2.format(r.nganSach) + ' USD</span><span title="Token vào / token ra (gồm suy nghĩ)">' + tok(r.tokVao) + ' / ' + tok(r.tokRa) + ' token</span><span>' + so(r.soLan) + ' lô · ' + NF2.format(r.tongPhut) + ' phút</span>' +
         (r.lanCuoi ? '<span>lần cuối ' + esc(r.lanCuoi.slice(5, 16)) + '</span>' : '') + '</div>' +
@@ -2201,13 +2219,19 @@ function baoLoiHop(h, chu) { var e = $('.ai-loi', h); if (e) e.textContent = chu
 function hopChay(r, thu) {
   var modelDangChon = ($('[data-ai-model="' + r.dong + '"]') || {}).value || r.model;
   var veUoc = function (h) {
-    var m = $('#hopModel', h).value, f = uocPhiFile(m), conFile = Math.max(0, r.soFile - r.daXong), soF = thu ? 1 : conFile;
-    $('.uoc', h).innerHTML = (thu ? 'Chạy thử <b>1 file</b>' : 'Còn <b>' + so(conFile) + '</b> file cần chạy') +
-      (f != null ? ' · ước tính <b>' + usd(f * soF) + '</b> (khoảng ' + usd(f) + '/file)' : '') +
-      (thu ? '' : ' · ngân sách còn <b>' + usd(Math.max(0, r.nganSach - r.chiPhi)) + '</b>, chạm ngân sách thì tự dừng');
+    var m = $('#hopModel', h).value, tc = !thu && $('#hopTatCa', h).checked;
+    var f = m === r.model && r.daXong >= 1 && r.chiPhi > 0 ? r.chiPhi / r.daXong : uocPhiFile(m);   // đã chạy cùng model: lấy chi phí thật
+    var muc = tc ? r.tongDrive : mucFile(r), conFile = muc == null ? null : Math.max(0, muc - r.daXong), soF = thu ? 1 : conFile;
+    var conNs = Math.max(0, r.nganSach - r.chiPhi);
+    $('.uoc', h).innerHTML = (thu ? 'Chạy thử <b>1 file</b>' : conFile == null ? 'Chưa đếm số file trong Drive (lô đầu sẽ đếm)' : 'Còn <b>' + so(conFile) + '</b> file cần chạy') +
+      (f != null && soF != null ? ' · ước tính <b>' + usd(f * soF) + '</b> (khoảng ' + usd(f) + '/file)' : '') +
+      (thu ? '' : ' · ngân sách còn <b>' + usd(conNs) + '</b>, chạm ngân sách thì tự dừng') +
+      (!thu && f && soF != null && f * soF > conNs ? '<div class="canh">Ngân sách chỉ đủ khoảng ' + so(Math.floor(conNs / f)) + ' file. Muốn chạy hết thì tăng ngân sách ở nút Sửa.</div>' : '');
   };
   moHopAi('<h3>' + (thu ? 'Chạy thử 1 file' : 'Chạy') + ' · ' + esc(r.phong) + ' ' + esc(r.congTy) + '</h3>' +
     '<label>Model' + chonModelHtml('hopModel', modelDangChon) + '</label>' +
+    (thu ? '' : '<label class="chk"><input type="checkbox" id="hopTatCa"' + (r.tatCa ? ' checked' : '') + '> Chạy tất cả file trong Drive' +
+      (r.tongDrive != null ? ' (' + so(r.tongDrive) + ' file)' : '') + (r.tatCa ? '' : ' — hiện đặt ' + so(r.soFile) + ' file') + '</label>') +
     '<div class="uoc"></div>' +
     '<label>Nhập mã chạy để xác nhận<input class="o" id="hopMa" type="password" autocomplete="off" placeholder="Mã chạy"></label>' +
     '<div class="ai-loi"></div>' +
@@ -2215,11 +2239,14 @@ function hopChay(r, thu) {
     function (h) {
       veUoc(h);
       $('#hopModel', h).onchange = function () { veUoc(h); };
+      if ($('#hopTatCa', h)) $('#hopTatCa', h).onchange = function () { veUoc(h); };
       var gui = function () {
         var ma = $('#hopMa', h).value;
         if (!ma) return baoLoiHop(h, 'Nhập mã chạy');
         $('[data-hop="ok"]', h).disabled = true;
-        goiAi(thu ? 'thu' : 'chay', { dong: r.dong, model: $('#hopModel', h).value }, ma).then(function (kq) {
+        var tc = !thu && $('#hopTatCa', h).checked;
+        var doiSo = !thu && tc !== !!r.tatCa ? goiAi('capNhat', { dong: r.dong, soFile: tc ? 'Tất cả' : Math.max(r.soFile || 100, 1) }, ma) : Promise.resolve();
+        doiSo.then(function () { return goiAi(thu ? 'thu' : 'chay', { dong: r.dong, model: $('#hopModel', h).value }, ma); }).then(function (kq) {
           dongHopAi(); thongBao(kq.thongBao);
           batDauCho(r.dong, thu);
         }, function (e) { $('[data-hop="ok"]', h).disabled = false; baoLoiHop(h, e.message); });
@@ -2232,14 +2259,15 @@ function hopChay(r, thu) {
 function hopSua(r) {
   moHopAi('<h3>Sửa · ' + esc(r.phong) + ' ' + esc(r.congTy) + '</h3>' +
     '<label>Model' + chonModelHtml('hopModel', r.model) + '</label>' +
-    '<div class="luoi2"><label>Số file tối đa<input class="o" id="hopSoFile" type="number" min="1" max="' + AI.du.soFileToiDa + '" value="' + r.soFile + '"></label>' +
-    '<label>Ngân sách (USD)<input class="o" id="hopNs" type="number" min="0.1" step="0.1" value="' + r.nganSach + '"></label></div>' +
+    oSoFile(r, AI.du.soFileToiDa) +
+    '<label>Ngân sách (USD)<input class="o" id="hopNs" type="number" min="0.1" step="0.1" value="' + r.nganSach + '"></label>' +
     '<label>Ghi chú<input class="o" id="hopGhiChu" value="' + esc(r.ghiChu) + '"></label>' +
     '<div class="ai-loi"></div>' +
     '<div class="hang"><button class="btn" data-hop="huy" type="button">Huỷ</button><button class="btn chinh" data-hop="ok" type="button">Lưu</button></div>',
     function (h) {
+      ganTatCa(h);
       $('[data-hop="ok"]', h).onclick = function () {
-        goiAi('capNhat', { dong: r.dong, model: $('#hopModel', h).value, soFile: Number($('#hopSoFile', h).value), nganSach: Number($('#hopNs', h).value),
+        goiAi('capNhat', { dong: r.dong, model: $('#hopModel', h).value, soFile: giaTriSoFile(h), nganSach: Number($('#hopNs', h).value),
           ghiChu: $('#hopGhiChu', h).value }).then(function (kq) { dongHopAi(); thongBao(kq.thongBao); lamMoiAi(); }, function (e) { baoLoiHop(h, e.message); });
       };
     });
@@ -2252,17 +2280,18 @@ function hopThem() {
     '<div class="luoi2"><label>Công ty<select class="o" id="hopCongTy"><option>CRCK2</option><option>BHCK</option></select></label>' +
     '<label>Phòng<select class="o" id="hopPhong"><option>TCHC</option><option>TCKT</option><option>KHĐT</option><option>KTNN</option></select></label></div>' +
     '<label>Model' + chonModelHtml('hopModel', AI.du.modelMacDinh) + '</label>' +
-    '<div class="luoi2"><label>Số file tối đa<input class="o" id="hopSoFile" type="number" min="1" max="' + AI.du.soFileToiDa + '" value="100"></label>' +
-    '<label>Ngân sách (USD)<input class="o" id="hopNs" type="number" min="0.1" step="0.1" value="' + AI.du.nganSachMacDinh + '"></label></div>' +
+    oSoFile(null, AI.du.soFileToiDa) +
+    '<label>Ngân sách (USD)<input class="o" id="hopNs" type="number" min="0.1" step="0.1" value="' + AI.du.nganSachMacDinh + '"></label>' +
     '<label>Tên tab kết quả (để trống: tự đặt TN_PHÒNG_CÔNG TY)<input class="o" id="hopTab" placeholder="TN_TCKT_CRCK2"></label>' +
     '<label>Ghi chú<input class="o" id="hopGhiChu"></label>' +
     '<div class="ai-loi"></div>' +
     '<div class="hang"><button class="btn" data-hop="huy" type="button">Huỷ</button><button class="btn chinh" data-hop="ok" type="button">Thêm</button></div>',
     function (h) {
+      ganTatCa(h);
       $('[data-hop="ok"]', h).onclick = function () {
         if (!$('#hopThuMuc', h).value.trim()) return baoLoiHop(h, 'Dán link thư mục Drive');
         goiAi('them', { thuMuc: $('#hopThuMuc', h).value, congTy: $('#hopCongTy', h).value, phong: $('#hopPhong', h).value, model: $('#hopModel', h).value,
-          soFile: Number($('#hopSoFile', h).value), nganSach: Number($('#hopNs', h).value), tab: $('#hopTab', h).value, ghiChu: $('#hopGhiChu', h).value })
+          soFile: giaTriSoFile(h), nganSach: Number($('#hopNs', h).value), tab: $('#hopTab', h).value, ghiChu: $('#hopGhiChu', h).value })
           .then(function (kq) { dongHopAi(); thongBao(kq.thongBao); lamMoiAi(); }, function (e) { baoLoiHop(h, e.message); });
       };
     });
@@ -2345,6 +2374,8 @@ function ganSuKienAi() {
     else if (v === 'thu') hopChay(r, true);
     else if (v === 'sua') hopSua(r);
     else if (v === 'ketQua') moKetQuaAi(r);
+    else if (v === 'dem') { b.disabled = true; b.textContent = 'Đang đếm…';
+      goiAi('demFile', { dong: r.dong }).then(function (kq) { thongBao(kq.thongBao); lamMoiAi(); }, function (e) { thongBao(e.message); b.disabled = false; b.textContent = 'Đếm'; }); }
     else if (v === 'dung') hopXacNhan('Dừng ' + r.phong + ' · ' + r.congTy, 'Lô đang chạy (nếu có) sẽ làm xong rồi ngừng. Bấm Chạy để tiếp tục từ chỗ dừng.', 'Dừng',
       function () { return goiAi('dung', { dong: r.dong }); });
     else if (v === 'xoa') hopXacNhan('Xoá dòng ' + r.phong + ' · ' + r.congTy, 'Chỉ xoá dòng trong tab điều khiển. Tab kết quả <b>' + esc(r.tab) + '</b> vẫn giữ nguyên.', 'Xoá',
