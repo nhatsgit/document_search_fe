@@ -2120,7 +2120,8 @@ function hienTrangAi() {
   $('#manAi').hidden = false;
   document.title = 'Chạy AI - Tra cứu lưu trữ';
   try { AI.ma = localStorage.getItem('tclt_ai_ma') || ''; } catch (e) {}
-  if (AI.ma) moAi(); else khoaAi('');
+  $('#aiKhoa').hidden = true;    // máy chủ có bật yêu cầu mã thì moAi tự hiện màn nhập mã
+  moAi();
 }
 function anTrangAi() {
   document.body.classList.remove('che-do-ai');
@@ -2141,7 +2142,7 @@ function moAi() {
     clearInterval(AI.hen);
     AI.hen = setInterval(function () { if (!document.hidden && $('#aiNenHop').hidden) lamMoiAi().catch(function () {}); }, 30000);
   }).catch(function (e) {
-    if (e.saiMa) { try { localStorage.removeItem('tclt_ai_ma'); } catch (x) {} AI.ma = ''; khoaAi('Sai mã chạy'); }
+    if (e.saiMa) { var coMa = !!AI.ma; try { localStorage.removeItem('tclt_ai_ma'); } catch (x) {} AI.ma = ''; khoaAi(coMa ? 'Sai mã chạy' : ''); }
     else khoaAi(e.message);
   });
 }
@@ -2176,6 +2177,7 @@ function kiemCho(d) {
 var TEN_TT_AI = { 'Chạy': 'chay', 'Dừng': 'dung', 'Xong': 'xong' };
 function veAi(d) {
   AI.du = d;
+  $('#aiDong').hidden = !d.canMa;   // không yêu cầu mã thì không cần nút Khoá
   kiemCho(d);
   var tongMuc = 0, tongXong = 0, tongVb = 0, tongLoi = 0, tongPhi = 0, tongNs = 0, dangChay = 0, tongVao = 0, tongRa = 0;
   d.dong.forEach(function (r) { tongMuc += mucFile(r); tongXong += r.daXong; tongVb += r.soVb; tongLoi += r.soLoi; tongPhi += r.chiPhi; tongNs += r.nganSach; tongVao += r.tokVao; tongRa += r.tokRa; if (r.trangThai === 'Chạy' || r.dangKhoa || (AI.cho && AI.cho.dong === r.dong)) dangChay++; });
