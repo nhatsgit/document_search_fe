@@ -2322,7 +2322,7 @@ function veBaoCaoAi(b) {
       so(b.canSoatXet) + ' văn bản cần soát xét · ' + so(b.fileLoi) + ' file lỗi</div>' +
     '<div><h3>Khớp dữ liệu cũ</h3>Số ký hiệu: ' + tl(b.khopSoHieuCu) + '<br>Ngày: ' + tl(b.khopNgayCu) + '</div>' +
     '<div><h3>Chi phí, thời gian</h3>' + usd(b.chiPhi) + ' · TB ' + usd(b.chiPhiTrungBinhFile) + '/file<br>TB ' + NF2.format(b.giayTrungBinhFile) + ' giây/file<br>' +
-      'Tổng ' + tok(b.tongTokenVao) + ' token vào, ' + tok(b.tongTokenRa) + ' token ra<br>TB ' + so(b.tokenVaoTrungBinh) + ' token vào, ' + so(b.tokenRaTrungBinh) + ' token ra / file</div>' +
+      'Tổng ' + tok(b.tongTokenVao) + ' token vào' + (b.tongTokenCache ? ' (' + tok(b.tongTokenCache) + ' trúng cache, giá 10%)' : '') + ', ' + tok(b.tongTokenRa) + ' token ra<br>TB ' + so(b.tokenVaoTrungBinh) + ' token vào, ' + so(b.tokenRaTrungBinh) + ' token ra / file</div>' +
     '<div><h3>Cảnh báo</h3><ul>' + (b.canhBao.map(function (c) { return '<li>' + esc(c[0]) + ': ' + so(c[1]) + '</li>'; }).join('') || '<li>Không có</li>') + '</ul></div>' +
     '<div><h3>Loại văn bản</h3><ul>' + b.loaiVanBan.slice(0, 8).map(function (c) { return '<li>' + esc(c[0]) + ': ' + so(c[1]) + '</li>'; }).join('') + '</ul></div></div>';
 }
