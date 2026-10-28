@@ -574,6 +574,81 @@ button.kpi:hover{border-color:var(--leaf)}
 .luoi-2.mot{grid-template-columns:1fr}
 #pTim .dau-trang{margin-bottom:10px}
 @media print{.dau-ud,.tabs-con,.cot-loc,.thanh-tim,.tam-pv,.nen-pv{display:none !important}}
+/* ---------- Trang "Chạy AI" (#/ai): theo dõi và điều khiển AI trích xuất của các phòng ---------- */
+.nut-ai{flex:none;height:36px;padding:0 12px;border:1px solid var(--sb-line);background:rgba(255,255,255,.08);color:var(--sb-ink);border-radius:99px;
+  font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:6px;text-decoration:none}
+.nut-ai:hover{background:rgba(255,255,255,.2)}
+.che-do-ai .noi-dung-chinh,.che-do-ai #tabsCon,.che-do-ai .chon-pv,.che-do-ai #nutPv,.che-do-ai .thong-tin-kho{display:none !important}
+.man-ai{max-width:1400px;margin:0 auto;padding:20px var(--le-ngang) 80px;display:flex;flex-direction:column;gap:16px}
+.man-ai[hidden]{display:none}
+.ai-dau{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.ai-dau h1{font-size:21px;margin:0;letter-spacing:-.02em}
+.ai-dau .phu{color:var(--ink-3);font-size:13px}
+.ai-dau .day-nut{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.ai-the{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+.ai-the>div{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.ai-the span{display:block;font-size:12px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em}
+.ai-the b{font-size:22px;font-variant-numeric:tabular-nums}
+.ai-the small{color:var(--ink-3);font-size:13px;margin-left:4px}
+.ai-ds{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.ai-dong{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr) 300px;gap:14px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line)}
+.ai-dong:last-child{border-bottom:none}
+.ai-dong .ten{font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ai-dong .ten small{font-weight:400;color:var(--ink-3);font-size:12.5px}
+.ai-dong .tt-model{display:flex;gap:6px;align-items:center;margin-top:6px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-3)}
+.ai-dong select{padding:5px 8px;font-size:13px;border:1px solid var(--line-2);background:var(--card);color:var(--ink);border-radius:6px;max-width:100%}
+.ai-tien{height:8px;background:var(--line);border-radius:4px;overflow:hidden}
+.ai-tien i{display:block;height:100%;background:var(--leaf);border-radius:4px;transition:width .4s}
+.ai-tien.loi i{background:var(--clay)}
+.ai-dong .so-lieu{font-size:12.5px;color:var(--ink-2);margin-top:6px;display:flex;gap:4px 12px;flex-wrap:wrap}
+.ai-dong .lo-cuoi{font-size:12px;color:var(--ink-3);margin-top:3px;overflow-wrap:anywhere}
+.ai-dong .nut-dong{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.ai-pill{font-size:12px;font-weight:700;padding:2px 10px;border-radius:99px;white-space:nowrap}
+.ai-pill.chay{background:var(--leaf-soft);color:var(--leaf)}
+.ai-pill.dung{background:var(--line);color:var(--ink-2)}
+.ai-pill.xong{background:var(--sky-soft);color:var(--sky)}
+@media (prefers-reduced-motion:no-preference){.ai-pill.chay::before{content:'';display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--leaf);margin-right:6px;animation:nhay-ai 1.2s ease-in-out infinite}}
+@keyframes nhay-ai{50%{opacity:.25}}
+.ai-muc{display:flex;flex-direction:column;gap:10px}
+.ai-muc h2{font-size:16px;margin:0}
+.ai-nk{background:var(--card);border:1px solid var(--line);border-radius:10px;font-size:13px}
+.ai-nk>div{display:flex;flex-wrap:wrap;gap:4px 14px;padding:9px 14px;border-bottom:1px solid var(--line);color:var(--ink-2)}
+.ai-nk>div:last-child{border-bottom:none}
+.ai-nk code{font-family:ui-monospace,Consolas,monospace;font-size:12px;color:var(--ink)}
+.ai-nk .loi{color:var(--clay)}
+.ai-loc{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.ai-loc select,.ai-loc input{padding:7px 10px;border:1px solid var(--line-2);background:var(--card);color:var(--ink);border-radius:6px;font-size:13.5px}
+.ai-loc input{flex:1 1 220px;min-width:0}
+.ai-bang{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:10px}
+.ai-bang table{min-width:980px;font-size:13px}
+.ai-bang td{cursor:default}
+.ai-bang tbody tr:hover{background:none}
+.ai-bang .cu{display:block;color:var(--ink-3);font-size:12px;margin-top:2px}
+.ai-bang .cb{color:var(--clay);font-size:12px}
+.ai-bc{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.ai-bc>div{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:13.5px}
+.ai-bc h3{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-3)}
+.ai-bc ul{margin:0;padding-left:18px}
+.ai-khoa{max-width:420px;margin:40px auto;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:24px;display:flex;flex-direction:column;gap:12px}
+.ai-khoa h2{margin:0;font-size:18px}
+.ai-khoa p{margin:0;color:var(--ink-3);font-size:13.5px}
+.ai-loi{color:var(--clay);font-size:13px;min-height:1em}
+.nen-ai-hop{position:fixed;inset:0;background:rgba(21,35,28,.5);z-index:150;display:flex;align-items:center;justify-content:center;padding:16px}
+.nen-ai-hop[hidden]{display:none}
+.ai-hop{background:var(--card);color:var(--ink);border-radius:12px;width:min(520px,100%);max-height:90vh;overflow:auto;padding:18px 20px;display:flex;flex-direction:column;gap:12px;
+  box-shadow:0 18px 50px rgba(0,0,0,.35)}
+.ai-hop h3{margin:0;font-size:17px}
+.ai-hop label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--ink-2)}
+.ai-hop .goi-y{font-size:12.5px;color:var(--ink-3)}
+.ai-hop .hang{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:4px}
+.ai-hop .luoi2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ai-hop .uoc{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--ink-2)}
+@media (max-width:900px){
+  .ai-dong{grid-template-columns:minmax(0,1fr)}
+  .ai-dong .nut-dong{justify-content:flex-start}
+  .nut-ai .chu-nut-ai{display:none}
+}
+@media (max-width:520px){.ai-hop .luoi2{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -595,6 +670,7 @@ button.kpi:hover{border-color:var(--leaf)}
       <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 8 5 5 5-5"/></svg>
     </button>
     <div class="thong-tin-kho" id="benNguon">Đang kết nối API…</div>
+    <a class="nut-ai" href="#/ai" title="Theo dõi, điều khiển AI trích xuất"><span aria-hidden="true">✦</span><span class="chu-nut-ai">Chạy AI</span></a>
     <button class="nut-theme" id="nutTheme" type="button" title="Đổi giao diện sáng / tối" aria-label="Đổi giao diện sáng / tối">◐</button>
   </div>
 </header>
@@ -709,6 +785,53 @@ button.kpi:hover{border-color:var(--leaf)}
       </section>
     </div>
 </main>
+
+<!-- ===================== CHẠY AI (#/ai) ===================== -->
+<section class="man-ai" id="manAi" hidden>
+  <div id="aiKhoa" class="ai-khoa">
+    <h2>Chạy AI trích xuất</h2>
+    <p>Nhập mã chạy để xem và điều khiển. Mã chỉ được nhớ trong thẻ trình duyệt này, đóng thẻ là phải nhập lại.</p>
+    <input class="o" id="aiMaVao" type="password" autocomplete="off" placeholder="Mã chạy" aria-label="Mã chạy">
+    <div class="ai-loi" id="aiLoiKhoa"></div>
+    <button class="btn chinh" id="aiMo" type="button">Mở</button>
+  </div>
+  <div id="aiNoiDung" hidden>
+    <div class="ai-dau">
+      <h1>Chạy AI trích xuất</h1>
+      <span class="phu" id="aiCapNhat"></span>
+      <div class="day-nut">
+        <button class="btn nho" id="aiLamMoi" type="button">Làm mới</button>
+        <button class="btn nho" id="aiThem" type="button">+ Thêm phòng</button>
+        <button class="btn nho" id="aiDong" type="button" title="Quên mã trong thẻ này">Khoá</button>
+      </div>
+    </div>
+    <div class="ai-the" id="aiThe"></div>
+    <div class="ai-ds" id="aiDs"></div>
+    <div class="ai-muc" id="aiMucKq" hidden>
+      <h2 id="aiTieuDeKq"></h2>
+      <div class="ai-loc">
+        <select id="aiLocTT" aria-label="Lọc trạng thái"><option value="">Mọi trạng thái</option><option value="can_soat_xet">Cần soát xét</option>
+          <option value="da_trich">Đã trích</option><option value="loi">Lỗi</option></select>
+        <select id="aiLocCB" aria-label="Lọc cảnh báo"><option value="">Mọi cảnh báo</option><option value="so_hieu_khong_ro">Số hiệu không rõ</option>
+          <option value="doc_mot_phan">Đọc một phần</option><option value="nhieu_van_ban_trong_file">Nhiều văn bản trong file</option>
+          <option value="ngay_khong_ro">Ngày không rõ</option><option value="so_tien_khong_ro">Số tiền không rõ</option>
+          <option value="chat_luong_scan_kem">Chất lượng scan kém</option><option value="do_tin_cay_thap">Độ tin cậy thấp</option>
+          <option value="loai_chua_co_trong_danh_muc">Loại chưa có trong danh mục</option></select>
+        <input id="aiLocQ" type="search" placeholder="Tìm theo tên file, số hiệu, trích yếu" aria-label="Tìm trong kết quả">
+        <button class="btn nho" id="aiDongKq" type="button">Đóng</button>
+      </div>
+      <div id="aiBaoCao"></div>
+      <div class="ai-bang"><table><thead><tr><th>File</th><th>Trang</th><th>Loại · chi tiết</th><th>Số ký hiệu</th><th>Ngày</th><th>Trích yếu</th><th>Cảnh báo</th><th>Trạng thái</th></tr></thead>
+        <tbody id="aiThanKq"></tbody></table></div>
+      <div class="phan-trang" id="aiPhanTrang"></div>
+    </div>
+    <div class="ai-muc">
+      <h2>Nhật ký các lô gần nhất</h2>
+      <div class="ai-nk" id="aiNk"></div>
+    </div>
+  </div>
+</section>
+<div class="nen-ai-hop" id="aiNenHop" hidden><div class="ai-hop" id="aiHop" role="dialog" aria-modal="true"></div></div>
 
 <!-- Ngăn chi tiết văn bản -->
 <div class="nen-ngan" id="nenNgan"></div>
@@ -880,6 +1003,7 @@ var DONG_NHOM_LOC = {};     // nhóm lọc đang thu gọn
 try { DONG_NHOM_LOC = JSON.parse(localStorage.getItem('tclt_nhom_dong') || '{}'); } catch (e) {}
 
 function docDiaChi() {
+  if (laTrangAi()) { TT.pv = pvMacDinh(); return; } // #/ai: trang Chạy AI, phía dưới vẫn nạp phạm vi dùng lần trước
   var h = location.hash.replace(/^#\/?/, '');
   var phan = h.split('?'), duong = phan[0] || 'tim', p = new URLSearchParams(phan[1] || '');
   var seg = duong.split('/');
@@ -904,6 +1028,7 @@ function docDiaChi() {
   }
 }
 function vietDiaChi(them) {
+  if (laTrangAi()) return;
   var p = new URLSearchParams(), duong = (TT.pv ? encodeURIComponent(TT.pv) : 'tat-ca') + '/' + TT.trang;
   if (TT.trang === 'tim') {
     var t = TT.tim;
@@ -956,7 +1081,7 @@ function veTrang() {
   $('#pTong').hidden = TT.trang !== 'tong';
   var ph = phongDangXem(), tenPv = ph ? ph.nhan : 'Toàn bộ kho';
   $('#tenPv').textContent = ph ? ph.ten : 'Toàn bộ kho lưu trữ (2 công ty)';
-  document.title = tenPv + ' · ' + TEN_TRANG[TT.trang] + ' - Tra cứu lưu trữ';
+  if (!laTrangAi()) document.title = tenPv + ' · ' + TEN_TRANG[TT.trang] + ' - Tra cứu lưu trữ';
   if (META) { $('#demTong').textContent = so(META.tong); $('#demBo').textContent = so(META.soBo); }
   if (TT.trang === 'tim') { dongBoOTim(); timKiem(); }
   else if (TT.trang === 'bo') { if (TT.bo.ma) moBo(TT.bo.ma); else dsBo(); }
@@ -1734,7 +1859,11 @@ function ganSuKien() {
   $('#nutPv').onclick = moChonPv;
   $('#nenPv').onclick = dongChonPv;
   $('#dongPv').onclick = dongChonPv;
-  $('#veDau').onclick = function (e) { e.preventDefault(); chuyenTrang('tim'); };
+  $('#veDau').onclick = function (e) {
+    e.preventDefault();
+    if (laTrangAi()) { history.replaceState(null, '', location.pathname + location.search); anTrangAi(); }
+    chuyenTrang('tim');
+  };
   // Tiêu đề bảng kết quả dính ngay dưới thanh tab trang con (chiều cao thanh đổi theo cỡ chữ / màn)
   var doCaoTab = function () { document.documentElement.style.setProperty('--cao-tab', $('#tabsCon').offsetHeight + 'px'); };
   doCaoTab(); window.addEventListener('resize', chongDoi(doCaoTab, 150));
@@ -1753,6 +1882,8 @@ function ganSuKien() {
   });
   // popstate chạy cả khi bấm Lùi/Tiến lẫn khi sửa tay phần # trên thanh địa chỉ
   window.addEventListener('popstate', function () {
+    if (laTrangAi()) return hienTrangAi();
+    if (document.body.classList.contains('che-do-ai')) anTrangAi();
     var pvCu = TT.pv;
     docDiaChi();
     if (TT.pv !== pvCu) { kqHienTai = []; nhoPv(); goiTruocTrangTim(); napMetaPhamVi().then(veTrang); } else veTrang();
@@ -1918,8 +2049,289 @@ function batDau() {
     $('#benNguon').textContent = 'Chưa kết nối được API';
   });
 }
+/* ===================================================================== Trang "Chạy AI" (#/ai)
+   Theo dõi và điều khiển AI trích xuất của các phòng. Gọi POST /api/ai kèm mã chạy (header X-AI-Key);
+   mã không nằm trong code trang này (repo công khai) — người dùng nhập, nhớ trong sessionStorage của thẻ.
+   Bấm Chạy / Thử 1 file phải nhập lại mã. Việc chạy diễn ra trên Cloud Run, đóng trình duyệt vẫn chạy tiếp. */
+var AI = { ma: '', du: null, hen: null, kq: null };
+var API_AI = API.replace(/\/api\/exec.*$/, '/api/ai');
+var UOC_TOKEN_RA = { 'gemini-2.5-flash': 4300, 'gemini-3.8-flash': 2200 };   // gồm token suy nghĩ, đo trên file thử
+
+function laTrangAi() { return /^#\/?ai(\/|\?|$)/.test(location.hash); }
+function goiAi(lenh, thamSo, ma) {
+  return fetch(API_AI, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-AI-Key': ma || AI.ma },
+    body: JSON.stringify(Object.assign({ lenh: lenh }, thamSo || {})) })
+    .then(function (r) { return r.json().catch(function () { throw new Error('API trả về không phải JSON (mã ' + r.status + ')'); }); })
+    .then(function (j) {
+      if (j.saiMa) throw Object.assign(new Error('Sai mã chạy'), { saiMa: true });
+      if (!j.ok) throw new Error(j.loi || 'Lỗi không rõ');
+      return j.data;
+    }, function (e) { if (e instanceof TypeError) throw new Error('Không kết nối được API'); throw e; });
+}
+function uocPhiFile(model) {
+  var m = AI.du && AI.du.modelChoPhep.filter(function (x) { return x.ma === model; })[0];
+  if (!m || !m.gia) return null;
+  return (7500 * m.gia.vao + (UOC_TOKEN_RA[model] || 1500) * m.gia.ra) / 1e6;
+}
+var NF3 = new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 3 });
+function usd(n) { return NF3.format(n) + ' USD'; }
+
+function hienTrangAi() {
+  document.body.classList.add('che-do-ai');
+  $('#manAi').hidden = false;
+  document.title = 'Chạy AI - Tra cứu lưu trữ';
+  try { AI.ma = sessionStorage.getItem('tclt_ai_ma') || ''; } catch (e) {}
+  if (AI.ma) moAi(); else khoaAi('');
+}
+function anTrangAi() {
+  document.body.classList.remove('che-do-ai');
+  $('#manAi').hidden = true;
+  clearInterval(AI.hen); AI.hen = null;
+  dongHopAi();
+}
+function khoaAi(loi) {
+  clearInterval(AI.hen); AI.hen = null;
+  $('#aiKhoa').hidden = false; $('#aiNoiDung').hidden = true;
+  $('#aiLoiKhoa').textContent = loi || '';
+  setTimeout(function () { $('#aiMaVao').focus(); }, 50);
+}
+function moAi() {
+  return lamMoiAi().then(function () {
+    $('#aiKhoa').hidden = true; $('#aiNoiDung').hidden = false;
+    clearInterval(AI.hen);
+    AI.hen = setInterval(function () { if (!document.hidden && $('#aiNenHop').hidden) lamMoiAi().catch(function () {}); }, 30000);
+  }).catch(function (e) {
+    if (e.saiMa) { try { sessionStorage.removeItem('tclt_ai_ma'); } catch (x) {} AI.ma = ''; khoaAi('Sai mã chạy'); }
+    else khoaAi(e.message);
+  });
+}
+function lamMoiAi() { return goiAi('tongQuan').then(veAi); }
+
+var TEN_TT_AI = { 'Chạy': 'chay', 'Dừng': 'dung', 'Xong': 'xong' };
+function veAi(d) {
+  AI.du = d;
+  var tongMuc = 0, tongXong = 0, tongVb = 0, tongLoi = 0, tongPhi = 0, tongNs = 0, dangChay = 0;
+  d.dong.forEach(function (r) { tongMuc += r.soFile; tongXong += r.daXong; tongVb += r.soVb; tongLoi += r.soLoi; tongPhi += r.chiPhi; tongNs += r.nganSach; if (r.trangThai === 'Chạy') dangChay++; });
+  $('#aiThe').innerHTML =
+    '<div><span>File đã xong</span><b>' + so(tongXong) + '</b><small>/ ' + so(tongMuc) + '</small></div>' +
+    '<div><span>Văn bản trích được</span><b>' + so(tongVb) + '</b></div>' +
+    '<div><span>File lỗi</span><b>' + so(tongLoi) + '</b></div>' +
+    '<div><span>Chi phí / ngân sách</span><b>' + NF2.format(Math.round(tongPhi * 100) / 100) + '</b><small>/ ' + NF2.format(tongNs) + ' USD</small></div>' +
+    '<div><span>Đang chạy</span><b>' + dangChay + '</b><small>dòng</small></div>';
+  $('#aiDs').innerHTML = d.dong.length ? d.dong.map(function (r) {
+    var tt = TEN_TT_AI[r.trangThai] || 'dung', pt = r.soFile ? Math.min(100, Math.round(r.daXong / r.soFile * 100)) : 0;
+    var chon = d.modelChoPhep.map(function (m) { return '<option value="' + esc(m.ma) + '"' + (m.ma === r.model ? ' selected' : '') + '>' + esc(m.ma) + '</option>'; }).join('');
+    if (!d.modelChoPhep.some(function (m) { return m.ma === r.model; })) chon = '<option value="' + esc(r.model) + '" selected>' + esc(r.model) + ' (không được phép)</option>' + chon;
+    var nut = (tt === 'chay'
+      ? '<button class="btn nho" data-ai="dung" data-dong="' + r.dong + '">⏸ Dừng</button>'
+      : (tt !== 'xong' ? '<button class="btn chinh nho" data-ai="chay" data-dong="' + r.dong + '">▶ Chạy</button>' : '') +
+        '<button class="btn nho" data-ai="thu" data-dong="' + r.dong + '">Thử 1 file</button>') +
+      '<button class="btn nho" data-ai="ketQua" data-dong="' + r.dong + '">Kết quả</button>' +
+      '<button class="btn nho" data-ai="sua" data-dong="' + r.dong + '">Sửa</button>' +
+      (tt !== 'chay' ? '<button class="btn nho" data-ai="xoa" data-dong="' + r.dong + '" title="Xoá dòng điều khiển (giữ tab kết quả)">Xoá</button>' : '');
+    return '<div class="ai-dong">' +
+      '<div><div class="ten">' + esc(r.phong) + ' · ' + esc(r.congTy) + ' <span class="ai-pill ' + tt + '">' + esc(r.trangThai) + '</span>' +
+        (r.dangKhoa ? '<small>lô đang chạy…</small>' : '') + '</div>' +
+        '<div class="tt-model">Model <select data-ai-model="' + r.dong + '"' + (tt === 'chay' ? ' disabled' : '') + ' aria-label="Model">' + chon + '</select>' +
+        '<span>tab ' + esc(r.tab) + '</span></div></div>' +
+      '<div><div class="ai-tien' + (r.soLoi > r.daXong / 2 && r.soLoi ? ' loi' : '') + '"><i style="width:' + pt + '%"></i></div>' +
+        '<div class="so-lieu"><span><b>' + so(r.daXong) + '</b>/' + so(r.soFile) + ' file</span><span>' + so(r.soVb) + ' văn bản</span>' +
+        (r.soLoi ? '<span style="color:var(--clay)">' + so(r.soLoi) + ' lỗi</span>' : '') +
+        '<span>' + usd(r.chiPhi) + ' / ' + NF2.format(r.nganSach) + ' USD</span><span>' + so(r.soLan) + ' lô · ' + NF2.format(r.tongPhut) + ' phút</span>' +
+        (r.lanCuoi ? '<span>lần cuối ' + esc(r.lanCuoi.slice(5, 16)) + '</span>' : '') + '</div>' +
+        (r.ketQuaCuoi ? '<div class="lo-cuoi">' + esc(r.ketQuaCuoi) + '</div>' : '') + '</div>' +
+      '<div class="nut-dong">' + nut + '</div></div>';
+  }).join('') : '<div class="rong">Chưa có dòng nào. Bấm "+ Thêm phòng" để thêm thư mục Drive của một phòng.</div>';
+  $('#aiNk').innerHTML = d.nhatKy.length ? d.nhatKy.map(function (n) {
+    return '<div><code>' + esc(n.maLo) + '</code><span>' + esc(n.batDau.slice(5, 16)) + ' → ' + esc(n.ketThuc.slice(11, 16)) + ' · ' + so(n.giay) + ' giây</span>' +
+      '<span>' + esc(n.tab) + '</span><span>' + so(n.fileXong) + ' file · ' + so(n.soVb) + ' văn bản' + (n.fileLoi ? ' · ' + so(n.fileLoi) + ' lỗi' : '') + '</span>' +
+      '<span>' + usd(n.chiPhi) + '</span><span>' + ({ lich: 'theo lịch', tu_dong: 'tự nối tiếp', trang: 'bấm trên trang', tay: 'gọi tay' }[n.cachGoi] || esc(n.cachGoi)) + '</span>' +
+      (n.ghiChu ? '<span class="' + (/LỖI/.test(n.ghiChu) ? 'loi' : '') + '">' + esc(n.ghiChu) + '</span>' : '') + '</div>';
+  }).join('') : '<div>Chưa có lô nào.</div>';
+  $('#aiCapNhat').textContent = 'Cập nhật ' + new Date().toLocaleTimeString('vi-VN') + ' · tự làm mới 30 giây';
+}
+
+/* ---------- Hộp thoại ---------- */
+function moHopAi(html, ganSuKien) {
+  $('#aiHop').innerHTML = html; $('#aiNenHop').hidden = false;
+  if (ganSuKien) ganSuKien($('#aiHop'));
+  var o = $('#aiHop input:not([type=hidden]), #aiHop select'); if (o) setTimeout(function () { o.focus(); }, 50);
+}
+function dongHopAi() { $('#aiNenHop').hidden = true; $('#aiHop').innerHTML = ''; }
+function dongTheoSo(so2) { return AI.du.dong.filter(function (r) { return r.dong === Number(so2); })[0]; }
+function chonModelHtml(id, chon) {
+  return '<select class="o" id="' + id + '">' + AI.du.modelChoPhep.map(function (m) {
+    return '<option value="' + esc(m.ma) + '"' + (m.ma === chon ? ' selected' : '') + '>' + esc(m.ma) + (m.ghiChu ? ' — ' + esc(m.ghiChu) : '') + '</option>';
+  }).join('') + '</select>';
+}
+function baoLoiHop(h, chu) { var e = $('.ai-loi', h); if (e) e.textContent = chu; }
+
+/** Chạy / Thử 1 file: chọn model, xem ước tính chi phí, nhập lại mã chạy. */
+function hopChay(r, thu) {
+  var modelDangChon = ($('[data-ai-model="' + r.dong + '"]') || {}).value || r.model;
+  var veUoc = function (h) {
+    var m = $('#hopModel', h).value, f = uocPhiFile(m), conFile = Math.max(0, r.soFile - r.daXong), soF = thu ? 1 : conFile;
+    $('.uoc', h).innerHTML = (thu ? 'Chạy thử <b>1 file</b>' : 'Còn <b>' + so(conFile) + '</b> file cần chạy') +
+      (f != null ? ' · ước tính <b>' + usd(f * soF) + '</b> (khoảng ' + usd(f) + '/file)' : '') +
+      (thu ? '' : ' · ngân sách còn <b>' + usd(Math.max(0, r.nganSach - r.chiPhi)) + '</b>, chạm ngân sách thì tự dừng');
+  };
+  moHopAi('<h3>' + (thu ? 'Chạy thử 1 file' : 'Chạy') + ' · ' + esc(r.phong) + ' ' + esc(r.congTy) + '</h3>' +
+    '<label>Model' + chonModelHtml('hopModel', modelDangChon) + '</label>' +
+    '<div class="uoc"></div>' +
+    '<label>Nhập mã chạy để xác nhận<input class="o" id="hopMa" type="password" autocomplete="off" placeholder="Mã chạy"></label>' +
+    '<div class="ai-loi"></div>' +
+    '<div class="hang"><button class="btn" data-hop="huy" type="button">Huỷ</button><button class="btn chinh" data-hop="ok" type="button">' + (thu ? 'Chạy thử' : '▶ Chạy') + '</button></div>',
+    function (h) {
+      veUoc(h);
+      $('#hopModel', h).onchange = function () { veUoc(h); };
+      var gui = function () {
+        var ma = $('#hopMa', h).value;
+        if (!ma) return baoLoiHop(h, 'Nhập mã chạy');
+        $('[data-hop="ok"]', h).disabled = true;
+        goiAi(thu ? 'thu' : 'chay', { dong: r.dong, model: $('#hopModel', h).value }, ma).then(function (kq) {
+          dongHopAi(); thongBao(kq.thongBao);
+          setTimeout(function () { lamMoiAi().catch(function () {}); }, 2500);
+        }, function (e) { $('[data-hop="ok"]', h).disabled = false; baoLoiHop(h, e.message); });
+      };
+      $('[data-hop="ok"]', h).onclick = gui;
+      $('#hopMa', h).onkeydown = function (e) { if (e.key === 'Enter') gui(); };
+    });
+}
+
+function hopSua(r) {
+  moHopAi('<h3>Sửa · ' + esc(r.phong) + ' ' + esc(r.congTy) + '</h3>' +
+    '<label>Model' + chonModelHtml('hopModel', r.model) + '</label>' +
+    '<div class="luoi2"><label>Số file tối đa<input class="o" id="hopSoFile" type="number" min="1" max="' + AI.du.soFileToiDa + '" value="' + r.soFile + '"></label>' +
+    '<label>Ngân sách (USD)<input class="o" id="hopNs" type="number" min="0.1" step="0.1" value="' + r.nganSach + '"></label></div>' +
+    '<label>Ghi chú<input class="o" id="hopGhiChu" value="' + esc(r.ghiChu) + '"></label>' +
+    '<div class="ai-loi"></div>' +
+    '<div class="hang"><button class="btn" data-hop="huy" type="button">Huỷ</button><button class="btn chinh" data-hop="ok" type="button">Lưu</button></div>',
+    function (h) {
+      $('[data-hop="ok"]', h).onclick = function () {
+        goiAi('capNhat', { dong: r.dong, model: $('#hopModel', h).value, soFile: Number($('#hopSoFile', h).value), nganSach: Number($('#hopNs', h).value),
+          ghiChu: $('#hopGhiChu', h).value }).then(function (kq) { dongHopAi(); thongBao(kq.thongBao); lamMoiAi(); }, function (e) { baoLoiHop(h, e.message); });
+      };
+    });
+}
+
+function hopThem() {
+  moHopAi('<h3>Thêm phòng</h3>' +
+    '<label>Link thư mục Drive của phòng<input class="o" id="hopThuMuc" placeholder="https://drive.google.com/drive/folders/…"></label>' +
+    '<div class="goi-y">Thư mục phải được chia sẻ quyền Xem cho service account search-document@… (kể cả thư mục con).</div>' +
+    '<div class="luoi2"><label>Công ty<select class="o" id="hopCongTy"><option>CRCK2</option><option>BHCK</option></select></label>' +
+    '<label>Phòng<select class="o" id="hopPhong"><option>TCHC</option><option>TCKT</option><option>KHĐT</option><option>KTNN</option></select></label></div>' +
+    '<label>Model' + chonModelHtml('hopModel', AI.du.modelMacDinh) + '</label>' +
+    '<div class="luoi2"><label>Số file tối đa<input class="o" id="hopSoFile" type="number" min="1" max="' + AI.du.soFileToiDa + '" value="100"></label>' +
+    '<label>Ngân sách (USD)<input class="o" id="hopNs" type="number" min="0.1" step="0.1" value="' + AI.du.nganSachMacDinh + '"></label></div>' +
+    '<label>Tên tab kết quả (để trống: tự đặt TN_PHÒNG_CÔNG TY)<input class="o" id="hopTab" placeholder="TN_TCKT_CRCK2"></label>' +
+    '<label>Ghi chú<input class="o" id="hopGhiChu"></label>' +
+    '<div class="ai-loi"></div>' +
+    '<div class="hang"><button class="btn" data-hop="huy" type="button">Huỷ</button><button class="btn chinh" data-hop="ok" type="button">Thêm</button></div>',
+    function (h) {
+      $('[data-hop="ok"]', h).onclick = function () {
+        if (!$('#hopThuMuc', h).value.trim()) return baoLoiHop(h, 'Dán link thư mục Drive');
+        goiAi('them', { thuMuc: $('#hopThuMuc', h).value, congTy: $('#hopCongTy', h).value, phong: $('#hopPhong', h).value, model: $('#hopModel', h).value,
+          soFile: Number($('#hopSoFile', h).value), nganSach: Number($('#hopNs', h).value), tab: $('#hopTab', h).value, ghiChu: $('#hopGhiChu', h).value })
+          .then(function (kq) { dongHopAi(); thongBao(kq.thongBao); lamMoiAi(); }, function (e) { baoLoiHop(h, e.message); });
+      };
+    });
+}
+
+function hopXacNhan(tieuDe, noiDung, nhanOk, lam) {
+  moHopAi('<h3>' + esc(tieuDe) + '</h3><div>' + noiDung + '</div><div class="ai-loi"></div>' +
+    '<div class="hang"><button class="btn" data-hop="huy" type="button">Huỷ</button><button class="btn chinh" data-hop="ok" type="button">' + esc(nhanOk) + '</button></div>',
+    function (h) { $('[data-hop="ok"]', h).onclick = function () { lam().then(function (kq) { dongHopAi(); thongBao(kq.thongBao); lamMoiAi(); }, function (e) { baoLoiHop(h, e.message); }); }; });
+}
+
+/* ---------- Kết quả + báo cáo của một dòng ---------- */
+function moKetQuaAi(r) {
+  AI.kq = { tab: r.tab, ten: r.phong + ' · ' + r.congTy, trang: 1 };
+  $('#aiMucKq').hidden = false;
+  $('#aiTieuDeKq').textContent = 'Kết quả · ' + AI.kq.ten + ' (' + r.tab + ')';
+  $('#aiBaoCao').innerHTML = '<div class="rong">Đang tổng hợp…</div>';
+  goiAi('baoCao', { tab: r.tab }).then(veBaoCaoAi, function (e) { $('#aiBaoCao').innerHTML = '<div class="bao-loi">' + esc(e.message) + '</div>'; });
+  napKetQuaAi();
+  $('#aiMucKq').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+function veBaoCaoAi(b) {
+  var tl = function (x) { return x ? x[0] + '/' + x[1] + ' (' + Math.round(x[0] / x[1] * 100) + '%)' : '—'; };
+  $('#aiBaoCao').innerHTML = !b.soFile ? '' : '<div class="ai-bc">' +
+    '<div><h3>Tổng</h3>' + so(b.soFile) + ' file · ' + so(b.soVanBan) + ' văn bản<br>' + so(b.fileNhieuVanBan) + ' file chứa nhiều văn bản<br>' +
+      so(b.canSoatXet) + ' văn bản cần soát xét · ' + so(b.fileLoi) + ' file lỗi</div>' +
+    '<div><h3>Khớp dữ liệu cũ</h3>Số ký hiệu: ' + tl(b.khopSoHieuCu) + '<br>Ngày: ' + tl(b.khopNgayCu) + '</div>' +
+    '<div><h3>Chi phí, thời gian</h3>' + usd(b.chiPhi) + ' · TB ' + usd(b.chiPhiTrungBinhFile) + '/file<br>TB ' + NF2.format(b.giayTrungBinhFile) + ' giây/file<br>' +
+      'TB ' + so(b.tokenVaoTrungBinh) + ' token vào, ' + so(b.tokenRaTrungBinh) + ' token ra / file</div>' +
+    '<div><h3>Cảnh báo</h3><ul>' + (b.canhBao.map(function (c) { return '<li>' + esc(c[0]) + ': ' + so(c[1]) + '</li>'; }).join('') || '<li>Không có</li>') + '</ul></div>' +
+    '<div><h3>Loại văn bản</h3><ul>' + b.loaiVanBan.slice(0, 8).map(function (c) { return '<li>' + esc(c[0]) + ': ' + so(c[1]) + '</li>'; }).join('') + '</ul></div></div>';
+}
+function napKetQuaAi() {
+  if (!AI.kq) return;
+  $('#aiThanKq').innerHTML = '<tr><td colspan="8" class="rong">Đang tải…</td></tr>';
+  goiAi('ketQua', { tab: AI.kq.tab, trang: AI.kq.trang, co: 50, trangThai: $('#aiLocTT').value, canhBao: $('#aiLocCB').value, q: $('#aiLocQ').value.trim() })
+    .then(function (d) {
+      var cu = function (moi, cu2) { return cu2 && String(cu2) !== String(moi) ? '<span class="cu">cũ: ' + esc(cu2) + '</span>' : ''; };
+      $('#aiThanKq').innerHTML = d.dong.length ? d.dong.map(function (x) {
+        return '<tr><td><a href="' + esc(x.link) + '" target="_blank" rel="noopener">' + esc(x.ten_file) + '</a>' +
+          (x.so_van_ban_con > 1 ? '<span class="cu">văn bản ' + x.thu_tu_trong_file + '/' + x.so_van_ban_con + '</span>' : '') + '</td>' +
+          '<td>' + esc(x.trang_tu ? x.trang_tu + '–' + x.trang_den : '') + '<span class="cu">' + esc(x.trang_da_gui ? 'gửi ' + x.trang_da_gui + ' / ' + x.so_trang : '') + '</span></td>' +
+          '<td>' + esc(x.loai_vb_ten || x.loai_vb) + (x.loai_vb_chi_tiet ? ' · ' + esc(x.loai_vb_chi_tiet) : '') + cu(x.loai_vb_ten, x.loai_cu) + '</td>' +
+          '<td class="ma">' + esc(x.so_ky_hieu) + (x.so_ky_hieu_ung_vien ? '<span class="cu">có thể: ' + esc(x.so_ky_hieu_ung_vien) + '</span>' : '') + cu(x.so_ky_hieu, x.so_ky_hieu_cu) + '</td>' +
+          '<td>' + esc(x.ngay_vb) + cu(x.ngay_vb, x.ngay_cu) + '</td>' +
+          '<td>' + esc(x.trich_yeu) + cu(x.trich_yeu, x.trich_yeu_cu) + '</td>' +
+          '<td class="cb">' + esc(x.canh_bao) + '</td>' +
+          '<td>' + esc({ da_trich: 'Đã trích', can_soat_xet: 'Cần soát xét', loi: 'Lỗi' }[x.trang_thai] || x.trang_thai) + '</td></tr>';
+      }).join('') : '<tr><td colspan="8" class="rong">Chưa có kết quả nào khớp.</td></tr>';
+      var soTrang = Math.max(1, Math.ceil(d.tong / d.co));
+      $('#aiPhanTrang').innerHTML = '<span>' + so(d.tong) + ' dòng · trang ' + d.trang + '/' + soTrang + '</span>' +
+        (d.trang > 1 ? '<button class="btn nho" data-ai-trang="' + (d.trang - 1) + '">‹ Trước</button>' : '') +
+        (d.trang < soTrang ? '<button class="btn nho" data-ai-trang="' + (d.trang + 1) + '">Sau ›</button>' : '');
+    }, function (e) { $('#aiThanKq').innerHTML = '<tr><td colspan="8"><div class="bao-loi">' + esc(e.message) + '</div></td></tr>'; });
+}
+
+function ganSuKienAi() {
+  var moKhoa = function () {
+    var ma = $('#aiMaVao').value;
+    if (!ma) return khoaAi('Nhập mã chạy');
+    AI.ma = ma;
+    try { sessionStorage.setItem('tclt_ai_ma', ma); } catch (e) {}
+    $('#aiMaVao').value = '';
+    moAi();
+  };
+  $('#aiMo').onclick = moKhoa;
+  $('#aiMaVao').onkeydown = function (e) { if (e.key === 'Enter') moKhoa(); };
+  $('#aiLamMoi').onclick = function () { lamMoiAi().then(function () { thongBao('Đã làm mới'); }, function (e) { thongBao(e.message); }); };
+  $('#aiThem').onclick = hopThem;
+  $('#aiDong').onclick = function () { try { sessionStorage.removeItem('tclt_ai_ma'); } catch (e) {} AI.ma = ''; khoaAi(''); };
+  $('#aiDongKq').onclick = function () { $('#aiMucKq').hidden = true; AI.kq = null; };
+  $('#aiLocTT').onchange = $('#aiLocCB').onchange = function () { if (AI.kq) { AI.kq.trang = 1; napKetQuaAi(); } };
+  $('#aiLocQ').addEventListener('input', chongDoi(function () { if (AI.kq) { AI.kq.trang = 1; napKetQuaAi(); } }, 400));
+  $('#aiPhanTrang').addEventListener('click', function (e) { var b = e.target.closest('[data-ai-trang]'); if (b && AI.kq) { AI.kq.trang = Number(b.dataset.aiTrang); napKetQuaAi(); } });
+  $('#aiDs').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-ai]'); if (!b) return;
+    var r = dongTheoSo(b.dataset.dong); if (!r) return;
+    var v = b.dataset.ai;
+    if (v === 'chay') hopChay(r, false);
+    else if (v === 'thu') hopChay(r, true);
+    else if (v === 'sua') hopSua(r);
+    else if (v === 'ketQua') moKetQuaAi(r);
+    else if (v === 'dung') hopXacNhan('Dừng ' + r.phong + ' · ' + r.congTy, 'Lô đang chạy (nếu có) sẽ làm xong rồi ngừng. Bấm Chạy để tiếp tục từ chỗ dừng.', 'Dừng',
+      function () { return goiAi('dung', { dong: r.dong }); });
+    else if (v === 'xoa') hopXacNhan('Xoá dòng ' + r.phong + ' · ' + r.congTy, 'Chỉ xoá dòng trong tab điều khiển. Tab kết quả <b>' + esc(r.tab) + '</b> vẫn giữ nguyên.', 'Xoá',
+      function () { return goiAi('xoa', { dong: r.dong }); });
+  });
+  $('#aiDs').addEventListener('change', function (e) {
+    var s = e.target.closest('[data-ai-model]'); if (!s) return;
+    goiAi('capNhat', { dong: Number(s.dataset.aiModel), model: s.value }).then(function (kq) { thongBao('Đã đổi model: ' + s.value); lamMoiAi(); },
+      function (er) { thongBao(er.message); lamMoiAi(); });
+  });
+  $('#aiNenHop').addEventListener('click', function (e) { if (e.target === this || e.target.closest('[data-hop="huy"]')) dongHopAi(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !$('#aiNenHop').hidden) dongHopAi(); });
+}
+
 ganSuKien();
+ganSuKienAi();
 docDiaChi();
+if (laTrangAi()) hienTrangAi();
 $('#pTim').hidden = TT.trang !== 'tim';
 batDau();
 </script>
