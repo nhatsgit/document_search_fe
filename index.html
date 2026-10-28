@@ -2061,7 +2061,7 @@ function batDau() {
    Bấm Chạy / Thử 1 file phải nhập lại mã. Việc chạy diễn ra trên Cloud Run, đóng trình duyệt vẫn chạy tiếp. */
 var AI = { ma: '', du: null, hen: null, kq: null, cho: null };   // cho: lô vừa bấm chạy, đang chờ xong
 var API_AI = API.replace(/\/api\/exec.*$/, '/api/ai');
-var UOC_TOKEN_RA = { 'gemini-2.5-flash': 4300, 'gemini-3.8-flash': 2200 };   // gồm token suy nghĩ, đo trên file thử
+var UOC_TOKEN_RA = { 'gemini-2.5-flash': 4300 };   // gồm token suy nghĩ, đo trên file thử
 
 function laTrangAi() { return /^#\/?ai(\/|\?|$)/.test(location.hash); }
 function goiAi(lenh, thamSo, ma) {
