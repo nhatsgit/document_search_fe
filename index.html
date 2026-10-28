@@ -678,6 +678,22 @@ button.kpi:hover{border-color:var(--leaf)}
 .ai-khoa-ds .thu-tu{display:inline-flex;flex-direction:column;gap:2px}
 .ai-khoa-ds .thu-tu button{padding:0 6px;font-size:10px;line-height:1.3}
 .goi-y-khoa{font-size:12.5px;color:var(--ink-3)}
+.ai-khoa-ds .model-khoa{font-size:12.5px;color:var(--ink-3)}
+#aiLuotBang .ai-muc-dau{margin:6px 0}
+#aiLuotBang h3{margin:0;font-size:14px}
+#aiLuotBang .phu{font-size:12.5px;color:var(--ink-3)}
+.bang-luot{min-width:0 !important;width:100%}
+.bang-luot th small{font-weight:400;color:var(--ink-3);text-transform:none;letter-spacing:0}
+.bang-luot td{min-width:150px}
+.bang-luot td small{display:block;color:var(--ink-3);font-size:11.5px;margin-top:2px}
+.bang-luot td .ai-tien{margin-top:4px;height:6px}
+.bang-luot td.sap .ai-tien i{background:#C9A227}
+.bang-luot td.het .ai-tien i{background:var(--clay)}
+.bang-luot td.khong{color:var(--ink-3)}
+.bang-luot .sap-het{color:#9A7A10;font-size:12px}
+.bang-luot .nghi{color:var(--clay);font-size:12px}
+.ai-hop .chon-model{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--ink-2)}
+.ai-hop .chon-model small{color:var(--ink-3)}
 .ai-hop .uoc{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--ink-2)}
 @media (max-width:900px){
   .ai-dong{grid-template-columns:minmax(0,1fr)}
@@ -865,6 +881,7 @@ button.kpi:hover{border-color:var(--leaf)}
     <div class="ai-muc">
       <div class="ai-muc-dau"><h2>Khoá API Gemini</h2><button class="btn nho" id="aiThemKhoa" type="button">+ Thêm khoá</button></div>
       <div class="ai-nk ai-khoa-ds" id="aiKhoaDs"><div>Đang tải…</div></div>
+      <div id="aiLuotBang"></div>
       <div class="goi-y-khoa">Dùng khoá đứng đầu trước; khoá hết hạn mức hoặc không mở được model thì tự chuyển sang khoá sau. Khoá lưu mã hoá trong tab TN_KHOA_API, trang chỉ hiện 4 ký tự cuối.</div>
     </div>
     <div class="ai-muc">
@@ -2112,6 +2129,7 @@ function goiAi(lenh, thamSo, ma) {
     }, function (e) { if (e instanceof TypeError) throw new Error('Không kết nối được API'); throw e; });
 }
 function uocPhiFile(model) {
+  if (model === 'tu-dong') return 0;   // trong hạn mức miễn phí
   var m = AI.du && AI.du.modelChoPhep.filter(function (x) { return x.ma === model; })[0];
   if (!m || !m.gia) return null;
   return (7500 * m.gia.vao + (UOC_TOKEN_RA[model] || 1500) * m.gia.ra) / 1e6;
@@ -2167,43 +2185,103 @@ function moAi() {
 function lamMoiAi() { napKhoaAi(); return goiAi('tongQuan').then(veAi); }
 
 /* ---------- Khoá API ---------- */
+var TEN_GOI_KHOA = { mien_phi: 'Miễn phí', tra_phi: 'Trả phí' };
+function tenModel(ma) { return ma === 'tu-dong' ? 'Tự động (miễn phí trước)' : ma; }
 function napKhoaAi() { return goiAi('dsKhoa').then(veKhoaAi, function (e) { $('#aiKhoaDs').innerHTML = '<div class="loi">' + esc(e.message) + '</div>'; }); }
 function veKhoaAi(d) {
-  AI.khoa = d.khoa;
+  AI.khoa = d.khoa; AI.khoaDu = d;
   var gio = function (iso) { return new Date(iso).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' }); };
   $('#aiKhoaDs').innerHTML = d.khoa.length ? d.khoa.map(function (k, i) {
     var tt = !k.bat ? '<span class="ai-pill dung">Tắt</span>' : k.loiGiaiMa ? '<span class="ai-pill dung">Lỗi giải mã</span>'
       : k.nghi.length ? '<span class="ai-pill dung">Nghỉ một phần</span>' : '<span class="ai-pill chay">Sẵn sàng</span>';
     return '<div><span class="thu-tu"><button class="btn nho" data-khoa="len" data-ten="' + esc(k.ten) + '"' + (i ? '' : ' disabled') + ' title="Dùng trước">▲</button>' +
       '<button class="btn nho" data-khoa="xuong" data-ten="' + esc(k.ten) + '"' + (i < d.khoa.length - 1 ? '' : ' disabled') + ' title="Dùng sau">▼</button></span>' +
-      '<span class="ten-khoa">' + (i + 1) + '. ' + esc(k.ten) + '</span><code>••••' + esc(k.cuoi) + '</code>' + tt +
+      '<span class="ten-khoa">' + (i + 1) + '. ' + esc(k.ten) + '</span><code>••••' + esc(k.cuoi) + '</code>' +
+      '<span class="ai-pill ' + (k.goi === 'tra_phi' ? 'xong' : 'chay') + '">' + TEN_GOI_KHOA[k.goi] + '</span>' + tt +
+      '<span class="model-khoa">' + k.models.map(esc).join(' · ') + '</span>' +
       k.nghi.map(function (n) { return '<span class="nghi">' + esc(n.model) + (n.model === '*' ? ' (mọi model)' : '') + ': ' + esc(n.lyDo) + ' tới ' + gio(n.den) + '</span>'; }).join('') +
       (k.ghiChu ? '<span>' + esc(k.ghiChu) + '</span>' : '') +
       '<span class="nut-khoa"><button class="btn nho" data-khoa="thu" data-ten="' + esc(k.ten) + '">Thử</button>' +
+      '<button class="btn nho" data-khoa="sua" data-ten="' + esc(k.ten) + '">Sửa</button>' +
       '<button class="btn nho" data-khoa="' + (k.bat ? 'tat' : 'bat') + '" data-ten="' + esc(k.ten) + '">' + (k.bat ? 'Tắt' : 'Bật') + '</button>' +
       '<button class="btn nho" data-khoa="xoa" data-ten="' + esc(k.ten) + '">Xoá</button></span></div>';
   }).join('') : '<div>Chưa có khoá nào.</div>';
+  veLuotAi(d);
+}
+/** Bảng lượt dùng hôm nay: hàng = khoá, cột = model; khoá miễn phí so với hạn mức ngày, khoá trả phí chỉ đếm. */
+function veLuotAi(d) {
+  var models = d.model, lm = new Date(d.lamMoiLuc);
+  var tongMp = {}, conMp = 0;
+  var hang = d.khoa.map(function (k) {
+    return '<tr><th>' + esc(k.ten) + ' <small>' + TEN_GOI_KHOA[k.goi] + '</small></th>' + models.map(function (m) {
+      if (k.models.indexOf(m) < 0) return '<td class="khong">—</td>';
+      var u = (d.luot[k.ten] || {})[m] || { n: 0, vao: 0, ra: 0 }, hm = k.goi !== 'tra_phi' && d.hanMuc[m];
+      var nghi = k.nghi.filter(function (x) { return x.model === m || x.model === '*'; })[0];
+      var tok = u.vao ? '<small>' + tok2(u.vao) + ' vào · ' + tok2(u.ra) + ' ra</small>' : '';
+      if (!hm) return '<td><b>' + so(u.n) + '</b> lần' + (nghi ? ' <span class="nghi">nghỉ</span>' : '') + tok + '</td>';
+      if (k.bat) { tongMp[m] = (tongMp[m] || 0) + u.n; conMp += Math.max(0, hm.rpd - u.n); }
+      var pt = Math.min(100, Math.round(u.n / hm.rpd * 100)), muc = pt >= 100 || nghi ? 'het' : pt >= 80 ? 'sap' : '';
+      return '<td class="' + muc + '"><b>' + so(u.n) + '</b>/' + so(hm.rpd) + (muc === 'het' ? ' <span class="nghi">hết</span>' : muc === 'sap' ? ' <span class="sap-het">sắp hết</span>' : '') +
+        '<div class="ai-tien"><i style="width:' + pt + '%"></i></div>' + tok + '</td>';
+    }).join('') + '</tr>';
+  }).join('');
+  $('#aiLuotBang').innerHTML = '<div class="ai-muc-dau"><h3>Lượt dùng hôm nay</h3><span class="phu">Google làm mới lúc ' +
+    lm.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) + ' (giờ máy bạn) · lượt miễn phí còn lại hôm nay: <b>' + so(conMp) + '</b> file</span></div>' +
+    '<div class="ai-bang"><table class="bang-luot"><thead><tr><th>Khoá</th>' + models.map(function (m) { return '<th>' + esc(m) + '</th>'; }).join('') +
+    '</tr></thead><tbody>' + hang + '</tbody></table></div>';
+}
+function tok2(n) { return n >= 1e6 ? NF2.format(Math.round(n / 1e4) / 100) + 'tr' : n >= 1e3 ? NF2.format(Math.round(n / 100) / 10) + 'k' : so(n); }
+/** Ô chọn gói + model cho hộp thêm / sửa khoá. */
+function oGoiModel(goi, models) {
+  var d = AI.khoaDu;
+  return '<label>Gói<select class="o" id="hopGoi"><option value="mien_phi"' + (goi !== 'tra_phi' ? ' selected' : '') + '>Miễn phí (chi phí ghi 0 USD, đếm theo hạn mức)</option>' +
+    '<option value="tra_phi"' + (goi === 'tra_phi' ? ' selected' : '') + '>Trả phí (tính tiền theo bảng giá)</option></select></label>' +
+    '<div class="chon-model"><span>Model được dùng</span>' + d.model.map(function (m) {
+      return '<label class="chk"><input type="checkbox" value="' + esc(m) + '"' + (models.indexOf(m) >= 0 ? ' checked' : '') + '> ' + esc(m) +
+        (d.hanMuc[m] ? ' <small>(miễn phí ' + d.hanMuc[m].rpd + '/ngày)</small>' : '') + '</label>';
+    }).join('') + '</div>';
+}
+function layModelChon(h) { return $$('.chon-model input:checked', h).map(function (x) { return x.value; }); }
+function ganDoiGoi(h) {   // đổi gói thì tick sẵn model mặc định của gói đó
+  $('#hopGoi', h).onchange = function () { var md = AI.khoaDu.modelGoi[this.value]; $$('.chon-model input', h).forEach(function (x) { x.checked = md.indexOf(x.value) >= 0; }); };
 }
 function hopThemKhoa() {
+  if (!AI.khoaDu) return thongBao('Đang tải danh sách khoá, thử lại sau giây lát');
   moHopAi('<h3>Thêm khoá API Gemini</h3>' +
     '<label>Khoá API<input class="o" id="hopKhoa" type="password" autocomplete="off" placeholder="AIza… hoặc AQ.…"></label>' +
     '<div class="luoi2"><label>Tên gợi nhớ<input class="o" id="hopTenKhoa" placeholder="vd: Khoá TCKT"></label>' +
     '<label>Ghi chú<input class="o" id="hopGhiChuKhoa"></label></div>' +
-    '<div class="goi-y">Máy chủ gọi thử khoá với từng model trước khi lưu. Khoá mới được dùng trước các khoá đang có (đổi thứ tự bằng nút ▲▼).</div>' +
+    oGoiModel('mien_phi', AI.khoaDu.modelGoi.mien_phi) +
+    '<div class="goi-y">Máy chủ gọi thử khoá với các model đã chọn trước khi lưu. Khoá mới được dùng trước các khoá đang có (đổi thứ tự bằng nút ▲▼).</div>' +
     '<div class="ai-loi"></div>' +
     '<div class="hang"><button class="btn" data-hop="huy" type="button">Huỷ</button><button class="btn chinh" data-hop="ok" type="button">Thử và lưu</button></div>',
     function (h) {
+      ganDoiGoi(h);
       var gui = function () {
         var k = $('#hopKhoa', h).value.trim();
         if (!k) return baoLoiHop(h, 'Dán khoá API');
+        if (!layModelChon(h).length) return baoLoiHop(h, 'Chọn ít nhất 1 model');
         var nut = $('[data-hop="ok"]', h);
         nut.disabled = true; nut.classList.add('dang-gui'); nut.textContent = 'Đang thử khoá…';
-        goiAi('themKhoa', { khoa: k, ten: $('#hopTenKhoa', h).value, ghiChu: $('#hopGhiChuKhoa', h).value })
+        goiAi('themKhoa', { khoa: k, ten: $('#hopTenKhoa', h).value, ghiChu: $('#hopGhiChuKhoa', h).value, goi: $('#hopGoi', h).value, models: layModelChon(h) })
           .then(function (kq) { dongHopAi(); thongBao(kq.thongBao); napKhoaAi(); },
             function (e) { nut.disabled = false; nut.classList.remove('dang-gui'); nut.textContent = 'Thử và lưu'; baoLoiHop(h, e.message); });
       };
       $('[data-hop="ok"]', h).onclick = gui;
       $('#hopKhoa', h).onkeydown = function (e) { if (e.key === 'Enter') gui(); };
+    });
+}
+function hopSuaKhoa(k) {
+  moHopAi('<h3>Sửa khoá ' + esc(k.ten) + ' <small>••••' + esc(k.cuoi) + '</small></h3>' + oGoiModel(k.goi, k.models) +
+    '<label>Ghi chú<input class="o" id="hopGhiChuKhoa" value="' + esc(k.ghiChu) + '"></label><div class="ai-loi"></div>' +
+    '<div class="hang"><button class="btn" data-hop="huy" type="button">Huỷ</button><button class="btn chinh" data-hop="ok" type="button">Lưu</button></div>',
+    function (h) {
+      ganDoiGoi(h);
+      $('[data-hop="ok"]', h).onclick = function () {
+        if (!layModelChon(h).length) return baoLoiHop(h, 'Chọn ít nhất 1 model');
+        goiAi('suaKhoa', { ten: k.ten, goi: $('#hopGoi', h).value, models: layModelChon(h), ghiChu: $('#hopGhiChuKhoa', h).value })
+          .then(function (kq) { dongHopAi(); thongBao(kq.thongBao); napKhoaAi(); }, function (e) { baoLoiHop(h, e.message); });
+      };
     });
 }
 
@@ -2249,7 +2327,7 @@ function veAi(d) {
     '<div><span>Đang chạy</span><b>' + dangChay + '</b><small>dòng</small></div>';
   $('#aiDs').innerHTML = d.dong.length ? d.dong.map(function (r) {
     var tt = TEN_TT_AI[r.trangThai] || 'dung', muc = mucFile(r), pt = muc ? Math.min(100, Math.round(r.daXong / muc * 100)) : 0;
-    var chon = d.modelChoPhep.map(function (m) { return '<option value="' + esc(m.ma) + '"' + (m.ma === r.model ? ' selected' : '') + '>' + esc(m.ma) + '</option>'; }).join('');
+    var chon = d.modelChoPhep.map(function (m) { return '<option value="' + esc(m.ma) + '"' + (m.ma === r.model ? ' selected' : '') + '>' + esc(tenModel(m.ma)) + '</option>'; }).join('');
     if (!d.modelChoPhep.some(function (m) { return m.ma === r.model; })) chon = '<option value="' + esc(r.model) + '" selected>' + esc(r.model) + ' (không được phép)</option>' + chon;
     var choDong = AI.cho && AI.cho.dong === r.dong && tt !== 'chay';   // vừa bấm Thử / Chạy, đang chờ lô: không cho bấm lại
     var nut = (choDong ? '' : tt === 'chay'
@@ -2298,7 +2376,7 @@ function dongHopAi() { $('#aiNenHop').hidden = true; $('#aiHop').innerHTML = '';
 function dongTheoSo(so2) { return AI.du.dong.filter(function (r) { return r.dong === Number(so2); })[0]; }
 function chonModelHtml(id, chon) {
   return '<select class="o" id="' + id + '">' + AI.du.modelChoPhep.map(function (m) {
-    return '<option value="' + esc(m.ma) + '"' + (m.ma === chon ? ' selected' : '') + '>' + esc(m.ma) + (m.ghiChu ? ' — ' + esc(m.ghiChu) : '') + '</option>';
+    return '<option value="' + esc(m.ma) + '"' + (m.ma === chon ? ' selected' : '') + '>' + esc(tenModel(m.ma)) + (m.ghiChu ? ' — ' + esc(m.ghiChu) : '') + '</option>';
   }).join('') + '</select>';
 }
 function baoLoiHop(h, chu) { var e = $('.ai-loi', h); if (e) e.textContent = chu; }
@@ -2510,6 +2588,7 @@ function ganSuKienAi() {
     var b = e.target.closest('[data-khoa]'); if (!b) return;
     var ten = b.dataset.ten, v = b.dataset.khoa;
     var xong = function (kq) { thongBao(kq.thongBao); napKhoaAi(); }, loi = function (er) { thongBao(er.message); napKhoaAi(); };
+    if (v === 'sua') return hopSuaKhoa(AI.khoa.filter(function (x) { return x.ten === ten; })[0]);
     if (v === 'xoa') return hopXacNhan('Xoá khoá ' + ten, 'Khoá bị xoá khỏi tab TN_KHOA_API. Muốn dùng lại phải thêm lại.', 'Xoá',
       function () { return goiAi('xoaKhoa', { ten: ten }).then(function (kq) { napKhoaAi(); return kq; }); });
     b.disabled = true;
