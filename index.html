@@ -2288,14 +2288,14 @@ function hopSuaKhoa(k) {
     });
 }
 
-/** Sau khi bấm Chạy / Thử: làm mới 5 giây một lần tới khi nhật ký có lô mới của dòng đó (tối đa 6 phút). */
+/** Sau khi bấm Chạy / Thử: làm mới 5 giây một lần tới khi nhật ký có lô mới của dòng đó (tối đa 20 phút: một lô nhận file mới trong 10 phút). */
 function batDauCho(dong, thu) {
   var dau = AI.du && loCuoiCua(AI.du, dong);
   AI.cho = { dong: dong, thu: thu, maLoCu: dau ? dau.maLo : '', tu: Date.now() };
   clearTimeout(AI.henCho);
   var vong = function () {
     if (!AI.cho) return;
-    if (Date.now() - AI.cho.tu > 360000) { AI.cho = null; thongBao('Chưa thấy lô xong sau 6 phút — xem lại nhật ký'); lamMoiAi().catch(function () {}); return; }
+    if (Date.now() - AI.cho.tu > 1200000) { AI.cho = null; thongBao('Chưa thấy lô xong sau 20 phút — xem lại nhật ký'); lamMoiAi().catch(function () {}); return; }
     lamMoiAi().catch(function () {}).then(function () { if (AI.cho) AI.henCho = setTimeout(vong, 5000); });
   };
   veAi(AI.du);
