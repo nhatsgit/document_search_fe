@@ -595,6 +595,7 @@ button.kpi:hover{border-color:var(--leaf)}
 .ai-dong:last-child{border-bottom:none}
 .ai-dong .ten{font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .ai-dong .ten small{font-weight:400;color:var(--ink-3);font-size:12.5px}
+.ai-dong .ten small.dang-cho{color:var(--leaf);font-weight:600}
 .ai-dong .tt-model{display:flex;gap:6px;align-items:center;margin-top:6px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-3)}
 .ai-dong select{padding:5px 8px;font-size:13px;border:1px solid var(--line-2);background:var(--card);color:var(--ink);border-radius:6px;max-width:100%}
 .ai-tien{height:8px;background:var(--line);border-radius:4px;overflow:hidden}
@@ -2053,7 +2054,7 @@ function batDau() {
    Theo dõi và điều khiển AI trích xuất của các phòng. Gọi POST /api/ai kèm mã chạy (header X-AI-Key);
    mã không nằm trong code trang này (repo công khai) — người dùng nhập, nhớ trong sessionStorage của thẻ.
    Bấm Chạy / Thử 1 file phải nhập lại mã. Việc chạy diễn ra trên Cloud Run, đóng trình duyệt vẫn chạy tiếp. */
-var AI = { ma: '', du: null, hen: null, kq: null };
+var AI = { ma: '', du: null, hen: null, kq: null, cho: null };   // cho: lô vừa bấm chạy, đang chờ xong
 var API_AI = API.replace(/\/api\/exec.*$/, '/api/ai');
 var UOC_TOKEN_RA = { 'gemini-2.5-flash': 4300, 'gemini-3.8-flash': 2200 };   // gồm token suy nghĩ, đo trên file thử
 
@@ -2088,6 +2089,7 @@ function anTrangAi() {
   document.body.classList.remove('che-do-ai');
   $('#manAi').hidden = true;
   clearInterval(AI.hen); AI.hen = null;
+  clearTimeout(AI.henCho); AI.cho = null;
   dongHopAi();
 }
 function khoaAi(loi) {
@@ -2108,9 +2110,35 @@ function moAi() {
 }
 function lamMoiAi() { return goiAi('tongQuan').then(veAi); }
 
+/** Sau khi bấm Chạy / Thử: làm mới 5 giây một lần tới khi nhật ký có lô mới của dòng đó (tối đa 6 phút). */
+function batDauCho(dong, thu) {
+  var dau = AI.du && loCuoiCua(AI.du, dong);
+  AI.cho = { dong: dong, thu: thu, maLoCu: dau ? dau.maLo : '', tu: Date.now() };
+  clearTimeout(AI.henCho);
+  var vong = function () {
+    if (!AI.cho) return;
+    if (Date.now() - AI.cho.tu > 360000) { AI.cho = null; thongBao('Chưa thấy lô xong sau 6 phút — xem lại nhật ký'); lamMoiAi().catch(function () {}); return; }
+    lamMoiAi().catch(function () {}).then(function () { if (AI.cho) AI.henCho = setTimeout(vong, 5000); });
+  };
+  veAi(AI.du);
+  AI.henCho = setTimeout(vong, 4000);
+}
+function loCuoiCua(d, dong) { return d.nhatKy.filter(function (n) { return String(n.dong) === String(dong); })[0]; }
+function kiemCho(d) {
+  if (!AI.cho) return;
+  var moi = loCuoiCua(d, AI.cho.dong);
+  if (!moi || moi.maLo === AI.cho.maLoCu) return;
+  var r = d.dong.filter(function (x) { return x.dong === AI.cho.dong; })[0];
+  if (!AI.cho.thu && r && r.trangThai === 'Chạy') { AI.cho.maLoCu = moi.maLo; return; }   // đang chạy liên tục: chỉ báo khi dừng / xong
+  thongBao(/LỖI/.test(moi.ghiChu) ? 'Lô ' + moi.maLo + ' lỗi: ' + moi.ghiChu.slice(0, 120)
+    : 'Xong lô ' + moi.maLo + ': ' + moi.fileXong + ' file, ' + moi.soVb + ' văn bản, ' + moi.giay + ' giây, ' + usd(moi.chiPhi));
+  AI.cho = null;
+}
+
 var TEN_TT_AI = { 'Chạy': 'chay', 'Dừng': 'dung', 'Xong': 'xong' };
 function veAi(d) {
   AI.du = d;
+  kiemCho(d);
   var tongMuc = 0, tongXong = 0, tongVb = 0, tongLoi = 0, tongPhi = 0, tongNs = 0, dangChay = 0, tongVao = 0, tongRa = 0;
   d.dong.forEach(function (r) { tongMuc += r.soFile; tongXong += r.daXong; tongVb += r.soVb; tongLoi += r.soLoi; tongPhi += r.chiPhi; tongNs += r.nganSach; tongVao += r.tokVao; tongRa += r.tokRa; if (r.trangThai === 'Chạy') dangChay++; });
   $('#aiThe').innerHTML =
@@ -2133,7 +2161,8 @@ function veAi(d) {
       (tt !== 'chay' ? '<button class="btn nho" data-ai="xoa" data-dong="' + r.dong + '" title="Xoá dòng điều khiển (giữ tab kết quả)">Xoá</button>' : '');
     return '<div class="ai-dong">' +
       '<div><div class="ten">' + esc(r.phong) + ' · ' + esc(r.congTy) + ' <span class="ai-pill ' + tt + '">' + esc(r.trangThai) + '</span>' +
-        (r.dangKhoa ? '<small>lô đang chạy…</small>' : '') + '</div>' +
+        (AI.cho && AI.cho.dong === r.dong ? '<small class="dang-cho">' + (AI.cho.thu ? 'đang chạy thử 1 file' : 'đang chạy') + '… ' + Math.round((Date.now() - AI.cho.tu) / 1000) + ' giây</small>'
+          : r.dangKhoa ? '<small>lô đang chạy…</small>' : '') + '</div>' +
         '<div class="tt-model">Model <select data-ai-model="' + r.dong + '"' + (tt === 'chay' ? ' disabled' : '') + ' aria-label="Model">' + chon + '</select>' +
         '<span>tab ' + esc(r.tab) + '</span></div></div>' +
       '<div><div class="ai-tien' + (r.soLoi > r.daXong / 2 && r.soLoi ? ' loi' : '') + '"><i style="width:' + pt + '%"></i></div>' +
@@ -2192,7 +2221,7 @@ function hopChay(r, thu) {
         $('[data-hop="ok"]', h).disabled = true;
         goiAi(thu ? 'thu' : 'chay', { dong: r.dong, model: $('#hopModel', h).value }, ma).then(function (kq) {
           dongHopAi(); thongBao(kq.thongBao);
-          setTimeout(function () { lamMoiAi().catch(function () {}); }, 2500);
+          batDauCho(r.dong, thu);
         }, function (e) { $('[data-hop="ok"]', h).disabled = false; baoLoiHop(h, e.message); });
       };
       $('[data-hop="ok"]', h).onclick = gui;
