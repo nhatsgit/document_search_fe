@@ -596,7 +596,21 @@ button.kpi:hover{border-color:var(--leaf)}
 .ai-dong:last-child{border-bottom:none}
 .ai-dong .ten{font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .ai-dong .ten small{font-weight:400;color:var(--ink-3);font-size:12.5px}
-.ai-dong .ten small.dang-cho{color:var(--leaf);font-weight:600}
+.ai-dong .ten small.dang-cho{color:var(--leaf);font-weight:600;display:inline-flex;align-items:center;gap:6px}
+.ai-dong .ten small.dang-cho::before{content:'';width:12px;height:12px;border-radius:50%;border:2px solid var(--leaf-soft);border-top-color:var(--leaf);animation:quay .8s linear infinite}
+.ai-dong.dang-chay{box-shadow:inset 3px 0 0 var(--leaf);background:linear-gradient(90deg,var(--leaf-soft),transparent 45%)}
+.ai-dong.dang-chay .ai-tien{position:relative}
+.ai-dong.dang-chay .ai-tien i{background-image:repeating-linear-gradient(-45deg,rgba(255,255,255,.28) 0 6px,transparent 6px 12px);background-size:17px 17px;animation:soc-ai .7s linear infinite}
+.ai-dong.dang-chay .ai-tien.chua::after{content:'';position:absolute;top:0;bottom:0;width:30%;border-radius:4px;background:linear-gradient(90deg,transparent,var(--leaf),transparent);animation:quet-ai 1.4s ease-in-out infinite}
+.ai-dong.vua-xong{animation:loe-ai 1.6s ease-out}
+.btn.dang-gui{opacity:.85;pointer-events:none}
+.btn.dang-gui::before{content:'';width:12px;height:12px;margin-right:6px;border-radius:50%;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;animation:quay .8s linear infinite;display:inline-block;vertical-align:-2px}
+@keyframes soc-ai{to{background-position:17px 0}}
+@keyframes quet-ai{0%{left:-30%}100%{left:100%}}
+@keyframes loe-ai{0%{background:var(--leaf-soft);box-shadow:inset 0 0 0 2px var(--leaf)}100%{background:transparent;box-shadow:inset 0 0 0 2px transparent}}
+@media (prefers-reduced-motion:reduce){
+  .ai-dong .ten small.dang-cho::before,.ai-dong.dang-chay .ai-tien i,.ai-dong.dang-chay .ai-tien.chua::after,.ai-dong.vua-xong,.btn.dang-gui::before{animation:none}
+}
 .ai-dong .tt-model{display:flex;gap:6px;align-items:center;margin-top:6px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-3)}
 .ai-dong select{padding:5px 8px;font-size:13px;border:1px solid var(--line-2);background:var(--card);color:var(--ink);border-radius:6px;max-width:100%}
 .ai-tien{height:8px;background:var(--line);border-radius:4px;overflow:hidden}
@@ -2146,6 +2160,7 @@ function kiemCho(d) {
   if (!moi || moi.maLo === AI.cho.maLoCu) return;
   var r = d.dong.filter(function (x) { return x.dong === AI.cho.dong; })[0];
   if (!AI.cho.thu && r && r.trangThai === 'Chạy') { AI.cho.maLoCu = moi.maLo; return; }   // đang chạy liên tục: chỉ báo khi dừng / xong
+  AI.vuaXong = { dong: AI.cho.dong, luc: Date.now() };
   thongBao(/LỖI/.test(moi.ghiChu) ? 'Lô ' + moi.maLo + ' lỗi: ' + moi.ghiChu.slice(0, 120)
     : 'Xong lô ' + moi.maLo + ': ' + moi.fileXong + ' file, ' + moi.soVb + ' văn bản, ' + moi.giay + ' giây, ' + usd(moi.chiPhi));
   AI.cho = null;
@@ -2156,7 +2171,7 @@ function veAi(d) {
   AI.du = d;
   kiemCho(d);
   var tongMuc = 0, tongXong = 0, tongVb = 0, tongLoi = 0, tongPhi = 0, tongNs = 0, dangChay = 0, tongVao = 0, tongRa = 0;
-  d.dong.forEach(function (r) { tongMuc += mucFile(r); tongXong += r.daXong; tongVb += r.soVb; tongLoi += r.soLoi; tongPhi += r.chiPhi; tongNs += r.nganSach; tongVao += r.tokVao; tongRa += r.tokRa; if (r.trangThai === 'Chạy') dangChay++; });
+  d.dong.forEach(function (r) { tongMuc += mucFile(r); tongXong += r.daXong; tongVb += r.soVb; tongLoi += r.soLoi; tongPhi += r.chiPhi; tongNs += r.nganSach; tongVao += r.tokVao; tongRa += r.tokRa; if (r.trangThai === 'Chạy' || r.dangKhoa || (AI.cho && AI.cho.dong === r.dong)) dangChay++; });
   $('#aiThe').innerHTML =
     '<div><span>File đã xong</span><b>' + so(tongXong) + '</b><small>/ ' + so(tongMuc) + '</small></div>' +
     '<div><span>Văn bản trích được</span><b>' + so(tongVb) + '</b></div>' +
@@ -2168,16 +2183,19 @@ function veAi(d) {
     var tt = TEN_TT_AI[r.trangThai] || 'dung', muc = mucFile(r), pt = muc ? Math.min(100, Math.round(r.daXong / muc * 100)) : 0;
     var chon = d.modelChoPhep.map(function (m) { return '<option value="' + esc(m.ma) + '"' + (m.ma === r.model ? ' selected' : '') + '>' + esc(m.ma) + '</option>'; }).join('');
     if (!d.modelChoPhep.some(function (m) { return m.ma === r.model; })) chon = '<option value="' + esc(r.model) + '" selected>' + esc(r.model) + ' (không được phép)</option>' + chon;
-    var nut = (tt === 'chay'
+    var choDong = AI.cho && AI.cho.dong === r.dong && tt !== 'chay';   // vừa bấm Thử / Chạy, đang chờ lô: không cho bấm lại
+    var nut = (choDong ? '' : tt === 'chay'
       ? '<button class="btn nho" data-ai="dung" data-dong="' + r.dong + '">⏸ Dừng</button>'
       : (tt !== 'xong' ? '<button class="btn chinh nho" data-ai="chay" data-dong="' + r.dong + '">▶ Chạy</button>' : '') +
         '<button class="btn nho" data-ai="thu" data-dong="' + r.dong + '">Thử 1 file</button>') +
       '<button class="btn nho" data-ai="ketQua" data-dong="' + r.dong + '">Kết quả</button>' +
       '<button class="btn nho" data-ai="sua" data-dong="' + r.dong + '">Sửa</button>' +
-      (tt !== 'chay' ? '<button class="btn nho" data-ai="xoa" data-dong="' + r.dong + '" title="Xoá dòng điều khiển (giữ tab kết quả)">Xoá</button>' : '');
-    return '<div class="ai-dong">' +
-      '<div><div class="ten">' + esc(r.phong) + ' · ' + esc(r.congTy) + ' <span class="ai-pill ' + tt + '">' + esc(r.trangThai) + '</span>' +
-        (AI.cho && AI.cho.dong === r.dong ? '<small class="dang-cho">' + (AI.cho.thu ? 'đang chạy thử 1 file' : 'đang chạy') + '… ' + Math.round((Date.now() - AI.cho.tu) / 1000) + ' giây</small>'
+      (tt !== 'chay' && !choDong ? '<button class="btn nho" data-ai="xoa" data-dong="' + r.dong + '" title="Xoá dòng điều khiển (giữ tab kết quả)">Xoá</button>' : '');
+    var dangChayDong = tt === 'chay' || r.dangKhoa || (AI.cho && AI.cho.dong === r.dong);
+    var vuaXong = AI.vuaXong && AI.vuaXong.dong === r.dong && Date.now() - AI.vuaXong.luc < 1600;
+    return '<div class="ai-dong' + (dangChayDong ? ' dang-chay' : '') + (vuaXong ? ' vua-xong' : '') + '">' +
+      '<div><div class="ten">' + esc(r.phong) + ' · ' + esc(r.congTy) + ' <span class="ai-pill ' + (choDong ? 'chay' : tt) + '">' + (choDong ? (AI.cho.thu ? 'Đang thử' : 'Đang bật') : esc(r.trangThai)) + '</span>' +
+        (AI.cho && AI.cho.dong === r.dong ? '<small class="dang-cho">' + (AI.cho.thu ? 'đang chạy thử 1 file' : 'đang chạy') + '… <span data-tu="' + AI.cho.tu + '">' + Math.round((Date.now() - AI.cho.tu) / 1000) + '</span> giây</small>'
           : r.dangKhoa ? '<small>lô đang chạy…</small>' : '') + '</div>' +
         '<div class="tt-model">Model <select data-ai-model="' + r.dong + '"' + (tt === 'chay' ? ' disabled' : '') + ' aria-label="Model">' + chon + '</select>' +
         '<span>tab ' + esc(r.tab) + '</span></div>' +
@@ -2185,7 +2203,7 @@ function veAi(d) {
         ' · chạy ' + (r.tatCa ? '<b>tất cả</b>' : so(r.soFile) + ' file') +
         ' <button class="btn nho nut-dem" data-ai="dem" data-dong="' + r.dong + '" title="Đếm lại số PDF trong thư mục Drive (kể cả thư mục con)">Đếm</button>' +
         (r.demLuc ? '<span>lúc ' + esc(r.demLuc.slice(5, 16)) + '</span>' : '') + '</div></div>' +
-      '<div><div class="ai-tien' + (r.soLoi > r.daXong / 2 && r.soLoi ? ' loi' : '') + '"><i style="width:' + pt + '%"></i></div>' +
+      '<div><div class="ai-tien' + (r.soLoi > r.daXong / 2 && r.soLoi ? ' loi' : '') + (pt === 0 ? ' chua' : '') + '"><i style="width:' + pt + '%"></i></div>' +
         '<div class="so-lieu"><span><b>' + so(r.daXong) + '</b>/' + (r.tatCa && r.tongDrive == null ? 'tất cả' : so(muc)) + ' file</span><span>' + so(r.soVb) + ' văn bản</span>' +
         (r.soLoi ? '<span style="color:var(--clay)">' + so(r.soLoi) + ' lỗi</span>' : '') +
         '<span>' + usd(r.chiPhi) + ' / ' + NF2.format(r.nganSach) + ' USD</span><span title="Token vào / token ra (gồm suy nghĩ)">' + tok(r.tokVao) + ' / ' + tok(r.tokRa) + ' token</span><span>' + so(r.soLan) + ' lô · ' + NF2.format(r.tongPhut) + ' phút</span>' +
@@ -2245,13 +2263,14 @@ function hopChay(r, thu) {
       var gui = function () {
         var ma = NHAP_LAI_MA ? $('#hopMa', h).value : AI.ma;
         if (!ma) return baoLoiHop(h, 'Nhập mã chạy');
-        $('[data-hop="ok"]', h).disabled = true;
+        var nutOk = $('[data-hop="ok"]', h), chuNut = nutOk.textContent;
+        nutOk.disabled = true; nutOk.classList.add('dang-gui'); nutOk.textContent = thu ? 'Đang gửi…' : 'Đang bật…';
         var tc = !thu && $('#hopTatCa', h).checked;
         var doiSo = !thu && tc !== !!r.tatCa ? goiAi('capNhat', { dong: r.dong, soFile: tc ? 'Tất cả' : Math.max(r.soFile || 100, 1) }, ma) : Promise.resolve();
         doiSo.then(function () { return goiAi(thu ? 'thu' : 'chay', { dong: r.dong, model: $('#hopModel', h).value }, ma); }).then(function (kq) {
           dongHopAi(); thongBao(kq.thongBao);
           batDauCho(r.dong, thu);
-        }, function (e) { $('[data-hop="ok"]', h).disabled = false; baoLoiHop(h, e.message); });
+        }, function (e) { nutOk.disabled = false; nutOk.classList.remove('dang-gui'); nutOk.textContent = chuNut; baoLoiHop(h, e.message); });
       };
       $('[data-hop="ok"]', h).onclick = gui;
       if ($('#hopMa', h)) $('#hopMa', h).onkeydown = function (e) { if (e.key === 'Enter') gui(); };
@@ -2360,6 +2379,9 @@ function ganSuKienAi() {
     moAi();
   };
   $('#aiMo').onclick = moKhoa;
+  setInterval(function () {   // số giây "đang chạy… N giây" nhảy từng giây giữa hai lần làm mới
+    $$('#aiDs [data-tu]').forEach(function (e) { e.textContent = Math.round((Date.now() - Number(e.dataset.tu)) / 1000); });
+  }, 1000);
   $('#aiMaVao').onkeydown = function (e) { if (e.key === 'Enter') moKhoa(); };
   $('#aiLamMoi').onclick = function () { lamMoiAi().then(function () { thongBao('Đã làm mới'); }, function (e) { thongBao(e.message); }); };
   $('#aiThem').onclick = hopThem;
