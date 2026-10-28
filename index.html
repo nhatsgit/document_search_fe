@@ -867,9 +867,9 @@ button.kpi:hover{border-color:var(--leaf)}
       <h2 id="aiTieuDeKq"></h2>
       <div class="ai-loc">
         <select id="aiLocTT" aria-label="Lọc trạng thái"><option value="">Mọi trạng thái</option><option value="can_soat_xet">Cần soát xét</option>
-          <option value="da_trich">Đã trích</option><option value="loi">Lỗi</option><option value="bo_ho_so">Dòng bộ hồ sơ</option></select>
+          <option value="da_trich">Đã trích</option><option value="loi">Lỗi</option><option value="bo_ho_so">Dòng bộ hồ sơ</option><option value="bo_qua">Bỏ qua (> 200 trang)</option></select>
         <select id="aiLocCB" aria-label="Lọc cảnh báo"><option value="">Mọi cảnh báo</option><option value="so_hieu_khong_ro">Số hiệu không rõ</option>
-          <option value="doc_mot_phan">Đọc một phần</option><option value="nhieu_van_ban_trong_file">Nhiều văn bản trong file</option>
+          <option value="doc_mot_phan">Đọc một phần</option><option value="dung_doc_som">Dừng đọc sớm</option><option value="qua_200_trang">Quá 200 trang</option><option value="nhieu_van_ban_trong_file">Nhiều văn bản trong file</option>
           <option value="ngay_khong_ro">Ngày không rõ</option><option value="so_tien_khong_ro">Số tiền không rõ</option>
           <option value="chat_luong_scan_kem">Chất lượng scan kém</option><option value="do_tin_cay_thap">Độ tin cậy thấp</option>
           <option value="loai_chua_co_trong_danh_muc">Loại chưa có trong danh mục</option></select>
@@ -2538,7 +2538,7 @@ function veBaoCaoAi(b) {
   var tl = function (x) { return x ? x[0] + '/' + x[1] + ' (' + Math.round(x[0] / x[1] * 100) + '%)' : '—'; };
   $('#aiBaoCao').innerHTML = !b.soFile ? '' : '<div class="ai-bc">' +
     '<div><h3>Tổng</h3>' + so(b.soFile) + ' file · ' + so(b.soVanBan) + ' văn bản<br>' + so(b.fileNhieuVanBan) + ' file chứa nhiều văn bản' + (b.soBoHoSo ? ' (' + so(b.soBoHoSo) + ' dòng bộ hồ sơ)' : '') + '<br>' +
-      so(b.canSoatXet) + ' văn bản cần soát xét · ' + so(b.fileLoi) + ' file lỗi</div>' +
+      so(b.canSoatXet) + ' văn bản cần soát xét · ' + so(b.fileLoi) + ' file lỗi' + (b.fileBoQua ? '<br>' + so(b.fileBoQua) + ' file bỏ qua (> 200 trang, soát tay)' : '') + '</div>' +
     '<div><h3>Khớp dữ liệu cũ</h3>Số ký hiệu: ' + tl(b.khopSoHieuCu) + '<br>Ngày: ' + tl(b.khopNgayCu) + '</div>' +
     '<div><h3>Chi phí, thời gian</h3>' + usd(b.chiPhi) + ' · TB ' + usd(b.chiPhiTrungBinhFile) + '/file<br>TB ' + NF2.format(b.giayTrungBinhFile) + ' giây/file<br>' +
       'Tổng ' + tok(b.tongTokenVao) + ' token vào' + (b.tongTokenCache ? ' (' + tok(b.tongTokenCache) + ' trúng cache, giá 10%)' : '') + ', ' + tok(b.tongTokenRa) + ' token ra<br>TB ' + so(b.tokenVaoTrungBinh) + ' token vào, ' + so(b.tokenRaTrungBinh) + ' token ra / file</div>' +
@@ -2568,7 +2568,7 @@ function napKetQuaAi() {
           '<td>' + esc(x.ngay_vb) + cu(x.ngay_vb, x.ngay_cu) + '</td>' +
           '<td>' + esc(x.trich_yeu) + cu(x.trich_yeu, x.trich_yeu_cu) + '</td>' +
           '<td class="cb">' + esc(x.canh_bao) + '</td>' +
-          '<td>' + esc({ da_trich: 'Đã trích', can_soat_xet: 'Cần soát xét', loi: 'Lỗi' }[x.trang_thai] || x.trang_thai) + '</td></tr>';
+          '<td>' + esc({ da_trich: 'Đã trích', can_soat_xet: 'Cần soát xét', loi: 'Lỗi', bo_qua: 'Bỏ qua — chuyên viên soát xét' }[x.trang_thai] || x.trang_thai) + '</td></tr>';
       }).join('') : '<tr><td colspan="9" class="rong">Chưa có kết quả nào khớp.</td></tr>';
       var soTrang = Math.max(1, Math.ceil(d.tong / d.co));
       $('#aiPhanTrang').innerHTML = '<span>' + so(d.tong) + ' dòng · trang ' + d.trang + '/' + soTrang + '</span>' +
