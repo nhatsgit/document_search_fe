@@ -2075,6 +2075,7 @@ function uocPhiFile(model) {
 }
 var NF3 = new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 3 });
 function usd(n) { return NF3.format(n) + ' USD'; }
+function tok(n) { return n >= 1e6 ? NF2.format(Math.round(n / 1e4) / 100) + ' triệu' : so(n); }
 
 function hienTrangAi() {
   document.body.classList.add('che-do-ai');
@@ -2110,13 +2111,14 @@ function lamMoiAi() { return goiAi('tongQuan').then(veAi); }
 var TEN_TT_AI = { 'Chạy': 'chay', 'Dừng': 'dung', 'Xong': 'xong' };
 function veAi(d) {
   AI.du = d;
-  var tongMuc = 0, tongXong = 0, tongVb = 0, tongLoi = 0, tongPhi = 0, tongNs = 0, dangChay = 0;
-  d.dong.forEach(function (r) { tongMuc += r.soFile; tongXong += r.daXong; tongVb += r.soVb; tongLoi += r.soLoi; tongPhi += r.chiPhi; tongNs += r.nganSach; if (r.trangThai === 'Chạy') dangChay++; });
+  var tongMuc = 0, tongXong = 0, tongVb = 0, tongLoi = 0, tongPhi = 0, tongNs = 0, dangChay = 0, tongVao = 0, tongRa = 0;
+  d.dong.forEach(function (r) { tongMuc += r.soFile; tongXong += r.daXong; tongVb += r.soVb; tongLoi += r.soLoi; tongPhi += r.chiPhi; tongNs += r.nganSach; tongVao += r.tokVao; tongRa += r.tokRa; if (r.trangThai === 'Chạy') dangChay++; });
   $('#aiThe').innerHTML =
     '<div><span>File đã xong</span><b>' + so(tongXong) + '</b><small>/ ' + so(tongMuc) + '</small></div>' +
     '<div><span>Văn bản trích được</span><b>' + so(tongVb) + '</b></div>' +
     '<div><span>File lỗi</span><b>' + so(tongLoi) + '</b></div>' +
     '<div><span>Chi phí / ngân sách</span><b>' + NF2.format(Math.round(tongPhi * 100) / 100) + '</b><small>/ ' + NF2.format(tongNs) + ' USD</small></div>' +
+    '<div><span>Token vào / ra</span><b>' + tok(tongVao) + '</b><small>/ ' + tok(tongRa) + '</small></div>' +
     '<div><span>Đang chạy</span><b>' + dangChay + '</b><small>dòng</small></div>';
   $('#aiDs').innerHTML = d.dong.length ? d.dong.map(function (r) {
     var tt = TEN_TT_AI[r.trangThai] || 'dung', pt = r.soFile ? Math.min(100, Math.round(r.daXong / r.soFile * 100)) : 0;
@@ -2137,7 +2139,7 @@ function veAi(d) {
       '<div><div class="ai-tien' + (r.soLoi > r.daXong / 2 && r.soLoi ? ' loi' : '') + '"><i style="width:' + pt + '%"></i></div>' +
         '<div class="so-lieu"><span><b>' + so(r.daXong) + '</b>/' + so(r.soFile) + ' file</span><span>' + so(r.soVb) + ' văn bản</span>' +
         (r.soLoi ? '<span style="color:var(--clay)">' + so(r.soLoi) + ' lỗi</span>' : '') +
-        '<span>' + usd(r.chiPhi) + ' / ' + NF2.format(r.nganSach) + ' USD</span><span>' + so(r.soLan) + ' lô · ' + NF2.format(r.tongPhut) + ' phút</span>' +
+        '<span>' + usd(r.chiPhi) + ' / ' + NF2.format(r.nganSach) + ' USD</span><span title="Token vào / token ra (gồm suy nghĩ)">' + tok(r.tokVao) + ' / ' + tok(r.tokRa) + ' token</span><span>' + so(r.soLan) + ' lô · ' + NF2.format(r.tongPhut) + ' phút</span>' +
         (r.lanCuoi ? '<span>lần cuối ' + esc(r.lanCuoi.slice(5, 16)) + '</span>' : '') + '</div>' +
         (r.ketQuaCuoi ? '<div class="lo-cuoi">' + esc(r.ketQuaCuoi) + '</div>' : '') + '</div>' +
       '<div class="nut-dong">' + nut + '</div></div>';
@@ -2145,7 +2147,7 @@ function veAi(d) {
   $('#aiNk').innerHTML = d.nhatKy.length ? d.nhatKy.map(function (n) {
     return '<div><code>' + esc(n.maLo) + '</code><span>' + esc(n.batDau.slice(5, 16)) + ' → ' + esc(n.ketThuc.slice(11, 16)) + ' · ' + so(n.giay) + ' giây</span>' +
       '<span>' + esc(n.tab) + '</span><span>' + so(n.fileXong) + ' file · ' + so(n.soVb) + ' văn bản' + (n.fileLoi ? ' · ' + so(n.fileLoi) + ' lỗi' : '') + '</span>' +
-      '<span>' + usd(n.chiPhi) + '</span><span>' + ({ lich: 'theo lịch', tu_dong: 'tự nối tiếp', trang: 'bấm trên trang', tay: 'gọi tay' }[n.cachGoi] || esc(n.cachGoi)) + '</span>' +
+      '<span>' + tok(n.tokVao) + ' / ' + tok(n.tokRa) + ' token</span><span>' + usd(n.chiPhi) + '</span><span>' + ({ lich: 'theo lịch', tu_dong: 'tự nối tiếp', trang: 'bấm trên trang', tay: 'gọi tay' }[n.cachGoi] || esc(n.cachGoi)) + '</span>' +
       (n.ghiChu ? '<span class="' + (/LỖI/.test(n.ghiChu) ? 'loi' : '') + '">' + esc(n.ghiChu) + '</span>' : '') + '</div>';
   }).join('') : '<div>Chưa có lô nào.</div>';
   $('#aiCapNhat').textContent = 'Cập nhật ' + new Date().toLocaleTimeString('vi-VN') + ' · tự làm mới 30 giây';
@@ -2260,7 +2262,7 @@ function veBaoCaoAi(b) {
       so(b.canSoatXet) + ' văn bản cần soát xét · ' + so(b.fileLoi) + ' file lỗi</div>' +
     '<div><h3>Khớp dữ liệu cũ</h3>Số ký hiệu: ' + tl(b.khopSoHieuCu) + '<br>Ngày: ' + tl(b.khopNgayCu) + '</div>' +
     '<div><h3>Chi phí, thời gian</h3>' + usd(b.chiPhi) + ' · TB ' + usd(b.chiPhiTrungBinhFile) + '/file<br>TB ' + NF2.format(b.giayTrungBinhFile) + ' giây/file<br>' +
-      'TB ' + so(b.tokenVaoTrungBinh) + ' token vào, ' + so(b.tokenRaTrungBinh) + ' token ra / file</div>' +
+      'Tổng ' + tok(b.tongTokenVao) + ' token vào, ' + tok(b.tongTokenRa) + ' token ra<br>TB ' + so(b.tokenVaoTrungBinh) + ' token vào, ' + so(b.tokenRaTrungBinh) + ' token ra / file</div>' +
     '<div><h3>Cảnh báo</h3><ul>' + (b.canhBao.map(function (c) { return '<li>' + esc(c[0]) + ': ' + so(c[1]) + '</li>'; }).join('') || '<li>Không có</li>') + '</ul></div>' +
     '<div><h3>Loại văn bản</h3><ul>' + b.loaiVanBan.slice(0, 8).map(function (c) { return '<li>' + esc(c[0]) + ': ' + so(c[1]) + '</li>'; }).join('') + '</ul></div></div>';
 }
