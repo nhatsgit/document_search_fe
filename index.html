@@ -667,11 +667,11 @@ button.kpi:hover{border-color:var(--leaf)}
 .ai-hop .uoc .canh{color:var(--clay);margin-top:4px}
 .ai-dong .nut-dem{padding:1px 8px;font-size:12px}
 .ai-hop.hop-rong{width:min(1080px,100%)}
-.ai-hop .dang-doc{display:flex;align-items:center;gap:10px;color:var(--leaf);font-weight:600;font-size:14px}
-.ai-hop .dang-doc::before{content:'';width:16px;height:16px;border-radius:50%;border:2px solid var(--leaf-soft);border-top-color:var(--leaf);animation:quay .8s linear infinite}
+.ai-hop .dang-doc,.dang-tai-ai{display:flex;align-items:center;gap:10px;color:var(--leaf);font-weight:600;font-size:14px}
+.ai-hop .dang-doc::before,.dang-tai-ai::before{content:'';width:16px;height:16px;border-radius:50%;border:2px solid var(--leaf-soft);border-top-color:var(--leaf);animation:quay .8s linear infinite}
 .ai-hop .tom-tat{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:13px;color:var(--ink-2)}
 .ai-hop .ai-bang table{min-width:860px}
-@media (prefers-reduced-motion:reduce){.ai-hop .dang-doc::before{animation:none}}
+@media (prefers-reduced-motion:reduce){.ai-hop .dang-doc::before,.dang-tai-ai::before{animation:none}}
 .ai-muc-dau{display:flex;align-items:center;gap:10px}
 .ai-muc-dau h2{margin:0}
 .ai-khoa-ds>div{align-items:center}
@@ -2174,7 +2174,13 @@ function khoaAi(loi) {
   setTimeout(function () { $('#aiMaVao').focus(); }, 50);
 }
 function moAi() {
-  return lamMoiAi().then(function () {
+  // Đã lưu mã thì hiện khung ngay kèm "Đang tải" (máy chủ ngủ cần 10–30 giây khởi động); quá 60 giây báo lỗi kèm nút thử lại
+  if (AI.ma) {
+    $('#aiKhoa').hidden = true; $('#aiNoiDung').hidden = false;
+    if (!$('#aiThe').children.length || $('#aiThe .dang-tai-ai')) $('#aiThe').innerHTML = '<div class="dang-doc dang-tai-ai" style="grid-column:1/-1">Đang tải dữ liệu… máy chủ có thể mất 10–30 giây để khởi động</div>';
+  }
+  var quaLau = new Promise(function (_, loi) { setTimeout(function () { loi(new Error('Máy chủ chưa phản hồi sau 60 giây')); }, 60000); });
+  return Promise.race([lamMoiAi(), quaLau]).then(function () {
     $('#aiKhoa').hidden = true; $('#aiNoiDung').hidden = false;
     clearInterval(AI.hen);
     AI.hen = setInterval(function () { if (!document.hidden && $('#aiNenHop').hidden) lamMoiAi().catch(function () {}); }, 30000);
