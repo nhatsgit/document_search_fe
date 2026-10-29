@@ -2495,10 +2495,19 @@ function veKqThuLink(kq) {
 }
 
 function hopThem() {
+  // Thư mục có sẵn (API trả kèm tổng quan) nhóm theo phòng; chọn "Nhập link khác…" để dán link tay
+  var san = AI.du.thuMucCoSan || [], nhomPh = [];
+  san.forEach(function (t) { if (nhomPh.indexOf(t.phong) < 0) nhomPh.push(t.phong); });
+  var chonSan = '<select class="o" id="hopSan"><option value="">— Chọn thư mục có sẵn —</option>' + nhomPh.map(function (p) {
+    return '<optgroup label="' + esc(p) + '">' + san.filter(function (t) { return t.phong === p; }).map(function (t) {
+      return '<option value="' + esc(t.ma) + '">' + esc(t.ma) + (t.dong ? ' (đã có dòng ' + t.dong + ')' : '') + '</option>';
+    }).join('') + '</optgroup>';
+  }).join('') + '<option value="__tay">Nhập link khác…</option></select>';
   moHopAi('<h3>Thêm phòng</h3>' +
-    '<label>Link thư mục Drive của phòng<input class="o" id="hopThuMuc" placeholder="https://drive.google.com/drive/folders/…"></label>' +
+    '<label>Thư mục Drive' + chonSan + '</label>' +
+    '<label id="hopNhanLink" hidden>Link thư mục Drive<input class="o" id="hopThuMuc" placeholder="https://drive.google.com/drive/folders/…"></label>' +
     '<div class="goi-y">Thư mục phải được chia sẻ quyền Xem cho service account search-document@… (kể cả thư mục con).</div>' +
-    '<div class="luoi2"><label>Công ty<select class="o" id="hopCongTy"><option>CRCK2</option><option>BHCK</option></select></label>' +
+    '<div class="luoi2"><label>Công ty<select class="o" id="hopCongTy"><option>CRCK2</option><option>CRCK</option><option>BHCK</option></select></label>' +
     '<label>Phòng<select class="o" id="hopPhong"><option>TCHC</option><option>TCKT</option><option>KHĐT</option><option>KTNN</option></select></label></div>' +
     '<label>Model' + chonModelHtml('hopModel', AI.du.modelMacDinh) + '</label>' +
     oSoFile(null, AI.du.soFileToiDa) +
@@ -2509,8 +2518,16 @@ function hopThem() {
     '<div class="hang"><button class="btn" data-hop="huy" type="button">Huỷ</button><button class="btn chinh" data-hop="ok" type="button">Thêm</button></div>',
     function (h) {
       ganTatCa(h);
+      $('#hopSan', h).onchange = function () {
+        var t = san.filter(function (x) { return x.ma === this.value; }, this)[0];
+        $('#hopNhanLink', h).hidden = this.value !== '__tay';
+        if (t) {   // điền sẵn theo thư mục đã lưu
+          $('#hopThuMuc', h).value = t.id; $('#hopCongTy', h).value = t.congTy; $('#hopPhong', h).value = t.phong; $('#hopTab', h).value = t.tab;
+          baoLoiHop(h, t.dong ? 'Thư mục này đã có ở dòng ' + t.dong + ' — thêm nữa sẽ chạy lại từ đầu vào tab khác.' : '');
+        } else if (this.value === '__tay') { $('#hopThuMuc', h).value = ''; $('#hopTab', h).value = ''; baoLoiHop(h, ''); $('#hopThuMuc', h).focus(); }
+      };
       $('[data-hop="ok"]', h).onclick = function () {
-        if (!$('#hopThuMuc', h).value.trim()) return baoLoiHop(h, 'Dán link thư mục Drive');
+        if (!$('#hopThuMuc', h).value.trim()) return baoLoiHop(h, 'Chọn thư mục có sẵn hoặc dán link thư mục Drive');
         goiAi('them', { thuMuc: $('#hopThuMuc', h).value, congTy: $('#hopCongTy', h).value, phong: $('#hopPhong', h).value, model: $('#hopModel', h).value,
           soFile: giaTriSoFile(h), nganSach: Number($('#hopNs', h).value), tab: $('#hopTab', h).value, ghiChu: $('#hopGhiChu', h).value })
           .then(function (kq) { dongHopAi(); thongBao(kq.thongBao); lamMoiAi(); }, function (e) { baoLoiHop(h, e.message); });
