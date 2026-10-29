@@ -2141,9 +2141,11 @@ var NF3 = new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 3 });
 function usd(n) { return NF3.format(n) + ' USD'; }
 /** Số file sẽ chạy của một dòng: "Tất cả" = cả thư mục Drive (cần đã đếm); số cụ thể thì không quá số file trong Drive. */
 function mucFile(r) { return r.tatCa ? (r.tongDrive || 0) : (r.tongDrive != null ? Math.min(r.soFile, r.tongDrive) : r.soFile); }
+// Trần = tổng file PDF trong thư mục khi đã đếm (máy chủ đếm lại lúc lưu); chưa đếm thì dùng trần chung
 function oSoFile(r, toiDa) {
-  var tc = r ? r.tatCa : false;
-  return '<label>Số file sẽ chạy<span class="o-so-file"><input class="o" id="hopSoFile" type="number" min="1" max="' + toiDa + '" value="' + (r && !tc ? r.soFile : 100) + '"' + (tc ? ' disabled' : '') + '>' +
+  var tc = r ? r.tatCa : false, tong = r && r.tongDrive ? r.tongDrive : null;
+  return '<label>Số file sẽ chạy' + (tong ? ' <span class="goi-y" style="display:inline">(1–' + so(tong) + ' · thư mục có ' + so(tong) + ' file)</span>' : '') +
+    '<span class="o-so-file"><input class="o" id="hopSoFile" type="number" min="1" max="' + (tong || toiDa) + '" value="' + (r && !tc ? r.soFile : 100) + '"' + (tc ? ' disabled' : '') + '>' +
     '<label class="chk"><input type="checkbox" id="hopTatCa"' + (tc ? ' checked' : '') + '> Tất cả file trong Drive</label></span></label>';
 }
 function giaTriSoFile(h) { return $('#hopTatCa', h).checked ? 'Tất cả' : Number($('#hopSoFile', h).value); }
@@ -2437,6 +2439,8 @@ function hopSua(r) {
     function (h) {
       ganTatCa(h);
       $('[data-hop="ok"]', h).onclick = function () {
+        var sf = giaTriSoFile(h);
+        if (sf !== 'Tất cả' && r.tongDrive && sf > r.tongDrive) return baoLoiHop(h, 'Số file phải từ 1 đến ' + so(r.tongDrive) + ' (tổng file PDF trong thư mục)');
         goiAi('capNhat', { dong: r.dong, model: $('#hopModel', h).value, soFile: giaTriSoFile(h), nganSach: Number($('#hopNs', h).value),
           ghiChu: $('#hopGhiChu', h).value }).then(function (kq) { dongHopAi(); thongBao(kq.thongBao); lamMoiAi(); }, function (e) { baoLoiHop(h, e.message); });
       };
