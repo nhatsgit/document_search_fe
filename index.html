@@ -2374,7 +2374,7 @@ function veAi(d) {
       '<span>' + tok(n.tokVao) + ' / ' + tok(n.tokRa) + ' token</span><span>' + usd(n.chiPhi) + '</span><span>' + ({ lich: 'theo lịch', tu_dong: 'tự nối tiếp', trang: 'bấm trên trang', tay: 'gọi tay' }[n.cachGoi] || esc(n.cachGoi)) + '</span>' +
       (n.ghiChu ? '<span class="' + (/LỖI/.test(n.ghiChu) ? 'loi' : '') + '">' + esc(n.ghiChu) + '</span>' : '') + '</div>';
   }).join('') : '<div>Chưa có lô nào.</div>';
-  $('#aiCapNhat').textContent = 'Cập nhật ' + new Date().toLocaleTimeString('vi-VN') + ' · tự làm mới 30 giây';
+  $('#aiCapNhat').textContent = 'Dữ liệu lúc ' + (d.docLuc ? d.docLuc.slice(11) : new Date().toLocaleTimeString('vi-VN')) + ' · tự làm mới 30 giây';
 }
 
 /* ---------- Hộp thoại ---------- */
