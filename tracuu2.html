@@ -64,7 +64,21 @@ mark{background:var(--mark);color:var(--chu);border-radius:3px}
 .khung{max-width:1480px;margin:0 auto;padding:16px 24px 48px;display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start}
 .trai{flex:1 1 200px;max-width:230px;min-width:0;display:flex;flex-direction:column;gap:12px}
 .giua{flex:999 1 640px;min-width:0;display:flex;flex-direction:column;gap:10px}
-.phai-cot{flex:1 1 300px;max-width:360px;min-width:0;position:sticky;top:12px}
+.phai-cot{flex:1 1 300px;max-width:360px;min-width:0}
+/* Màn rộng: đầu trang + thanh tìm đứng yên, mỗi cột tự cuộn, danh sách có thanh cuộn riêng (tiêu đề cột dính trên) */
+@media (min-width:901px){
+  body{height:100vh;display:flex;flex-direction:column;overflow:hidden}
+  .dau,.tim{flex:none}
+  .khung{flex:1 1 auto;min-height:0;width:100%;flex-wrap:nowrap;align-items:stretch;padding-bottom:14px}
+  .trai{flex:0 0 220px;overflow-y:auto;padding-right:2px}
+  .giua{min-height:0}
+  .phai-cot{flex:0 0 340px;overflow-y:auto}
+  .bang-khung{flex:1 1 auto;min-height:0;overflow:auto}
+  .bang thead{position:sticky;top:0;z-index:2}
+  .bang thead tr{background:#F7F8F6}
+  .bang thead tr.loc-cot{box-shadow:0 1px 0 var(--vien)}
+}
+@media (min-width:901px) and (max-width:1250px){ .phai-cot{flex-basis:280px} .trai{flex-basis:190px} }
 .the{background:#fff;border:1px solid var(--vien);border-radius:12px}
 .hop-loc{padding:12px 14px;display:flex;flex-direction:column;gap:2px}
 .tieu-nho{margin:0 0 4px;font-size:12.5px;font-weight:700;color:var(--chu-3);text-transform:uppercase;letter-spacing:.04em}
@@ -619,7 +633,7 @@ function popupXN() {
 }
 
 /* ---------- sự kiện ---------- */
-function datTrang1() { S.trang = 1; }
+function datTrang1() { S.trang = 1; var k = $('.bang-khung'); if (k) k.scrollTop = 0; }
 var hen;
 $('#oTim').addEventListener('input', function (e) { S.q = e.target.value; $('#xoaQ').hidden = !S.q; clearTimeout(hen); hen = setTimeout(function () { datTrang1(); ve(); }, 150); });
 $('#xoaQ').addEventListener('click', function () { S.q = ''; $('#oTim').value = ''; this.hidden = true; ve(); $('#oTim').focus(); });
@@ -650,14 +664,15 @@ var hanhDong = {
     var tr = KQ.nhom.slice((S.trang - 1) * CO, S.trang * CO).filter(function (g) { return g.hs; }), het = tr.every(function (g) { return laMo(g.hs); });
     tr.forEach(function (g) { S.mo[g.hs] = !het; });
   },
-  trangTruoc: function () { S.trang = Math.max(1, S.trang - 1); window.scrollTo({ top: 0 }); },
-  trangSau: function () { S.trang++; window.scrollTo({ top: 0 }); },
+  trangTruoc: function () { S.trang = Math.max(1, S.trang - 1); lenDau(); },
+  trangSau: function () { S.trang++; lenDau(); },
   dongCT: function () { S.ct = null; },
   ctTruoc: function () { var i = KQ.kq.indexOf(timDoc(S.ct)); if (i > 0) S.ct = S.sel = KQ.kq[i - 1].id; },
   ctSau: function () { var i = KQ.kq.indexOf(timDoc(S.ct)); if (i >= 0 && i < KQ.kq.length - 1) S.ct = S.sel = KQ.kq[i + 1].id; },
   dongXN: function () { S.xn = null; },
   xnTruoc: function () { buocXN(-1); }, xnSau: function () { buocXN(1); }
 };
+function lenDau() { $('.bang-khung').scrollTop = 0; if (window.innerWidth <= 900) window.scrollTo({ top: 0 }); }
 function buocXN(n) { var b = BO[S.xn.bo]; if (!b) return; var i = b.ds.indexOf(timDoc(S.xn.id)); var j = Math.min(b.ds.length - 1, Math.max(0, (i < 0 ? 0 : i) + n)); S.xn = { bo: S.xn.bo, id: b.ds[j].id }; }
 document.addEventListener('click', function (e) {
   var t = e.target, el;
