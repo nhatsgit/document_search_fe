@@ -196,6 +196,9 @@ tr.bo .trich{font-weight:700;color:#0A3D2E}
 .nhom-ct .dl{grid-template-columns:130px minmax(0,1fr);font-size:13.5px}
 .vb-bo{display:flex;gap:12px;align-items:flex-start;text-align:left;border:1px solid var(--vien);background:#fff;border-radius:10px;padding:10px 12px;cursor:pointer;width:100%}
 .vb-bo.nay{border-color:var(--xanh);background:var(--xanh-nen)}
+.vb-dong{display:flex;align-items:center;gap:6px;border:1px solid var(--vien);background:#fff;border-radius:10px;padding-right:8px}
+.vb-dong.nay{border-color:var(--xanh);background:var(--xanh-nen)}
+.vb-dong .vb-bo{border:0;background:none;flex:1;min-width:0}
 .xem-than{display:flex;flex-wrap:wrap;align-items:stretch;background:#E9ECE8;min-height:70vh}
 .xem-than iframe{flex:999 1 560px;min-width:0;border:0;min-height:70vh;background:#E9ECE8}
 .xem-ben{flex:1 1 260px;max-width:330px;min-width:0;background:#fff;border-left:1px solid var(--vien);padding:14px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;max-height:80vh}
@@ -679,7 +682,11 @@ function popupCT() {
     ['Lưu trữ', [['Đơn vị', x.cty + ' · Phòng ' + x.phong], ['Tên hồ sơ', x.hoSo], ['Thùng', x.thung], ['File', x.file], ['Số trang', x.soTrang ? x.soTrang + ' trang' : '']]]];
   var than = S.tab === 'tt' ? '<div class="luoi-ct">' + nhom.map(function (g, gi) { return '<section class="nhom-ct"><h3 class="tieu-nho" style="margin:0">' + g[0] + '</h3>' + dl(g[1], 'ct-' + gi + '-') + '</section>'; }).join('') + '</div>'
     : b ? '<div style="display:flex;flex-direction:column;gap:8px"><b style="font-size:15px">' + esc(b.ten) + '</b><span style="font-size:13px;color:var(--chu-4)">Thùng ' + esc(b.thung) + ' · ' + b.ds.length + ' văn bản · ' + soVN(b.soTrang) + ' trang</span>' +
-      b.ds.map(function (y) { return '<button type="button" class="vb-bo' + (y === x ? ' nay' : '') + '" data-ct="' + esc(y.id) + '" data-giu-tab="1"' + (y === x ? ' aria-current="true"' : '') + '><span class="so" style="font-size:12px;color:var(--chu-4);min-width:56px">' + y.soTrang + ' trang</span><span style="flex:1;min-width:0"><b style="font-size:12.5px">' + esc(y.loai) + ' ' + esc(y.so) + '</b><br><span style="font-size:13.5px">' + esc(y.trich) + '</span></span></button>'; }).join('') + '</div>'
+      '<div style="display:flex;flex-wrap:wrap;gap:8px"><button type="button" class="nut" data-xn-ca-bo="' + esc(x.id) + '" style="display:inline-flex;align-items:center;gap:6px">' + IC.mat + 'Xem cả bộ</button>' +
+        '<button type="button" class="nut" data-tai-bo="' + esc(x.hs) + '" style="display:inline-flex;align-items:center;gap:6px">' + IC_TAI + 'Tải cả bộ · ' + b.ds.length + ' file</button></div>' +
+      b.ds.map(function (y) { return '<div class="vb-dong' + (y === x ? ' nay' : '') + '"><button type="button" class="vb-bo" data-ct="' + esc(y.id) + '" data-giu-tab="1"' + (y === x ? ' aria-current="true"' : '') + '><span class="so" style="font-size:12px;color:var(--chu-4);min-width:56px">' + y.soTrang + ' trang</span><span style="flex:1;min-width:0"><b style="font-size:12.5px">' + esc(y.loai) + ' ' + esc(y.so) + '</b><br><span style="font-size:13.5px">' + esc(y.trich) + '</span></span></button>' +
+        '<button type="button" class="nut-icon" data-xn="' + esc(y.id) + '" title="Xem nhanh" aria-label="Xem nhanh ' + esc(y.file) + '">' + IC.mat + '</button>' +
+        '<a class="nut-icon" href="' + linkTai(y.driveId) + '" target="_blank" rel="noopener" title="Tải xuống" aria-label="Tải ' + esc(y.file) + '">' + IC_TAI + '</a></div>'; }).join('') + '</div>'
     : '<span style="color:var(--chu-3)">Văn bản lẻ — không thuộc bộ hồ sơ nào.</span>';
   return '<div class="phu-nen" data-nen="ct"><div class="hop-thoai" role="dialog" aria-modal="true" aria-label="Chi tiết văn bản" style="max-width:960px">' +
     '<div style="padding:18px 22px 0;display:flex;flex-direction:column;gap:8px" class="ct-tren"><div class="ct-dau" style="display:flex;align-items:flex-start;gap:12px"><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px">' +
@@ -689,6 +696,8 @@ function popupCT() {
     '<button type="button" class="nut-dong" data-act="dongCT" aria-label="Đóng">×</button></div>' +
     '<div style="display:flex;flex-wrap:wrap;gap:8px;padding:4px 0 10px"><button type="button" class="nut chinh" data-xn="' + esc(x.id) + '" style="display:inline-flex;align-items:center;gap:8px;min-height:40px">' + IC.mat + 'Xem nhanh · ' + (x.soTrang || '?') + ' trang</button>' +
     (b ? '<button type="button" class="nut vien-xanh" data-xn-ca-bo="' + esc(x.id) + '" style="display:inline-flex;align-items:center;gap:8px;min-height:40px">' + IC.thu + 'Xem cả bộ · ' + b.ds.length + ' file · ' + soVN(b.soTrang) + ' trang</button>' : '') +
+    '<a class="nut" style="display:inline-flex;align-items:center;gap:6px;min-height:40px;text-decoration:none;color:var(--chu)" href="' + linkTai(x.driveId) + '" target="_blank" rel="noopener">' + IC_TAI + 'Tải xuống</a>' +
+    (b ? '<button type="button" class="nut" data-tai-bo="' + esc(x.hs) + '" style="display:inline-flex;align-items:center;gap:6px;min-height:40px">' + IC_TAI + 'Tải cả bộ · ' + b.ds.length + ' file</button>' : '') +
     '<a class="nut" style="display:inline-flex;align-items:center;min-height:40px;text-decoration:none;color:var(--chu)" href="https://drive.google.com/file/d/' + encodeURIComponent(x.driveId) + '/view" target="_blank" rel="noopener">Mở file trong Drive</a></div>' +
     '<div class="tabs" role="tablist">' + [['tt', 'Thông tin'], ['bo', 'Bộ hồ sơ']].map(function (t) { return '<button type="button" role="tab" data-tab="' + t[0] + '" aria-selected="' + (S.tab === t[0]) + '" class="' + (S.tab === t[0] ? 'on' : '') + '">' + t[1] + '</button>'; }).join('') + '</div></div>' +
     '<div style="padding:18px 22px 22px">' + than + '</div></div></div>';
@@ -794,10 +803,16 @@ var hanhDong = {
   dongXN: function () { S.xn = null; },
   xnTruoc: function () { buocXN(-1); }, xnSau: function () { buocXN(1); },
   xnCaBo: function () { S.xn = { bo: S.xn.bo, id: S.xn.id, caBo: !S.xn.caBo }; },
-  taiBo: function () { BO[S.xn.bo].ds.forEach(function (y, i) { setTimeout(function () { var a = document.createElement('a'); a.href = linkTai(y.driveId); a.target = '_blank'; a.rel = 'noopener'; document.body.appendChild(a); a.click(); a.remove(); }, i * 700); }); thongBao('Đang mở tải ' + BO[S.xn.bo].ds.length + ' file — nếu trình duyệt chặn cửa sổ bật lên, hãy cho phép.'); }
+  taiBo: function () { taiCaBo(S.xn.bo); }
 };
 function manNho() { return window.matchMedia('(max-width:900px)').matches; }
 function lenDau() { $('.bang-khung').scrollTop = 0; if (window.innerWidth <= 900) window.scrollTo({ top: 0 }); }
+/** Tải lần lượt mọi file của bộ qua Drive (cách nhau 0,7 giây để trình duyệt không gộp / chặn). */
+function taiCaBo(hs) {
+  var ds = BO[hs].ds;
+  ds.forEach(function (y, i) { setTimeout(function () { var a = document.createElement('a'); a.href = linkTai(y.driveId); a.target = '_blank'; a.rel = 'noopener'; document.body.appendChild(a); a.click(); a.remove(); }, i * 700); });
+  thongBao('Đang tải ' + ds.length + ' file — nếu trình duyệt chặn cửa sổ bật lên, hãy cho phép.');
+}
 function buocXN(n) { var b = BO[S.xn.bo]; if (!b) return; var i = b.ds.indexOf(timDoc(S.xn.id)); var j = Math.min(b.ds.length - 1, Math.max(0, (i < 0 ? 0 : i) + n)); if (S.xn.caBo) { toiPhan(b.ds[j].id); return true; } S.xn = { bo: S.xn.bo, id: b.ds[j].id }; }
 document.addEventListener('click', function (e) {
   var t = e.target, el;
@@ -824,6 +839,7 @@ document.addEventListener('click', function (e) {
   }
   if ((el = t.closest('[data-tab]'))) { S.tab = el.dataset.tab; vePopup(); return; }
   if ((el = t.closest('[data-xn-chon]'))) { if (S.xn.caBo) { toiPhan(el.dataset.xnChon); return; } S.xn = { bo: S.xn.bo, id: el.dataset.xnChon }; vePopup(); return; }
+  if ((el = t.closest('[data-tai-bo]'))) { taiCaBo(el.dataset.taiBo); return; }
   if ((el = t.closest('[data-xn-ca-bo]'))) { var dcb = timDoc(el.dataset.xnCaBo); S.xn = { bo: dcb.hs, id: dcb.id, caBo: true }; vePopup(); setTimeout(function () { toiPhan(dcb.id); }, 50); return; }
   if ((el = t.closest('[data-xn-bo]'))) { var bk = el.dataset.xnBo; S.sel = 'bo:' + bk; S.xn = { bo: bk, id: BO[bk].ds[0].id, caBo: true }; ve(); return; }
   if ((el = t.closest('[data-xn]'))) { var d = timDoc(el.dataset.xn); S.xn = { id: d.id, bo: d.hs || '' }; if (!S.ct) S.sel = d.id; ve(); return; }
