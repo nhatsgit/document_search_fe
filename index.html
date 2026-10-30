@@ -694,6 +694,7 @@ button.kpi:hover{border-color:var(--leaf)}
 .bang-luot td.het .ai-tien i{background:var(--clay)}
 .bang-luot td.khong{color:var(--ink-3)}
 .bang-luot .sap-het{color:#9A7A10;font-size:12px}
+.bang-luot .tu-choi{color:var(--clay)}
 .bang-luot .nghi{color:var(--clay);font-size:12px}
 .ai-hop .chon-model{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--ink-2)}
 .ai-hop .chon-model small{color:var(--ink-3)}
@@ -2229,7 +2230,9 @@ function veLuotAi(d) {
       if (k.models.indexOf(m) < 0) return '<td class="khong">—</td>';
       var u = (d.luot[k.ten] || {})[m] || { n: 0, vao: 0, ra: 0 }, hm = k.goi !== 'tra_phi' && d.hanMuc[m];
       var nghi = k.nghi.filter(function (x) { return x.model === m || x.model === '*'; })[0];
-      var tok = u.vao ? '<small>' + tok2(u.vao) + ' vào · ' + tok2(u.ra) + ' ra</small>' : '';
+      // n = mọi lượt đã gửi (Google trừ cả lượt bị từ chối); tc = bị từ chối (429); n − tc = thành công (khớp RPD trên AI Studio)
+      var tc = u.tc || 0, tcHtml = '<small>' + so(u.n - tc) + ' thành công' + (tc ? ' · <span class="tu-choi">' + so(tc) + ' bị từ chối</span>' : '') + '</small>';
+      var tok = (u.n ? tcHtml : '') + (u.vao ? '<small>' + tok2(u.vao) + ' vào · ' + tok2(u.ra) + ' ra</small>' : '');
       if (!hm) return '<td><b>' + so(u.n) + '</b> lần' + (nghi ? ' <span class="nghi">nghỉ</span>' : '') + tok + '</td>';
       if (k.bat) { tongMp[m] = (tongMp[m] || 0) + u.n; conMp += Math.max(0, hm.rpd - u.n); }
       var pt = Math.min(100, Math.round(u.n / hm.rpd * 100)), muc = pt >= 100 || nghi ? 'het' : pt >= 80 ? 'sap' : '';
@@ -2238,7 +2241,7 @@ function veLuotAi(d) {
     }).join('') + '</tr>';
   }).join('');
   $('#aiLuotBang').innerHTML = '<div class="ai-muc-dau"><h3>Lượt dùng hôm nay</h3><span class="phu">Google làm mới lúc ' +
-    lm.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) + ' (giờ máy bạn) · lượt miễn phí còn lại hôm nay: <b>' + so(conMp) + '</b> file</span></div>' +
+    lm.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) + ' (giờ máy bạn) · lượt miễn phí còn lại hôm nay: <b>' + so(conMp) + '</b> lượt · số lớn = đã gửi (Google trừ cả lượt bị từ chối)</span></div>' +
     '<div class="ai-bang"><table class="bang-luot"><thead><tr><th>Khoá</th>' + models.map(function (m) { return '<th>' + esc(m) + '</th>'; }).join('') +
     '</tr></thead><tbody>' + hang + '</tbody></table></div>';
 }
