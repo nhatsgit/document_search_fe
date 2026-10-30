@@ -196,6 +196,14 @@ tr.bo .trich{font-weight:700;color:#0A3D2E}
 .nhom-ct .dl{grid-template-columns:130px minmax(0,1fr);font-size:13.5px}
 .vb-bo{display:flex;gap:12px;align-items:flex-start;text-align:left;border:1px solid var(--vien);background:#fff;border-radius:10px;padding:10px 12px;cursor:pointer;width:100%}
 .vb-bo.nay{border-color:var(--xanh);background:var(--xanh-nen)}
+.hang-nut{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;padding:4px 0 10px}
+.cum{display:flex;align-items:center;gap:6px}
+.cum.bo{padding-left:14px;border-left:1px solid var(--vien)}
+.cum-nhan{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--chu-3);margin-right:2px;white-space:nowrap}
+.nut-xem{display:inline-flex;align-items:center;gap:7px;min-height:40px}
+.nut-ic{width:40px;height:40px;flex:none;border-radius:10px;border:1px solid var(--o);background:#fff;color:var(--chu-2);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;text-decoration:none}
+.nut-ic:hover{border-color:var(--xanh);color:var(--xanh);background:var(--xanh-nen)}
+.nut-ic.bo{border-color:var(--xanh-vien);color:var(--xanh)}
 .vb-dong{display:flex;align-items:center;gap:6px;border:1px solid var(--vien);background:#fff;border-radius:10px;padding-right:8px}
 .vb-dong.nay{border-color:var(--xanh);background:var(--xanh-nen)}
 .vb-dong .vb-bo{border:0;background:none;flex:1;min-width:0}
@@ -697,11 +705,10 @@ function popupCT() {
     '<div style="display:flex;gap:8px;align-items:flex-start"><h2 style="font-size:20px;line-height:1.35;overflow-wrap:anywhere">' + esc(x.trich) + '</h2>' + nutChep('ct-trich', x.trich) + '</div></div>' +
     '<button type="button" class="nut-vuong" data-act="ctTruoc" aria-label="Văn bản trước"' + (i <= 0 ? ' disabled' : '') + '>‹</button><button type="button" class="nut-vuong" data-act="ctSau" aria-label="Văn bản sau"' + (i < 0 || i >= KQ.kq.length - 1 ? ' disabled' : '') + '>›</button>' +
     '<button type="button" class="nut-dong" data-act="dongCT" aria-label="Đóng">×</button></div>' +
-    '<div style="display:flex;flex-wrap:wrap;gap:8px;padding:4px 0 10px"><button type="button" class="nut chinh" data-xn="' + esc(x.id) + '" style="display:inline-flex;align-items:center;gap:8px;min-height:40px">' + IC.mat + 'Xem nhanh · ' + (x.soTrang || '?') + ' trang</button>' +
-    (b ? '<button type="button" class="nut vien-xanh" data-xn-ca-bo="' + esc(x.id) + '" style="display:inline-flex;align-items:center;gap:8px;min-height:40px">' + IC.thu + 'Xem cả bộ · ' + b.ds.length + ' file · ' + soVN(b.soTrang) + ' trang</button>' : '') +
-    '<a class="nut" style="display:inline-flex;align-items:center;gap:6px;min-height:40px;text-decoration:none;color:var(--chu)" href="' + linkTai(x.driveId) + '" target="_blank" rel="noopener">' + IC_TAI + 'Tải xuống</a>' +
-    (b ? '<button type="button" class="nut" data-tai-bo="' + esc(x.hs) + '" style="display:inline-flex;align-items:center;gap:6px;min-height:40px">' + IC_TAI + 'Tải cả bộ · ' + b.ds.length + ' file</button>' : '') +
-    '<a class="nut" style="display:inline-flex;align-items:center;min-height:40px;text-decoration:none;color:var(--chu)" href="https://drive.google.com/file/d/' + encodeURIComponent(x.driveId) + '/view" target="_blank" rel="noopener">Mở file trong Drive</a></div>' +
+    '<div class="hang-nut"><div class="cum"><button type="button" class="nut chinh nut-xem" data-xn="' + esc(x.id) + '" title="Xem nhanh văn bản này (' + (x.soTrang || '?') + ' trang)">' + IC.mat + 'Xem</button>' +
+      aIc(linkTai(x.driveId), IC_TAI, 'Tải xuống file này') + aIc(linkXem(x.driveId), IC_DRIVE, 'Mở file trong Google Drive') + '</div>' +
+    (b ? '<div class="cum bo"><span class="cum-nhan">' + IC.thu + 'Cả bộ · ' + b.ds.length + ' file · ' + soVN(b.soTrang) + ' tr</span>' +
+      btnIc('data-xn-ca-bo="' + esc(x.id) + '"', IC.mat, 'Xem cả bộ (' + soVN(b.soTrang) + ' trang)', 'bo') + btnIc('data-tai-bo="' + esc(x.hs) + '"', IC_TAI, 'Tải cả bộ (' + b.ds.length + ' file)', 'bo') + '</div>' : '') + '</div>' +
     '<div class="tabs" role="tablist">' + [['tt', 'Thông tin'], ['bo', 'Bộ hồ sơ']].map(function (t) { return '<button type="button" role="tab" data-tab="' + t[0] + '" aria-selected="' + (S.tab === t[0]) + '" class="' + (S.tab === t[0] ? 'on' : '') + '">' + t[1] + '</button>'; }).join('') + '</div></div>' +
     '<div style="padding:18px 22px 22px">' + than + '</div></div></div>';
 }
@@ -718,8 +725,8 @@ function popupBo() {
     '<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center"><span class="nhan-bo" style="font-size:12px;padding:2px 9px">' + IC.thu + 'Bộ hồ sơ · ' + b.ds.length + ' văn bản</span><span class="tt">' + esc(b.ds[0].phong + ' · ' + b.ds[0].cty) + '</span><span style="font-size:13px;color:var(--chu-4)">' + esc(ngayBo(b)) + '</span></div>' +
     '<div style="display:flex;gap:8px;align-items:flex-start"><h2 style="font-size:20px;line-height:1.35;overflow-wrap:anywhere">' + esc(b.ten) + '</h2>' + nutChep('boct-ten', b.ten) + '</div></div>' +
     '<button type="button" class="nut-dong" data-act="dongBo" aria-label="Đóng">×</button></div>' +
-    '<div style="display:flex;flex-wrap:wrap;gap:8px;padding:4px 0 14px;border-bottom:1px solid var(--vien)"><button type="button" class="nut chinh" data-xn-bo="' + esc(k) + '" style="display:inline-flex;align-items:center;gap:8px;min-height:40px">' + IC.mat + 'Xem nhanh cả bộ · ' + soVN(b.soTrang) + ' trang</button>' +
-    '<button type="button" class="nut" data-tai-bo="' + esc(k) + '" style="display:inline-flex;align-items:center;gap:6px;min-height:40px">' + IC_TAI + 'Tải cả bộ · ' + b.ds.length + ' file</button></div></div>' +
+    '<div class="hang-nut" style="padding-bottom:14px;border-bottom:1px solid var(--vien)"><div class="cum"><button type="button" class="nut chinh nut-xem" data-xn-bo="' + esc(k) + '" title="Xem nhanh cả bộ (' + soVN(b.soTrang) + ' trang)">' + IC.mat + 'Xem cả bộ</button>' +
+      btnIc('data-tai-bo="' + esc(k) + '"', IC_TAI, 'Tải cả bộ (' + b.ds.length + ' file)') + '<span class="cum-nhan" style="margin-left:4px">' + b.ds.length + ' file · ' + soVN(b.soTrang) + ' trang</span></div></div></div>' +
     '<div style="padding:18px 22px 22px;display:flex;flex-direction:column;gap:16px"><div class="luoi-ct">' + nhom.map(function (g, gi) { return '<section class="nhom-ct"><h3 class="tieu-nho" style="margin:0">' + g[0] + '</h3>' + dl(g[1], 'boct-' + gi + '-') + '</section>'; }).join('') + '</div>' +
     '<div style="display:flex;flex-direction:column;gap:8px"><h3 class="tieu-nho" style="margin:0">Các văn bản trong bộ</h3>' +
       '<div class="thanh-trang" aria-hidden="true">' + b.ds.map(function (d, i) { return '<span style="flex:' + Math.max(1, d.soTrang) + ' 1 0;background:' + MAU_VB[i % MAU_VB.length] + '"></span>'; }).join('') + '</div>' +
@@ -729,6 +736,10 @@ function popupBo() {
         '<button type="button" class="nut-icon" data-ct="' + esc(y.id) + '" title="Xem đầy đủ chi tiết" aria-label="Xem chi tiết ' + esc(y.file) + '">' + IC.mo + '</button></div>'; }).join('') +
     '</div></div></div></div>';
 }
+var IC_DRIVE = '<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M8 3h8l6 10-4 7H6l-4-7z"/><path d="m8 3 6 10H2M16 3l-6 10 4 7"/></svg>';
+/** Nút chỉ có icon: chữ giải thích nằm ở tooltip (title) và aria-label. */
+function btnIc(attr, ic, ten, kieu) { return '<button type="button" class="nut-ic' + (kieu ? ' ' + kieu : '') + '" ' + attr + ' title="' + esc(ten) + '" aria-label="' + esc(ten) + '">' + ic + '</button>'; }
+function aIc(href, ic, ten) { return '<a class="nut-ic" href="' + href + '" target="_blank" rel="noopener" title="' + esc(ten) + '" aria-label="' + esc(ten) + '">' + ic + '</a>'; }
 function linkTai(id) { return 'https://drive.google.com/uc?export=download&id=' + encodeURIComponent(id); }
 function linkXem(id) { return 'https://drive.google.com/file/d/' + encodeURIComponent(id) + '/view'; }
 var IC_TAI = '<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 19h14"/></svg>';
@@ -742,11 +753,10 @@ function benXN() {
         return '<div style="display:flex;align-items:flex-start;gap:4px' + (y === d ? ';background:var(--xanh-nen)' : '') + '"><button type="button" data-xn-chon="' + esc(y.id) + '"' + (y === d ? ' aria-current="true"' : '') + ' style="border-bottom:0"><span class="cham" style="background:' + MAU_VB[j % MAU_VB.length] + '"></span><span style="flex:1;min-width:0"><b>' + esc(y.loai) + '</b><br>' + esc(y.trich) + '</span><span class="so" style="font-size:12px;color:var(--chu-4);white-space:nowrap">' + y.soTrang + ' tr.</span></button>' +
           '<a class="nut-icon" style="width:30px;height:30px;margin-top:6px" href="' + linkTai(y.driveId) + '" target="_blank" rel="noopener" title="Tải file này" aria-label="Tải ' + esc(y.file) + '">' + IC_TAI + '</a></div>';
       }).join('') + '</div>' : '') +
-    '<div style="margin-top:auto;display:flex;flex-direction:column;gap:8px">' +
-    (b && X.caBo ? '<button type="button" class="nut-to" data-act="taiBo">' + IC_TAI + 'Tải cả bộ · ' + ds.length + ' file</button>'
-      : '<a class="nut-to" style="text-decoration:none" href="' + linkTai(d.driveId) + '" target="_blank" rel="noopener">' + IC_TAI + 'Tải xuống</a>') +
-    '<button type="button" class="nut-to vien" data-ct="' + esc(d.id) + '" data-tu-xn="1">Xem đầy đủ chi tiết</button>' +
-    '<a class="nut-to vien" style="text-decoration:none" href="' + linkXem(d.driveId) + '" target="_blank" rel="noopener">Mở file trong Drive</a>' +
+    '<div style="margin-top:auto;display:flex;flex-direction:column;gap:8px"><div class="cum">' +
+    '<button type="button" class="nut chinh nut-xem" style="flex:1;justify-content:center" data-ct="' + esc(d.id) + '" data-tu-xn="1" title="Xem đầy đủ chi tiết văn bản đang xem">' + IC.mo + 'Chi tiết</button>' +
+    (b && X.caBo ? btnIc('data-act="taiBo"', IC_TAI, 'Tải cả bộ (' + ds.length + ' file)', 'bo') : aIc(linkTai(d.driveId), IC_TAI, 'Tải xuống file này')) +
+    aIc(linkXem(d.driveId), IC_DRIVE, 'Mở file đang xem trong Google Drive') + '</div>' +
     '<span style="font-size:12px;color:var(--chu-4)">Xem và tải qua Google Drive — cần đăng nhập tài khoản có quyền xem thư mục lưu trữ.</span></div>';
 }
 function popupXN() {
