@@ -88,6 +88,7 @@ mark{background:var(--mark);color:var(--chu);border-radius:3px}
 .muc-loc .dem{font-size:12px;color:var(--chu-4)}
 .hop{width:18px;height:18px;flex:none;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;background:#fff;border:1px solid #A7B0AA}
 .hop.on{background:var(--xanh);color:#fff;border-color:var(--xanh)}
+.tim-loai{height:34px;border:1px solid var(--o-2);border-radius:8px;padding:0 10px;font-size:13px;margin:0 0 4px;width:100%;background:#fff}
 .lk{border:0;background:none;color:var(--xanh);font-size:13px;font-weight:600;cursor:pointer;padding:6px 0}
 .chon-nho{height:40px;border:1px solid var(--o);border-radius:8px;padding:0 8px;font-size:14px;background:#fff;width:100%}
 .nut-them{min-height:44px;border-radius:10px;border:1px dashed #8DB5A2;background:var(--xanh-nen);color:var(--xanh-dam);font-weight:600;cursor:pointer}
@@ -318,6 +319,7 @@ tr.bo .trich{font-weight:700;color:#0A3D2E}
     </div>
     <section class="the hop-loc">
       <h3 class="tieu-nho">Loại văn bản</h3>
+      <input type="search" class="tim-loai" id="timLoai" placeholder="Tìm loại văn bản…" aria-label="Tìm loại văn bản" autocomplete="off">
       <div id="dsLoai"></div>
     </section>
     <section class="the hop-loc" style="gap:8px">
@@ -389,7 +391,7 @@ var COT_RONG = function () { return { so: '', trich: '', cq: '', ngay: '', trang
 
 var DOCS = [], BO = {}, LOAI_DS = [];
 var S = { q: '', truong: 'tat', cty: 'CRCK2', nam: '', loai: [], kieu: 'tat', nc: NC_RONG(), cot: COT_RONG(), sap: 'ngay', chieu: -1, trang: 1,
-  sel: null, mo: {}, ct: null, tab: 'tt', xn: null, nhap: null, chepK: '', loaiHet: false, ncTimCq: '', ncTimLoai: '' };
+  sel: null, mo: {}, ct: null, tab: 'tt', xn: null, nhap: null, chepK: '', loaiHet: false, timLoai: '', ncTimCq: '', ncTimLoai: '' };
 var KQ = { kq: [], nhom: [], khop: [] };
 
 function $(s) { return document.querySelector(s); }
@@ -512,11 +514,12 @@ function veTrai() {
   var dem = {};
   KQ.khop.forEach(function (d) { if (quaLoc(d, S.nc, S.kieu, 'loai')) dem[d.loai] = (dem[d.loai] || 0) + 1; });
   var ds = LOAI_DS.filter(function (k) { return dem[k] || S.loai.indexOf(k) >= 0; }).sort(function (a, b) { return (dem[b] || 0) - (dem[a] || 0); });
-  var hien = S.loaiHet ? ds : ds.slice(0, 10);
+  if (S.timLoai) ds = ds.filter(function (k) { return chuan(k).indexOf(chuan(S.timLoai)) >= 0; });
+  var hien = S.loaiHet || S.timLoai ? ds : ds.slice(0, 10);
   $('#dsLoai').innerHTML = hien.map(function (k) {
     var on = S.loai.indexOf(k) >= 0;
     return '<button type="button" class="muc-loc" data-loai="' + esc(k) + '" aria-pressed="' + on + '" title="' + esc(k) + '"><span class="hop' + (on ? ' on' : '') + '" aria-hidden="true">' + (on ? '✓' : '') + '</span><span class="ten">' + esc(k) + '</span><span class="dem so">' + (dem[k] || 0) + '</span></button>';
-  }).join('') + (ds.length > 10 ? '<button type="button" class="lk" data-act="loaiHet">' + (S.loaiHet ? 'Thu gọn' : 'Xem thêm ' + (ds.length - 10) + ' loại') + '</button>' : '');
+  }).join('') + (S.timLoai && !ds.length ? '<span style="font-size:13px;color:var(--chu-4);padding:4px">Không có loại khớp</span>' : '') + (!S.timLoai && ds.length > 10 ? '<button type="button" class="lk" data-act="loaiHet">' + (S.loaiHet ? 'Thu gọn' : 'Xem thêm ' + (ds.length - 10) + ' loại') + '</button>' : '');
   $('#chonNam').value = S.nam;
   $('#xoaLoc').hidden = !danhSachChip().length;
 }
@@ -708,6 +711,7 @@ $('#xoaQ').addEventListener('click', function () { S.q = ''; $('#oTim').value = 
 $('#chonTruong').innerHTML = TRUONG.map(function (t) { return '<option value="' + t[0] + '">' + t[1] + '</option>'; }).join('');
 $('#chonTruong').addEventListener('change', function (e) { S.truong = e.target.value; datTrang1(); ve(); });
 $('#chonCty').addEventListener('change', function (e) { S.cty = e.target.value; datTrang1(); ve(); });
+$('#timLoai').addEventListener('input', function (e) { S.timLoai = e.target.value; veTrai(); });
 $('#sapDt').addEventListener('change', function (e) { var v = e.target.value.split('|'); S.sap = v[0]; S.chieu = +v[1]; datTrang1(); ve(); });
 $('#chonNam').addEventListener('change', function (e) { S.nam = e.target.value; datTrang1(); ve(); });
 document.querySelectorAll('[data-cot]').forEach(function (o) {
