@@ -114,6 +114,9 @@ table.bang{width:100%;min-width:780px;border-collapse:collapse;font-size:13.5px}
 .bang th button{border:0;background:none;padding:10px 0 6px;font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--chu-3);cursor:pointer;white-space:nowrap}
 .bang th button span{color:var(--xanh)}
 .bang thead tr.loc-cot{border-bottom:1px solid var(--vien)}
+.nut-loc-cot{height:32px;padding:0 10px;border-radius:7px;border:1px solid var(--xanh);background:#fff;color:var(--xanh);font-size:12.5px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.nut-loc-cot:hover{background:var(--xanh-nen)}
+@media (min-width:901px){ .tim-hang>.nut-nc{display:none} }
 .bang thead td{padding:0 6px 8px 0}
 .bang thead input,.bang thead select{width:100%;height:32px;border:1px solid var(--o-2);border-radius:7px;padding:0 8px;font-size:12.5px;background:#fff}
 .bang tbody tr{border-top:1px solid var(--vien-2);cursor:pointer}
@@ -366,8 +369,7 @@ tr.bo .trich{font-weight:700;color:#0A3D2E}
             <td><input data-cot="trich" type="search" placeholder="Lọc trích yếu…" aria-label="Lọc cột trích yếu"></td>
             <td><input data-cot="cq" type="search" placeholder="Lọc cơ quan…" aria-label="Lọc cột cơ quan / đối tác"></td>
             <td><input data-cot="ngay" type="search" placeholder="dd/mm/yyyy" aria-label="Lọc cột ngày"></td>
-            <td><select data-cot="trang" aria-label="Lọc cột trang"><option value="">Tất cả</option><option value="mot">1 trang</option><option value="vua">2–10 trang</option><option value="nhieu">Trên 10</option></select></td>
-            <td></td>
+            <td colspan="2"><button type="button" class="nut-loc-cot" data-act="moNC" title="Bộ lọc nâng cao" aria-label="Bộ lọc nâng cao"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg><span>Lọc thêm</span><span class="huy-hieu" id="soNC2" hidden></span></button></td>
           </tr>
         </thead>
         <tbody id="than"><tr><td colspan="6"><div class="dang-tai" id="dangTai">Đang tải 1000 dòng KHĐT · CRCK2…</div></td></tr></tbody>
@@ -404,12 +406,12 @@ var MAU_VB = ['#0F6B4F', '#5B8DEF', '#D08A2E', '#9B6BC9', '#C9534F', '#3E9C9C'];
 var TRUONG = [['tat', 'Tất cả trường'], ['so', 'Số ký hiệu'], ['trich', 'Trích yếu'], ['cq', 'Cơ quan ban hành'], ['doiTac', 'Đối tác'], ['hoSo', 'Tên hồ sơ'], ['file', 'Tên file']];
 var KIEU = [['tat', 'Tất cả'], ['le', 'Văn bản lẻ'], ['bo', 'Bộ hồ sơ']];
 var COT = [['so', 'Loại · Số ký hiệu', 'width:170px'], ['trich', 'Trích yếu', ''], ['cq', 'Cơ quan / Đối tác', 'width:190px'], ['ngay', 'Ngày ban hành', 'width:108px'], ['trang', 'Trang', 'width:62px']];
-var NC_RONG = function () { return { phong: [], tuNgay: '', denNgay: '', tien: '', cq: [], doiTac: '', coSo: '' }; };
+var NC_RONG = function () { return { phong: [], loai2: [], tuNgay: '', denNgay: '', tien: '', cq: [], doiTac: '', coSo: '' }; };
 var COT_RONG = function () { return { so: '', trich: '', cq: '', ngay: '', trang: '' }; };
 
 var DOCS = [], BO = {}, LOAI_DS = [];
 var S = { q: '', truong: 'tat', cty: 'CRCK2', nam: '', loai: [], kieu: 'tat', nc: NC_RONG(), cot: COT_RONG(), sap: 'ngay', chieu: -1, trang: 1,
-  sel: null, mo: {}, ct: null, tab: 'tt', xn: null, nhap: null, chepK: '', loaiHet: false, timLoai: '', ncTimCq: '', ncTimLoai: '' };
+  sel: null, mo: {}, ct: null, tab: 'tt', xn: null, nhap: null, chepK: '', loaiHet: false, timLoai: '', ncTimCq: '', ncTimLoai: '', ncTimLoai2: '' };
 var KQ = { kq: [], nhom: [], khop: [] };
 
 function $(s) { return document.querySelector(s); }
@@ -484,8 +486,9 @@ function dung(ds) {
     BO[k] = { ma: k, ten: ds2[0].hoSo, thung: ds2[0].thung, ds: ds2, soTrang: ds2.reduce(function (s, d) { return s + d.soTrang; }, 0), ngayTu: ngs[0] || '', ngayDen: ngs[ngs.length - 1] || '' };
     ds2.forEach(function (d) { d.hs = k; });
   });
+  gopTen('cq'); gopTen('doiTac');
   var m = {};
-  DOCS.forEach(function (d) { m[d.loai] = (m[d.loai] || 0) + 1; });
+  DOCS.forEach(function (d) { d.loai1 = phanLoai(d.loai); m[d.loai1] = (m[d.loai1] || 0) + 1; });
   LOAI_DS = Object.keys(m).sort(function (a, b) { return m[b] - m[a]; });
   var nams = Array.from(new Set(DOCS.map(function (d) { return d.nam; }).filter(Boolean))).sort().reverse();
   $('#chonNam').innerHTML = '<option value="">Tất cả các năm</option>' + nams.map(function (n) { return '<option value="' + n + '">' + n + '</option>'; }).join('');
@@ -493,12 +496,58 @@ function dung(ds) {
   S.sel = boDau ? 'bo:' + boDau : (DOCS[0] && DOCS[0].id);
 }
 
+/* ---------- chuẩn hoá: loại cấp 1, tên cơ quan / đối tác ---------- */
+/** Loại cấp 1 theo danh mục 61 loại của AI (jobs/trich_xuat/danh_muc.json), suy từ tên loại tự do trong dữ liệu cũ.
+    Thứ tự quan trọng: luật cụ thể đứng trước ("biên bản thương thảo hợp đồng" là Biên bản, không phải Hợp đồng). */
+var LUAT_LOAI = [
+  ['Thanh lý hợp đồng', /thanh ly|liquidation/], ['Phụ lục hợp đồng', /phu luc|annex|appendix|addendum/],
+  ['Packing list', /packing/], ['Chứng nhận xuất xứ, kiểm dịch', /xuat xu|kiem dich|origin|phytosanitary|fumigation/],
+  ['Chứng từ vận chuyển', /van don|bill of lading|shipping|van chuyen|airway|booking|truck bill/], ['Phiếu cân', /can trong luong|phieu can|weigh/],
+  ['Hồ sơ quyết toán', /quyet toan|settlement/], ['Biên bản', /bien ban|minutes|vehicle check|record of/],
+  ['Thư bảo lãnh', /bao lanh|guarantee/], ['Đơn đặt hàng', /don dat hang|purchase order|^po\b/],
+  ['Hồ sơ dự thầu, báo giá', /du thau|nhan thau|bao gia|quotation|offer|bid\b|proforma/], ['Hồ sơ mời thầu', /moi thau|ho so yeu cau|chi dan nha thau/],
+  ['Hợp đồng', /hop dong|contract|agreement/], ['Hoá đơn', /hoa don|invoice/],
+  ['Phiếu chi', /phieu chi|payment voucher/], ['Phiếu thu', /phieu thu|receipt voucher/], ['Giấy thanh toán tiền tạm ứng', /tam ung|advance/],
+  ['Phiếu nhập kho', /nhap kho|goods received|receiving/], ['Phiếu xuất kho', /xuat kho|delivery note|goods issue/],
+  ['Phiếu kế toán', /phieu ke toan/], ['Chứng từ ngân hàng', /uy nhiem chi|giay bao no|giay bao co|sao ke|ngan hang|bank|remittance/],
+  ['Bảng chấm công', /cham cong|timesheet/], ['Bảng thanh toán', /bang thanh toan|thanh toan luong|bang luong|payroll/],
+  ['Phiếu cân', /phieu can|weigh/], ['Tờ khai', /to khai|declaration/],
+  ['Nghị quyết', /nghi quyet|resolution/], ['Quyết định', /quyet dinh|decision/], ['Quy chế, quy định', /quy che|quy dinh|noi quy|regulation|policy/],
+  ['Tờ trình', /to trinh|phieu trinh|submission/], ['Thông báo', /thong bao|notice|notification|announcement/], ['Kế hoạch', /ke hoach|plan\b|schedule/],
+  ['Báo cáo', /bao cao|report|tham dinh|danh gia/], ['Hướng dẫn', /huong dan|guideline|instruction/], ['Giấy mời', /giay moi|thu moi|invitation/],
+  ['Giấy uỷ quyền, giới thiệu', /uy quyen|gioi thieu|authoriz|power of attorney/], ['Thoả thuận, ghi nhớ', /thoa thuan|ghi nho|memorandum|mou\b/],
+  ['Cam kết', /cam ket|commitment|undertaking/], ['Giấy khám sức khoẻ', /suc khoe|medical|health/], ['Giấy phép lao động', /giay phep lao dong|work permit/],
+  ['Hồ sơ cá nhân', /ly lich|ho so ca nhan|curriculum|\bcv\b|resume/], ['Văn bản pháp luật', /nghi dinh|thong tu|\bluat\b|decree|sub-decree|prakas|law\b/],
+  ['Giấy chứng nhận, giấy phép', /chung nhan|giay phep|certificate|license|licence|permit/], ['Kiểm kê', /kiem ke|inventory/],
+  ['Dự toán', /du toan|estimate|boq|khoi luong/], ['Bản vẽ, hồ sơ thiết kế', /ban ve|thiet ke|drawing|design/], ['Hồ sơ hoàn công', /hoan cong|as-built/],
+  ['Nhật ký', /nhat ky|diary|log ?book/], ['Kết quả thí nghiệm, kiểm nghiệm', /thi nghiem|kiem nghiem|test|analysis|phan tich/],
+  ['Hồ sơ dự án đầu tư', /du an|chu truong dau tu|bao cao kinh te|feasibility/], ['Lệnh', /^lenh|\blenh khoi cong|lenh dieu/],
+  ['Danh sách', /danh sach|list\b/], ['Bảng kê', /bang ke|bieu chi tiet|danh muc|statement/], ['Bảng tổng hợp', /tong hop|summary/], ['Sổ kế toán', /^so (cai|chi tiet|nhat ky)|ledger/],
+  ['Giấy đề nghị', /de nghi|de xuat|yeu cau|request|proposal|requisition/], ['Đơn', /^don\b|don xin|application/],
+  ['Phiếu gửi, phiếu chuyển', /phieu gui|phieu chuyen|transmittal/], ['Giấy biên nhận, xác nhận', /bien nhan|xac nhan|receipt|confirmation|acknowledg/],
+  ['Lịch, giấy công tác', /lich |cong tac|travel/], ['Phiếu khảo sát, lấy ý kiến', /khao sat|lay y kien|survey/], ['Công văn', /cong van|phuc dap|letter|v\/v/]
+];
+function phanLoai(t) { var c = chuan(t); for (var i = 0; i < LUAT_LOAI.length; i++) if (LUAT_LOAI[i][1].test(c)) return LUAT_LOAI[i][0]; return 'Khác'; }
+/** Gộp các cách viết của cùng một tên (hoa/thường, dấu chấm phẩy, "Co., Ltd") về cách viết hay gặp nhất; các công ty trong tập đoàn gộp cố định. */
+var TEN_CO_DINH = [[/crck2|aphivath/, 'Công ty C.R.C.K.2 Aphivath Caoutchouc Co., Ltd'], [/beanheack/, 'Công ty TNHH Đầu tư Bean Heack'], [/tapdoancongnghiepcaosu/, 'Tập đoàn Công nghiệp Cao su Việt Nam']];
+function khoaTen(s) { return chuan(s).replace(/[^a-z0-9]/g, '').replace(/congtytnhh|congty|company|limited|coltd|ltd|cojsc|jsc/g, ''); }
+function gopTen(truong) {
+  var dem = {}, chon = {};
+  DOCS.forEach(function (d) { var v = d[truong]; if (!v) return; var k = khoaTen(v); (dem[k] = dem[k] || {})[v] = (dem[k][v] || 0) + 1; });
+  Object.keys(dem).forEach(function (k) {
+    var co = TEN_CO_DINH.find(function (x) { return x[0].test(k) && !/nhamay|nongtruong|congdoan|chibo|dangu/.test(k); });
+    chon[k] = co ? co[1] : Object.keys(dem[k]).sort(function (a, b) { return dem[k][b] - dem[k][a]; })[0];
+  });
+  DOCS.forEach(function (d) { var v = d[truong]; if (v) { d[truong + 'Goc'] = v; d[truong] = chon[khoaTen(v)]; } });
+}
+
 /* ---------- lọc ---------- */
 function hienKhoa(k) { return /-00/.test(k) ? k.slice(0, 4) : ngayVN(k); }
 function ngayBo(b) { return !b.ngayTu ? '—' : b.ngayTu === b.ngayDen ? hienKhoa(b.ngayTu) : hienKhoa(b.ngayTu) + ' – ' + hienKhoa(b.ngayDen); }
 function quaLoc(d, nc, kieu, bo) {
   var nam = nc.nam !== undefined ? nc.nam : S.nam, loai = nc.loai || S.loai;
-  return (!nam || String(d.nam) === nam) && (bo === 'loai' || !loai.length || loai.indexOf(d.loai) >= 0)
+  return (!nam || String(d.nam) === nam) && (bo === 'loai' || !loai.length || loai.indexOf(d.loai1) >= 0)
+    && (bo === 'loai2' || !nc.loai2 || !nc.loai2.length || nc.loai2.indexOf(d.loai) >= 0)
     && (bo === 'kieu' || kieu === 'tat' || (kieu === 'le' ? !d.hs : !!d.hs))
     && (bo === 'phong' || !nc.phong.length || nc.phong.indexOf(d.phong) >= 0)
     && (!nc.tuNgay || (d.ngayIso && d.ngayIso >= nc.tuNgay)) && (!nc.denNgay || (d.ngayIso && d.ngayIso <= nc.denNgay))
@@ -530,7 +579,7 @@ function tinh() {
 function ve() { tinh(); veTrai(); veThanh(); veBang(); vePhai(); vePopup(); }
 function veTrai() {
   var dem = {};
-  KQ.khop.forEach(function (d) { if (quaLoc(d, S.nc, S.kieu, 'loai')) dem[d.loai] = (dem[d.loai] || 0) + 1; });
+  KQ.khop.forEach(function (d) { if (quaLoc(d, S.nc, S.kieu, 'loai')) dem[d.loai1] = (dem[d.loai1] || 0) + 1; });
   var ds = LOAI_DS.filter(function (k) { return dem[k] || S.loai.indexOf(k) >= 0; }).sort(function (a, b) { return (dem[b] || 0) - (dem[a] || 0); });
   if (S.timLoai) ds = ds.filter(function (k) { return chuan(k).indexOf(chuan(S.timLoai)) >= 0; });
   var hien = S.loaiHet || S.timLoai ? ds : ds.slice(0, 10);
@@ -551,6 +600,7 @@ function danhSachChip() {
   if (nc.denNgay) c.push(['Đến ' + ngayVN(nc.denNgay), function () { nc.denNgay = ''; }]);
   if (nc.tien) c.push([nc.tien === 'co' ? 'Có giá trị tiền' : 'Không có giá trị tiền', function () { nc.tien = ''; }]);
   nc.cq.forEach(function (k) { c.push([k, function () { nc.cq = nc.cq.filter(function (x) { return x !== k; }); }]); });
+  nc.loai2.forEach(function (k) { c.push(['Chi tiết: ' + k, function () { nc.loai2 = nc.loai2.filter(function (x) { return x !== k; }); }]); });
   if (nc.doiTac) c.push(['Đối tác: ' + nc.doiTac, function () { nc.doiTac = ''; }]);
   if (nc.coSo) c.push([nc.coSo === 'co' ? 'Có số hiệu' : 'Chưa có số hiệu', function () { nc.coSo = ''; }]);
   return c;
@@ -565,8 +615,8 @@ function veThanh() {
   $('#moTa').textContent = !KQ.coDuLieu ? 'Chưa có dữ liệu cho công ty này (bản thử chỉ có KHĐT · CRCK2)' : (S.q ? 'khớp “' + S.q + '” · ' : '') + soLe + ' văn bản lẻ · ' + soBo + ' bộ hồ sơ';
   var chips = danhSachChip(); CHIP_BO = chips.map(function (x) { return x[1]; });
   $('#chips').innerHTML = chips.map(function (x, i) { return '<button type="button" data-chip="' + i + '" aria-label="Bỏ lọc ' + esc(x[0]) + '">' + esc(x[0]) + ' <span aria-hidden="true" style="font-size:15px">×</span></button>'; }).join('');
-  var soNC = ['tuNgay', 'denNgay', 'tien', 'doiTac', 'coSo'].filter(function (k) { return S.nc[k]; }).length + S.nc.phong.length + S.nc.cq.length + (manNho() ? S.loai.length + (S.nam ? 1 : 0) : 0);
-  $('#soNC').hidden = !soNC; $('#soNC').textContent = soNC;
+  var soNC = ['tuNgay', 'denNgay', 'tien', 'doiTac', 'coSo'].filter(function (k) { return S.nc[k]; }).length + S.nc.phong.length + S.nc.cq.length + S.nc.loai2.length + (manNho() ? S.loai.length + (S.nam ? 1 : 0) : 0);
+  ['#soNC', '#soNC2'].forEach(function (s) { $(s).hidden = !soNC; $(s).textContent = soNC; });
   $('#xoaCot').hidden = !Object.keys(S.cot).some(function (k) { return S.cot[k]; });
   $('#dauCot').innerHTML = COT.map(function (c) {
     return '<th scope="col" style="' + c[2] + '"><button type="button" data-sap="' + c[0] + '">' + c[1] + '<span>' + (S.sap === c[0] ? (S.chieu > 0 ? ' ▲' : ' ▼') : '') + '</span></button></th>';
@@ -660,7 +710,11 @@ function popupNC() {
   N.cq.forEach(function (k) { if (cqDs.indexOf(k) < 0) cqDs.unshift(k); });
   if (S.ncTimCq) cqDs = cqDs.filter(function (k) { return chuan(k).indexOf(chuan(S.ncTimCq)) >= 0; });
   var pill = function (nhom, gt, ten, on) { return '<button type="button" class="pill' + (on ? ' on' : '') + '" data-nc="' + nhom + '" data-gt="' + esc(gt) + '" aria-pressed="' + on + '">' + esc(ten) + '</button>'; };
-  var demLoai = demBy('loai', function (d) { return d.loai; });
+  var demLoai = demBy('loai', function (d) { return d.loai1; });
+  var demLoai2 = demBy('loai2', function (d) { return d.loai; });
+  var loai2Ds = Object.keys(demLoai2).sort(function (a, b) { return demLoai2[b] - demLoai2[a]; });
+  N.loai2.forEach(function (k) { if (loai2Ds.indexOf(k) < 0) loai2Ds.unshift(k); });
+  if (S.ncTimLoai2) loai2Ds = loai2Ds.filter(function (k) { return chuan(k).indexOf(chuan(S.ncTimLoai2)) >= 0; });
   var loaiDs = Object.keys(demLoai).sort(function (a, b) { return demLoai[b] - demLoai[a]; });
   N.loai.forEach(function (k) { if (loaiDs.indexOf(k) < 0) loaiDs.unshift(k); });
   if (S.ncTimLoai) loaiDs = loaiDs.filter(function (k) { return chuan(k).indexOf(chuan(S.ncTimLoai)) >= 0; });
@@ -671,6 +725,9 @@ function popupNC() {
     '<div class="nhom-nc ca chi-dt"><b>Loại văn bản</b><input class="o-nc" style="flex:none;height:34px" id="ncTimLoai" type="search" value="' + esc(S.ncTimLoai) + '" placeholder="Tìm loại văn bản…" aria-label="Tìm loại văn bản"><div class="vien-ds">' +
       loaiDs.slice(0, 60).map(function (k) { var on = N.loai.indexOf(k) >= 0; return '<button type="button" class="muc-loc" data-nc="loai" data-gt="' + esc(k) + '" aria-pressed="' + on + '"><span class="hop' + (on ? ' on' : '') + '" aria-hidden="true">' + (on ? '✓' : '') + '</span><span class="ten">' + esc(k) + '</span><span class="dem so">' + (demLoai[k] || 0) + '</span></button>'; }).join('') + '</div></div>' +
     '<div class="nhom-nc ca chi-dt"><label for="ncNam" style="font-size:13px;font-weight:600">Năm ban hành</label><select id="ncNam" class="o-nc" style="flex:none" data-nc-o="nam">' + $('#chonNam').innerHTML.replace(' selected', '').replace('value="' + N.nam + '"', 'value="' + N.nam + '" selected') + '</select></div>' +
+    '<div class="nhom-nc ca"><b>Loại văn bản chi tiết (cấp 2)</b><input class="o-nc" style="flex:none;height:34px" id="ncTimLoai2" type="search" value="' + esc(S.ncTimLoai2) + '" placeholder="Tìm loại chi tiết… (vd: thanh lý, invoice)" aria-label="Tìm loại văn bản chi tiết"><div class="vien-ds">' +
+      loai2Ds.slice(0, 80).map(function (k) { var on = N.loai2.indexOf(k) >= 0; return '<button type="button" class="muc-loc" data-nc="loai2" data-gt="' + esc(k) + '" aria-pressed="' + on + '" title="' + esc(k) + ' — thuộc ' + esc(phanLoai(k)) + '"><span class="hop' + (on ? ' on' : '') + '" aria-hidden="true">' + (on ? '✓' : '') + '</span><span class="ten">' + esc(k) + '</span><span class="dem so">' + (demLoai2[k] || 0) + '</span></button>'; }).join('') +
+      (loai2Ds.length ? '' : '<span style="font-size:13px;color:var(--chu-4)">Không có loại khớp</span>') + '</div></div>' +
     '<div class="nhom-nc ca"><b>Phòng</b><div class="pills">' + DS_PHONG.map(function (k) { return pill('phong', k, k + ' · ' + (phong[k] || 0), N.phong.indexOf(k) >= 0); }).join('') + '</div></div>' +
     '<div class="nhom-nc"><b>Phạm vi</b><div class="pills">' + KIEU.map(function (k) { return pill('kieu', k[0], k[1], N.kieu === k[0]); }).join('') + '</div></div>' +
     '<div class="nhom-nc"><b>Khoảng ngày ban hành</b><div style="display:flex;gap:8px;align-items:center"><input type="date" class="o-nc" data-nc-o="tuNgay" value="' + esc(N.tuNgay) + '" aria-label="Từ ngày"><span style="color:var(--chu-4)">–</span><input type="date" class="o-nc" data-nc-o="denNgay" value="' + esc(N.denNgay) + '" aria-label="Đến ngày"></div></div>' +
@@ -687,7 +744,7 @@ function popupNC() {
 function popupCT() {
   var x = timDoc(S.ct); if (!x) return '';
   var i = KQ.kq.indexOf(x), b = x.hs ? BO[x.hs] : null;
-  var nhom = [['Định danh', [['Loại văn bản', x.loai], ['Số ký hiệu', x.so || '(chưa đọc được)'], ['Ngày ban hành', hienNgay(x)], ['Ngày (ghi trên sheet)', x.ngayGoc && x.ngayGoc !== x.ngayIso && x.ngayGoc !== String(x.nam) ? x.ngayGoc : ''], ['Năm', String(x.nam || '')]].filter(function (r) { return r[0] !== 'Ngày (ghi trên sheet)' || r[1]; })],
+  var nhom = [['Định danh', [['Loại văn bản (cấp 1)', x.loai1], ['Loại chi tiết (cấp 2)', x.loai], ['Số ký hiệu', x.so || '(chưa đọc được)'], ['Ngày ban hành', hienNgay(x)], ['Ngày (ghi trên sheet)', x.ngayGoc && x.ngayGoc !== x.ngayIso && x.ngayGoc !== String(x.nam) ? x.ngayGoc : ''], ['Năm', String(x.nam || '')]].filter(function (r) { return r[0] !== 'Ngày (ghi trên sheet)' || r[1]; })],
     ['Chủ thể', [['Cơ quan ban hành', x.cq], ['Đối tác', x.doiTac]]],
     ['Nội dung', [['Trích yếu', x.trich], ['Giá trị', x.gia]]],
     ['Lưu trữ', [['Đơn vị', x.cty + ' · Phòng ' + x.phong], ['Tên hồ sơ', x.hoSo], ['Thùng', x.thung], ['File', x.file], ['Số trang', x.soTrang ? x.soTrang + ' trang' : '']]]];
@@ -814,13 +871,13 @@ document.querySelectorAll('[data-cot]').forEach(function (o) {
 });
 document.addEventListener('input', function (e) {
   var t = e.target;
-  if (t.id === 'ncTimCq' || t.id === 'ncTimLoai') { var id = t.id; S[id] = t.value; var vt = t.selectionStart, nenY = $('.phu-nen').scrollTop; vePopup(); $('.phu-nen').scrollTop = nenY; var o = $('#' + id); if (o) { o.focus(); o.setSelectionRange(vt, vt); } }
+  if (t.id === 'ncTimCq' || t.id === 'ncTimLoai' || t.id === 'ncTimLoai2') { var id = t.id; S[id] = t.value; var vt = t.selectionStart, nenY = $('.phu-nen').scrollTop; vePopup(); $('.phu-nen').scrollTop = nenY; var o = $('#' + id); if (o) { o.focus(); o.setSelectionRange(vt, vt); } }
   else if (t.dataset && t.dataset.ncO && S.nhap) { S.nhap[t.dataset.ncO] = t.value; capNhatDemNC(); }
 });
 function capNhatDemNC() { var b = document.querySelector('.hop-chan b'); if (b) b.textContent = KQ.khop.filter(function (d) { return quaLoc(d, S.nhap, S.nhap.kieu, ''); }).length; }
 function thongBao(s) { var t = document.createElement('div'); t.className = 'toast'; t.textContent = s; document.body.appendChild(t); setTimeout(function () { t.remove(); }, 1800); }
 var hanhDong = {
-  moNC: function () { S.nhap = JSON.parse(JSON.stringify(S.nc)); S.nhap.kieu = S.kieu; S.nhap.nam = S.nam; S.nhap.loai = S.loai.slice(); S.ncTimCq = ''; S.ncTimLoai = ''; },
+  moNC: function () { S.nhap = JSON.parse(JSON.stringify(S.nc)); S.nhap.kieu = S.kieu; S.nhap.nam = S.nam; S.nhap.loai = S.loai.slice(); S.ncTimCq = ''; S.ncTimLoai = ''; S.ncTimLoai2 = ''; },
   dongNC: function () { S.nhap = null; },
   ncXoa: function () { S.nhap = NC_RONG(); S.nhap.kieu = 'tat'; S.nhap.nam = ''; S.nhap.loai = []; },
   ncApDung: function () { var N = S.nhap; S.kieu = N.kieu; S.nam = N.nam; S.loai = N.loai; delete N.kieu; delete N.nam; delete N.loai; S.nc = N; S.nhap = null; datTrang1(); },
@@ -869,7 +926,7 @@ document.addEventListener('click', function (e) {
   if ((el = t.closest('[data-sap]'))) { var c = el.dataset.sap; if (S.sap === c) S.chieu = -S.chieu; else { S.sap = c; S.chieu = c === 'ngay' ? -1 : 1; } ve(); return; }
   if ((el = t.closest('[data-nc]')) && S.nhap) {
     var n = el.dataset.nc, g = el.dataset.gt;
-    if (n === 'phong' || n === 'cq' || n === 'loai') S.nhap[n] = S.nhap[n].indexOf(g) >= 0 ? S.nhap[n].filter(function (x) { return x !== g; }) : S.nhap[n].concat(g);
+    if (n === 'phong' || n === 'cq' || n === 'loai' || n === 'loai2') S.nhap[n] = S.nhap[n].indexOf(g) >= 0 ? S.nhap[n].filter(function (x) { return x !== g; }) : S.nhap[n].concat(g);
     else S.nhap[n] = g;
     var cuons = Array.from(document.querySelectorAll('.vien-ds, .phu-nen')).map(function (c) { return c.scrollTop; });
     vePopup(); document.querySelectorAll('.vien-ds, .phu-nen').forEach(function (c, i) { c.scrollTop = cuons[i] || 0; });
