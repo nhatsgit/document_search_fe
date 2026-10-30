@@ -592,7 +592,8 @@ function veBang() {
       '<td><span class="trich">' + hl(b.ten, S.truong === 'hoSo' ? tus : tO) + '</span><span class="phu">Thùng ' + esc(b.thung || '—') + ' · ' + b.ds.length + ' file · ' + soVN(b.soTrang) + ' trang</span></td>' +
       '<td style="font-size:13px"><div>' + esc(cqs[0] || '—') + '</div>' + (cqs.length > 1 ? '<div class="doi">+ ' + (cqs.length - 1) + ' cơ quan khác</div>' : '') + '</td>' +
       '<td class="ngay" style="white-space:normal">' + esc(ngayBo(b)) + '</td><td class="trang">' + soVN(b.soTrang) + '</td>' +
-      '<td style="padding:6px 8px 6px 0"><div class="thao-tac"><button type="button" class="nut-icon" data-xn-bo="' + esc(g.hs) + '" title="Xem nhanh cả bộ" aria-label="Xem nhanh cả bộ">' + IC.mat + '</button></div></td></tr>';
+      '<td style="padding:6px 8px 6px 0"><div class="thao-tac"><button type="button" class="nut-icon" data-xn-bo="' + esc(g.hs) + '" title="Xem nhanh cả bộ" aria-label="Xem nhanh cả bộ">' + IC.mat + '</button>' +
+        '<button type="button" class="nut-icon" data-bo-ct="' + esc(g.hs) + '" title="Xem chi tiết bộ hồ sơ" aria-label="Xem chi tiết bộ hồ sơ">' + IC.mo + '</button></div></td></tr>';
     if (mo) g.con.forEach(function (d, i) { h += dongVb(d, true, i === g.con.length - 1); });
   });
   $('#than').innerHTML = h;
@@ -617,7 +618,8 @@ function vePhai() {
       '<div class="ds-bo">' + b.ds.map(function (d, i) {
         return '<button type="button" data-chon-con="' + esc(d.id) + '"><span class="cham" style="background:' + MAU_VB[i % MAU_VB.length] + '"></span><span style="flex:1;min-width:0"><b>' + esc(d.loai) + '</b> ' + (d.so ? '<span class="ma" style="font-size:12px">' + esc(d.so) + '</span>' : '') + '<br>' + esc(d.trich) + '</span><span class="so" style="font-size:12px;color:var(--chu-4);white-space:nowrap">' + d.soTrang + ' tr.</span></button>';
       }).join('') + '</div></div>' +
-      '<button type="button" class="nut-to" data-xn-bo="' + esc(k) + '">' + IC.mat + 'Xem nhanh cả bộ</button></div>';
+      '<div style="display:flex;flex-direction:column;gap:8px"><button type="button" class="nut-to" data-bo-ct="' + esc(k) + '">Xem chi tiết bộ hồ sơ</button>' +
+      '<button type="button" class="nut-to vien" data-xn-bo="' + esc(k) + '">' + IC.mat + 'Xem nhanh cả bộ</button></div></div>';
     return;
   }
   var d = timDoc(S.sel);
@@ -634,6 +636,7 @@ function vePhai() {
 function vePopup() {
   var h = '';
   if (S.nhap) h += popupNC();
+  if (S.boCt) h += popupBo();
   if (S.ct) h += popupCT();
   if (S.xn) h += popupXN();
   $('#popup').innerHTML = h;
@@ -701,6 +704,30 @@ function popupCT() {
     '<a class="nut" style="display:inline-flex;align-items:center;min-height:40px;text-decoration:none;color:var(--chu)" href="https://drive.google.com/file/d/' + encodeURIComponent(x.driveId) + '/view" target="_blank" rel="noopener">Mở file trong Drive</a></div>' +
     '<div class="tabs" role="tablist">' + [['tt', 'Thông tin'], ['bo', 'Bộ hồ sơ']].map(function (t) { return '<button type="button" role="tab" data-tab="' + t[0] + '" aria-selected="' + (S.tab === t[0]) + '" class="' + (S.tab === t[0] ? 'on' : '') + '">' + t[1] + '</button>'; }).join('') + '</div></div>' +
     '<div style="padding:18px 22px 22px">' + than + '</div></div></div>';
+}
+/** Chi tiết một bộ hồ sơ: thông tin chung (có nút sao chép) + từng văn bản trong bộ với nút xem nhanh / tải / chi tiết. */
+function popupBo() {
+  var k = S.boCt, b = BO[k]; if (!b) return '';
+  var dem = function (f) { return Array.from(new Set(b.ds.map(f).filter(Boolean))); };
+  var cqs = dem(function (d) { return d.cq; }), dts = dem(function (d) { return d.doiTac; }), loais = dem(function (d) { return d.loai; });
+  var gia = b.ds.filter(function (d) { return d.gia; }).map(function (d) { return d.gia; });
+  var nhom = [['Thông tin chung', [['Tên hồ sơ', b.ten], ['Đơn vị', b.ds[0].cty + ' · Phòng ' + b.ds[0].phong], ['Thùng', b.thung], ['Khoảng ngày', ngayBo(b)], ['Số văn bản', b.ds.length + ' văn bản'], ['Tổng số trang', soVN(b.soTrang) + ' trang']]],
+    ['Chủ thể & nội dung', [['Cơ quan ban hành', cqs.join('; ')], ['Đối tác', dts.join('; ')], ['Loại văn bản', loais.join('; ')], ['Giá trị ghi trên văn bản', Array.from(new Set(gia)).join('; ')]]]];
+  return '<div class="phu-nen" data-nen="boCt"><div class="hop-thoai" role="dialog" aria-modal="true" aria-label="Chi tiết bộ hồ sơ" style="max-width:960px">' +
+    '<div style="padding:18px 22px 0;display:flex;flex-direction:column;gap:8px" class="ct-tren"><div class="ct-dau" style="display:flex;align-items:flex-start;gap:12px"><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px">' +
+    '<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center"><span class="nhan-bo" style="font-size:12px;padding:2px 9px">' + IC.thu + 'Bộ hồ sơ · ' + b.ds.length + ' văn bản</span><span class="tt">' + esc(b.ds[0].phong + ' · ' + b.ds[0].cty) + '</span><span style="font-size:13px;color:var(--chu-4)">' + esc(ngayBo(b)) + '</span></div>' +
+    '<div style="display:flex;gap:8px;align-items:flex-start"><h2 style="font-size:20px;line-height:1.35;overflow-wrap:anywhere">' + esc(b.ten) + '</h2>' + nutChep('boct-ten', b.ten) + '</div></div>' +
+    '<button type="button" class="nut-dong" data-act="dongBo" aria-label="Đóng">×</button></div>' +
+    '<div style="display:flex;flex-wrap:wrap;gap:8px;padding:4px 0 14px;border-bottom:1px solid var(--vien)"><button type="button" class="nut chinh" data-xn-bo="' + esc(k) + '" style="display:inline-flex;align-items:center;gap:8px;min-height:40px">' + IC.mat + 'Xem nhanh cả bộ · ' + soVN(b.soTrang) + ' trang</button>' +
+    '<button type="button" class="nut" data-tai-bo="' + esc(k) + '" style="display:inline-flex;align-items:center;gap:6px;min-height:40px">' + IC_TAI + 'Tải cả bộ · ' + b.ds.length + ' file</button></div></div>' +
+    '<div style="padding:18px 22px 22px;display:flex;flex-direction:column;gap:16px"><div class="luoi-ct">' + nhom.map(function (g, gi) { return '<section class="nhom-ct"><h3 class="tieu-nho" style="margin:0">' + g[0] + '</h3>' + dl(g[1], 'boct-' + gi + '-') + '</section>'; }).join('') + '</div>' +
+    '<div style="display:flex;flex-direction:column;gap:8px"><h3 class="tieu-nho" style="margin:0">Các văn bản trong bộ</h3>' +
+      '<div class="thanh-trang" aria-hidden="true">' + b.ds.map(function (d, i) { return '<span style="flex:' + Math.max(1, d.soTrang) + ' 1 0;background:' + MAU_VB[i % MAU_VB.length] + '"></span>'; }).join('') + '</div>' +
+      b.ds.map(function (y, i) { return '<div class="vb-dong"><button type="button" class="vb-bo" data-ct="' + esc(y.id) + '"><span class="cham" style="background:' + MAU_VB[i % MAU_VB.length] + '"></span><span class="so" style="font-size:12px;color:var(--chu-4);min-width:56px">' + y.soTrang + ' trang</span><span style="flex:1;min-width:0"><b style="font-size:12.5px">' + esc(y.loai) + ' ' + esc(y.so) + '</b><br><span style="font-size:13.5px">' + esc(y.trich) + '</span><br><span style="font-size:12px;color:var(--chu-4)">' + esc(hienNgay(y)) + (y.cq ? ' · ' + esc(y.cq) : '') + '</span></span></button>' +
+        '<button type="button" class="nut-icon" data-xn="' + esc(y.id) + '" title="Xem nhanh" aria-label="Xem nhanh ' + esc(y.file) + '">' + IC.mat + '</button>' +
+        '<a class="nut-icon" href="' + linkTai(y.driveId) + '" target="_blank" rel="noopener" title="Tải xuống" aria-label="Tải ' + esc(y.file) + '">' + IC_TAI + '</a>' +
+        '<button type="button" class="nut-icon" data-ct="' + esc(y.id) + '" title="Xem đầy đủ chi tiết" aria-label="Xem chi tiết ' + esc(y.file) + '">' + IC.mo + '</button></div>'; }).join('') +
+    '</div></div></div></div>';
 }
 function linkTai(id) { return 'https://drive.google.com/uc?export=download&id=' + encodeURIComponent(id); }
 function linkXem(id) { return 'https://drive.google.com/file/d/' + encodeURIComponent(id) + '/view'; }
@@ -798,6 +825,7 @@ var hanhDong = {
   trangTruoc: function () { S.trang = Math.max(1, S.trang - 1); lenDau(); },
   trangSau: function () { S.trang++; lenDau(); },
   dongCT: function () { S.ct = null; },
+  dongBo: function () { S.boCt = null; },
   ctTruoc: function () { var i = KQ.kq.indexOf(timDoc(S.ct)); if (i > 0) S.ct = S.sel = KQ.kq[i - 1].id; },
   ctSau: function () { var i = KQ.kq.indexOf(timDoc(S.ct)); if (i >= 0 && i < KQ.kq.length - 1) S.ct = S.sel = KQ.kq[i + 1].id; },
   dongXN: function () { S.xn = null; },
@@ -839,6 +867,7 @@ document.addEventListener('click', function (e) {
   }
   if ((el = t.closest('[data-tab]'))) { S.tab = el.dataset.tab; vePopup(); return; }
   if ((el = t.closest('[data-xn-chon]'))) { if (S.xn.caBo) { toiPhan(el.dataset.xnChon); return; } S.xn = { bo: S.xn.bo, id: el.dataset.xnChon }; vePopup(); return; }
+  if ((el = t.closest('[data-bo-ct]'))) { S.boCt = el.dataset.boCt; S.sel = 'bo:' + S.boCt; ve(); return; }
   if ((el = t.closest('[data-tai-bo]'))) { taiCaBo(el.dataset.taiBo); return; }
   if ((el = t.closest('[data-xn-ca-bo]'))) { var dcb = timDoc(el.dataset.xnCaBo); S.xn = { bo: dcb.hs, id: dcb.id, caBo: true }; vePopup(); setTimeout(function () { toiPhan(dcb.id); }, 50); return; }
   if ((el = t.closest('[data-xn-bo]'))) { var bk = el.dataset.xnBo; S.sel = 'bo:' + bk; S.xn = { bo: bk, id: BO[bk].ds[0].id, caBo: true }; ve(); return; }
@@ -851,7 +880,7 @@ document.addEventListener('click', function (e) {
 });
 document.addEventListener('keydown', function (e) {
   if (e.key !== 'Escape') return;
-  if (S.xn) S.xn = null; else if (S.ct) S.ct = null; else if (S.nhap) S.nhap = null; else return;
+  if (S.xn) S.xn = null; else if (S.ct) S.ct = null; else if (S.boCt) S.boCt = null; else if (S.nhap) S.nhap = null; else return;
   ve();
 });
 nap();
