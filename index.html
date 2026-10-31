@@ -662,6 +662,11 @@ button.kpi:hover{border-color:var(--leaf)}
 .ai-hop .hang{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:4px}
 .ai-hop .luoi2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .ai-hop label.chk{flex-direction:row;align-items:center;gap:8px;color:var(--ink)}
+.nhom-khoa{display:flex;flex-direction:column;gap:6px;font-size:13px}
+.nhom-khoa small{color:var(--ink-3);font-weight:400}
+.ds-chk-khoa{display:flex;flex-wrap:wrap;gap:6px 16px}
+.ds-chk-khoa label.tat{opacity:.55}
+.khoa-dong{padding:1px 8px;border-radius:99px;background:var(--brand-50, #E3F1EA);color:var(--brand-700, #0A4D39);font-weight:600}
 .ai-hop .o-so-file{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 .ai-hop .o-so-file .o{width:140px}
 .ai-hop .uoc .canh{color:var(--clay);margin-top:4px}
@@ -2360,7 +2365,7 @@ function veAi(d) {
         (AI.cho && AI.cho.dong === r.dong ? '<small class="dang-cho">' + (AI.cho.thu ? 'đang chạy thử 1 file' : 'đang chạy') + '… <span data-tu="' + AI.cho.tu + '">' + Math.round((Date.now() - AI.cho.tu) / 1000) + '</span> giây</small>'
           : r.dangKhoa ? '<small>lô đang chạy…</small>' : '') + '</div>' +
         '<div class="tt-model">Model <select data-ai-model="' + r.dong + '"' + (tt === 'chay' ? ' disabled' : '') + ' aria-label="Model">' + chon + '</select>' +
-        '<span>tab ' + esc(r.tab) + '</span></div>' +
+        '<span>tab ' + esc(r.tab) + '</span>' + (r.khoaDung && r.khoaDung.length ? '<span class="khoa-dong" title="Dòng này chỉ chạy bằng các khoá này">khoá: ' + esc(r.khoaDung.join(', ')) + '</span>' : '') + '</div>' +
         '<div class="tt-model">Drive: ' + (r.tongDrive != null ? '<b>' + so(r.tongDrive) + '</b> file PDF' : 'chưa đếm') +
         ' · chạy ' + (r.tatCa ? '<b>tất cả</b>' : so(r.soFile) + ' file') +
         ' <button class="btn nho nut-dem" data-ai="dem" data-dong="' + r.dong + '" title="Đếm lại số PDF trong thư mục Drive (kể cả thư mục con)">Đếm</button>' +
@@ -2439,10 +2444,22 @@ function hopChay(r, thu) {
     });
 }
 
+/** Ô tích chọn khoá cho một dòng: không tích khoá nào = dùng mọi khoá đang bật. */
+function chonKhoaHtml(daChon) {
+  var ds = AI.khoa || [];
+  if (!ds.length) return '';
+  return '<div class="nhom-khoa"><span>Khoá dùng cho dòng này <small>(không tích = mọi khoá đang bật)</small></span><div class="ds-chk-khoa">' + ds.map(function (k) {
+    var on = (daChon || []).indexOf(k.ten) >= 0;
+    return '<label class="chk' + (k.bat ? '' : ' tat') + '"><input type="checkbox" data-khoa-dong="' + esc(k.ten) + '"' + (on ? ' checked' : '') + '> ' + esc(k.ten) +
+      ' <small>' + (k.goi === 'tra_phi' ? 'trả phí' : 'miễn phí') + (k.bat ? '' : ' · đang tắt') + '</small></label>';
+  }).join('') + '</div></div>';
+}
+function giaTriKhoa(h) { return $$('[data-khoa-dong]', h).filter(function (x) { return x.checked; }).map(function (x) { return x.dataset.khoaDong; }); }
 function hopSua(r) {
   moHopAi('<h3>Sửa · ' + esc(r.phong) + ' ' + esc(r.congTy) + '</h3>' +
     '<label>Model' + chonModelHtml('hopModel', r.model) + '</label>' +
     oSoFile(r, AI.du.soFileToiDa) +
+    chonKhoaHtml(r.khoaDung) +
     '<label>Ngân sách (USD)<input class="o" id="hopNs" type="number" min="0.1" step="0.1" value="' + r.nganSach + '"></label>' +
     '<label>Ghi chú<input class="o" id="hopGhiChu" value="' + esc(r.ghiChu) + '"></label>' +
     '<div class="ai-loi"></div>' +
@@ -2453,7 +2470,7 @@ function hopSua(r) {
         var sf = giaTriSoFile(h);
         if (sf !== 'Tất cả' && r.tongDrive && sf > r.tongDrive) return baoLoiHop(h, 'Số file phải từ 1 đến ' + so(r.tongDrive) + ' (tổng file PDF trong thư mục)');
         goiAi('capNhat', { dong: r.dong, model: $('#hopModel', h).value, soFile: giaTriSoFile(h), nganSach: Number($('#hopNs', h).value),
-          ghiChu: $('#hopGhiChu', h).value }).then(function (kq) { dongHopAi(); thongBao(kq.thongBao); lamMoiAi(); }, function (e) { baoLoiHop(h, e.message); });
+          ghiChu: $('#hopGhiChu', h).value, khoaDung: giaTriKhoa(h) }).then(function (kq) { dongHopAi(); thongBao(kq.thongBao); lamMoiAi(); }, function (e) { baoLoiHop(h, e.message); });
       };
     });
 }
@@ -2526,6 +2543,7 @@ function hopThem() {
     '<label>Phòng<select class="o" id="hopPhong"><option>TCHC</option><option>TCKT</option><option>KHĐT</option><option>KTNN</option></select></label></div>' +
     '<label>Model' + chonModelHtml('hopModel', AI.du.modelMacDinh) + '</label>' +
     oSoFile(null, AI.du.soFileToiDa) +
+    chonKhoaHtml([]) +
     '<label>Ngân sách (USD)<input class="o" id="hopNs" type="number" min="0.1" step="0.1" value="' + AI.du.nganSachMacDinh + '"></label>' +
     '<label>Tên tab kết quả (để trống: tự đặt TN_PHÒNG_CÔNG TY)<input class="o" id="hopTab" placeholder="TN_TCKT_CRCK2"></label>' +
     '<label>Ghi chú<input class="o" id="hopGhiChu"></label>' +
@@ -2544,7 +2562,7 @@ function hopThem() {
       $('[data-hop="ok"]', h).onclick = function () {
         if (!$('#hopThuMuc', h).value.trim()) return baoLoiHop(h, 'Chọn thư mục có sẵn hoặc dán link thư mục Drive');
         goiAi('them', { thuMuc: $('#hopThuMuc', h).value, congTy: $('#hopCongTy', h).value, phong: $('#hopPhong', h).value, model: $('#hopModel', h).value,
-          soFile: giaTriSoFile(h), nganSach: Number($('#hopNs', h).value), tab: $('#hopTab', h).value, ghiChu: $('#hopGhiChu', h).value })
+          soFile: giaTriSoFile(h), nganSach: Number($('#hopNs', h).value), tab: $('#hopTab', h).value, ghiChu: $('#hopGhiChu', h).value, khoaDung: giaTriKhoa(h) })
           .then(function (kq) { dongHopAi(); thongBao(kq.thongBao); lamMoiAi(); }, function (e) { baoLoiHop(h, e.message); });
       };
     });
