@@ -171,7 +171,6 @@ body.trich-gon .bang .trich{display:-webkit-box;-webkit-line-clamp:2;-webkit-box
 .bang thead tr.loc-cot{border-bottom:1px solid var(--vien)}
 .nut-loc-cot{height:32px;padding:0 10px;border-radius:7px;border:1px solid var(--xanh);background:#fff;color:var(--xanh);font-size:12.5px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .nut-loc-cot:hover{background:var(--xanh-nen)}
-@media (min-width:901px){ .tim-hang>.nut-nc{display:none} }
 .bang thead td{padding:0 6px 8px 0}
 .bang thead input,.bang thead select{width:100%;height:32px;border:1px solid var(--o-2);border-radius:7px;padding:0 8px;font-size:12.5px;background:#fff}
 .bang tbody tr{border-top:1px solid var(--vien-2);cursor:pointer}
@@ -822,7 +821,7 @@ function veDauBang() {
     KHOA_LOC = khoa;
     $('#locCot').innerHTML = ds.map(function (c) {
       return '<td>' + (c.gt ? '<input data-cot="' + c.id + '" type="search" placeholder="' + esc(c.loc || '') + '" aria-label="Lọc cột ' + esc(c.ten) + '" value="' + esc(S.cot[c.id] || '') + '">' : '') + '</td>';
-    }).join('') + '<td><button type="button" class="nut-loc-cot" data-act="moNC" title="Bộ lọc nâng cao" aria-label="Bộ lọc nâng cao"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg><span>Lọc</span><span class="huy-hieu" id="soNC2" hidden></span></button></td>';
+    }).join('') + '<td></td>';
     $('#locCot').hidden = false;
   }
 }
