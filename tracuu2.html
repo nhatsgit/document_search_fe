@@ -592,7 +592,6 @@ function veTrai() {
 function danhSachChip() {
   var nc = S.nc, c = [];
   if (S.nam) c.push(['Năm ' + S.nam, function () { S.nam = ''; }]);
-  if (S.kieu !== 'tat') c.push([S.kieu === 'le' ? 'Văn bản lẻ' : 'Bộ hồ sơ', function () { S.kieu = 'tat'; }]);
   S.loai.forEach(function (k) { c.push([k, function () { S.loai = S.loai.filter(function (x) { return x !== k; }); }]); });
   nc.phong.forEach(function (k) { c.push(['Phòng ' + k, function () { nc.phong = nc.phong.filter(function (x) { return x !== k; }); }]); });
   if (nc.tuNgay) c.push(['Từ ' + ngayVN(nc.tuNgay), function () { nc.tuNgay = ''; }]);
@@ -724,7 +723,6 @@ function popupNC() {
       loai2Ds.slice(0, 80).map(function (k) { var on = N.loai2.indexOf(k) >= 0; return '<button type="button" class="muc-loc" data-nc="loai2" data-gt="' + esc(k) + '" aria-pressed="' + on + '" title="' + esc(k) + ' — thuộc ' + esc(phanLoai(k)) + '"><span class="hop' + (on ? ' on' : '') + '" aria-hidden="true">' + (on ? '✓' : '') + '</span><span class="ten">' + esc(k) + '</span><span class="dem so">' + (demLoai2[k] || 0) + '</span></button>'; }).join('') +
       (loai2Ds.length ? '' : '<span style="font-size:13px;color:var(--chu-4)">Không có loại khớp</span>') + '</div></div>' +
     '<div class="nhom-nc ca"><b>Phòng</b><div class="pills">' + DS_PHONG.map(function (k) { return pill('phong', k, k + ' · ' + (phong[k] || 0), N.phong.indexOf(k) >= 0); }).join('') + '</div></div>' +
-    '<div class="nhom-nc"><b>Phạm vi</b><div class="pills">' + KIEU.map(function (k) { return pill('kieu', k[0], k[1], N.kieu === k[0]); }).join('') + '</div></div>' +
     '<div class="nhom-nc"><b>Khoảng ngày ban hành</b><div style="display:flex;gap:8px;align-items:center"><input type="date" class="o-nc" data-nc-o="tuNgay" value="' + esc(N.tuNgay) + '" aria-label="Từ ngày"><span style="color:var(--chu-4)">–</span><input type="date" class="o-nc" data-nc-o="denNgay" value="' + esc(N.denNgay) + '" aria-label="Đến ngày"></div></div>' +
     '<div class="nhom-nc"><b>Giá trị tiền</b><div class="pills">' + [['', 'Tất cả'], ['co', 'Có giá trị'], ['khong', 'Không có']].map(function (o) { return pill('tien', o[0], o[1], N.tien === o[0]); }).join('') + '</div></div>' +
     '<div class="nhom-nc"><b>Số hiệu</b><div class="pills">' + [['', 'Tất cả'], ['co', 'Có số hiệu'], ['khong', 'Chưa có số hiệu']].map(function (o) { return pill('coSo', o[0], o[1], N.coSo === o[0]); }).join('') + '</div></div>' +
