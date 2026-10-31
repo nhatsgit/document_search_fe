@@ -352,7 +352,6 @@ tr.bo .trich{font-weight:700;color:#0A3D2E}
 
   <main class="giua">
     <div class="thanh">
-      <div class="seg" role="group" aria-label="Phạm vi" id="segKieu"></div>
       <div class="mo-ta" id="moTa"></div>
       <button type="button" class="lk" data-act="moHet" id="moHet" hidden></button>
       <button type="button" class="lk" data-act="xoaCot" id="xoaCot" hidden>Xoá lọc theo cột</button>
@@ -607,10 +606,6 @@ function danhSachChip() {
 }
 var CHIP_BO = [];
 function veThanh() {
-  var truKieu = KQ.khop.filter(function (d) { return quaLoc(d, S.nc, S.kieu, 'kieu'); });
-  var le = truKieu.filter(function (d) { return !d.hs; }).length, bo = new Set(truKieu.filter(function (d) { return d.hs; }).map(function (d) { return d.hs; })).size;
-  var so = { tat: le + bo, le: le, bo: bo };
-  $('#segKieu').innerHTML = KIEU.map(function (k) { return '<button type="button" data-kieu="' + k[0] + '" class="' + (S.kieu === k[0] ? 'on' : '') + '" aria-pressed="' + (S.kieu === k[0]) + '">' + k[1] + ' <span class="so">' + so[k[0]] + '</span></button>'; }).join('');
   var soLe = KQ.nhom.filter(function (g) { return g.vb; }).length, soBo = KQ.nhom.length - soLe;
   $('#moTa').textContent = !KQ.coDuLieu ? 'Chưa có dữ liệu cho công ty này (bản thử chỉ có KHĐT · CRCK2)' : (S.q ? 'khớp “' + S.q + '” · ' : '') + soLe + ' văn bản lẻ · ' + soBo + ' bộ hồ sơ';
   var chips = danhSachChip(); CHIP_BO = chips.map(function (x) { return x[1]; });
