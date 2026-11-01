@@ -166,7 +166,7 @@ body.trich-gon .bang .trich{display:-webkit-box;-webkit-line-clamp:2;-webkit-box
 .ds-cot .nut-mui:disabled{opacity:.3;cursor:default}
 .lua-chon{display:flex;flex-wrap:wrap;gap:6px}
 .bang th:first-child,.bang thead td:first-child{padding-left:14px}
-.bang th button{border:0;background:none;padding:10px 0 6px;font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--chu-3);cursor:pointer;white-space:nowrap}
+.bang th button{border:0;background:none;padding:10px 0 6px;font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--chu-3);cursor:pointer;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis;display:block;text-align:left}
 .bang th button span{color:var(--xanh)}
 .bang thead tr.loc-cot{border-bottom:1px solid var(--vien)}
 .nut-loc-cot{height:32px;padding:0 10px;border-radius:7px;border:1px solid var(--xanh);background:#fff;color:var(--xanh);font-size:12.5px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
@@ -492,8 +492,8 @@ var COTS = [
   { id: 'cq', ten: 'Cơ quan / Đối tác', rong: 190, loc: 'Lọc cơ quan…', gt: function (d) { return d.cq + ' ' + d.doiTac; }, sap: function (d) { return d.cq; },
     vb: function (d, x) { return '<div>' + hl(d.cq || '—', S.truong === 'cq' ? x.tus : x.tO) + '</div>' + (d.doiTac ? '<div class="doi">→ ' + hl(d.doiTac, S.truong === 'doiTac' ? x.tus : x.tO) + '</div>' : ''); },
     bo: function (g, b) { var c = khac(b, 'cq'); return '<div>' + esc(c[0] || '—') + '</div>' + (c.length > 1 ? '<div class="doi">+ ' + (c.length - 1) + ' cơ quan khác</div>' : ''); } },
-  { id: 'ngay', ten: 'Ngày ban hành', rong: 108, loc: 'dd/mm/yyyy', gt: function (d) { return hienNgay(d); }, sap: function (d) { return khoaNgay(d); }, lop: 'ngay',
-    vb: function (d) { return esc(hienNgay(d)); }, bo: function (g, b) { return esc(ngayBo(b)); } },
+  { id: 'ngay', ten: 'Ngày ban hành', rong: 124, loc: 'dd/mm/yyyy', gt: function (d) { return hienNgay(d); }, sap: function (d) { return khoaNgay(d); }, lop: 'ngay',
+    vb: function (d) { return esc(hienNgay(d)); }, bo: function (g, b) { return esc(ngayBo(b)).replace(' – ', ' –<br>'); } },   // khoảng ngày của bộ: 2 ngày xuống 2 dòng
   { id: 'trang', ten: 'Trang', rong: 62, sap: function (d) { return d.soTrang; }, lop: 'trang', so: true,
     vb: function (d) { return d.soTrang || '—'; }, bo: function (g, b) { return soVN(b.soTrang); } },
   { id: 'loai1', ten: 'Loại (cấp 1)', rong: 130, an: true, loc: 'Lọc loại…', gt: function (d) { return d.loai1; }, sap: function (d) { return d.loai1; },
