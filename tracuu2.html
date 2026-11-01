@@ -114,6 +114,16 @@ body.gon .so-kh{display:inline;margin:0 0 0 6px}
   .bang thead tr{background:#F7F8F6}
   .bang thead tr.loc-cot{box-shadow:0 1px 0 var(--vien)}
 }
+/* màn rộng nhưng thấp (laptop 1366×768, 1280×720): thu gọn phần đầu để bảng có thêm chỗ */
+@media (min-width:901px) and (max-height:800px){
+  .dau-trong{padding-top:6px;padding-bottom:6px}
+  .logo i{width:30px;height:30px}
+  .tim-trong{padding-top:10px;padding-bottom:8px;gap:6px}
+  .goi-y{display:none}
+  .chon-cty,.o-tim-khung,.nut-nc{height:44px}
+  .o-tim-khung input{height:40px}
+  .khung{padding-top:10px}
+}
 @media (min-width:901px) and (max-width:1250px){ .phai-cot{flex-basis:280px} .trai{flex-basis:190px} }
 .the{background:#fff;border:1px solid var(--vien);border-radius:12px}
 .hop-loc{padding:12px 14px;display:flex;flex-direction:column;gap:2px}
@@ -184,7 +194,7 @@ body.trich-gon .bang .trich{display:-webkit-box;-webkit-line-clamp:2;-webkit-box
 .bang tr.con td:first-child{padding-left:46px;background:linear-gradient(#B5D3C4,#B5D3C4) no-repeat 25px 0/2px 100%,linear-gradient(#B5D3C4,#B5D3C4) no-repeat 25px 21px/13px 2px}
 .bang tr.con.cuoi td:first-child{background:linear-gradient(#B5D3C4,#B5D3C4) no-repeat 25px 0/2px 22px,linear-gradient(#B5D3C4,#B5D3C4) no-repeat 25px 21px/13px 2px}
 .bang tr.con.dang-xem td:first-child{background-color:transparent}
-.loai{display:inline-block;max-width:180px;padding:1px 7px;border-radius:6px;background:#EEF1EE;color:var(--chu-2);font-size:11.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:top}
+.loai{display:inline-block;max-width:100%;padding:1px 7px;border-radius:6px;background:#EEF1EE;color:var(--chu-2);font-size:11.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:top}
 .so-kh{display:block;margin-top:3px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:600;color:var(--xanh);overflow-wrap:anywhere}
 .so-kh.trong{color:var(--chu-4);font-weight:500;font-family:inherit;font-size:12px}
 .trich{font-weight:600;line-height:1.4;overflow-wrap:anywhere}
@@ -311,7 +321,7 @@ tr.bo .trich{font-weight:700;color:#0A3D2E}
   .mo-ta{font-size:13px;flex:1 1 auto}
   .sap-dt{height:36px;border:1px solid var(--o);border-radius:8px;padding:0 6px;font-size:13px;background:#fff}
   .bang-khung{background:none;border:0;overflow:visible}
-  table.bang,.bang tbody{display:block;min-width:0}
+  table.bang,.bang tbody{display:block;min-width:0!important;width:100%}
   .bang thead{display:none}
   .bang tbody tr{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 10px;background:#fff;border:1px solid var(--vien);border-radius:12px;padding:12px;margin-bottom:8px}
   .bang tbody tr:hover{background:#fff}
@@ -1274,9 +1284,14 @@ function veHopCot() {
 function moHopCot() {
   var h = $('#hopCot'), r = $('#nutCot').getBoundingClientRect();
   veHopCot(); h.hidden = false;
-  h.style.top = Math.min(r.bottom + 6, window.innerHeight - 100) + 'px';
+  // đặt ngay dưới nút; không đủ chỗ phía dưới thì kéo lên, luôn nằm gọn trong màn hình (phần dưới tự cuộn)
+  var cao = window.innerHeight, tren = r.bottom + 6;
+  h.style.maxHeight = Math.max(240, cao - tren - 12) + 'px';
+  if (cao - tren - 12 < 240) { tren = Math.max(12, cao - 252); h.style.maxHeight = (cao - tren - 12) + 'px'; }
+  h.style.top = tren + 'px';
   h.style.left = Math.max(12, Math.min(r.right - h.offsetWidth, window.innerWidth - h.offsetWidth - 12)) + 'px';
 }
+window.addEventListener('resize', function () { $('#hopCot').hidden = true; $('#goiYTim').hidden = true; });
 function doiCot() { luuCfg(); KHOA_LOC = ''; document.body.classList.toggle('trich-gon', CFG.trichGon); ve(); if (!$('#hopCot').hidden) veHopCot(); }
 document.body.classList.toggle('trich-gon', CFG.trichGon);
 $('#nutCot').addEventListener('click', function (e) { e.stopPropagation(); if ($('#hopCot').hidden) moHopCot(); else $('#hopCot').hidden = true; });
