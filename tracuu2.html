@@ -651,7 +651,7 @@ var LUAT_LOAI = [
 ];
 function phanLoai(t) { var c = chuan(t); for (var i = 0; i < LUAT_LOAI.length; i++) if (LUAT_LOAI[i][1].test(c)) return LUAT_LOAI[i][0]; return 'Khác'; }
 /** Gộp các cách viết của cùng một tên (hoa/thường, dấu chấm phẩy, "Co., Ltd") về cách viết hay gặp nhất; các công ty trong tập đoàn gộp cố định. */
-var TEN_CO_DINH = [[/crck2|aphivath/, 'Công ty C.R.C.K.2 Aphivath Caoutchouc Co., Ltd'], [/beanheack/, 'Công ty TNHH Đầu tư Bean Heack'], [/tapdoancongnghiepcaosu/, 'Tập đoàn Công nghiệp Cao su Việt Nam']];
+var TEN_CO_DINH = [[/crck2|aphivath/, 'CRCK2'], [/beanheack/, 'BHCK'], [/tapdoancongnghiepcaosu/, 'Tập đoàn Công nghiệp Cao su Việt Nam']];
 function khoaTen(s) { return chuan(s).replace(/[^a-z0-9]/g, '').replace(/congtytnhh|congty|company|limited|coltd|ltd|cojsc|jsc/g, ''); }
 function gopTen(truong) {
   var dem = {}, chon = {};
