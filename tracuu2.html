@@ -101,18 +101,17 @@ body.gon .so-kh{display:inline;margin:0 0 0 6px}
 .trai{flex:1 1 200px;max-width:230px;min-width:0;display:flex;flex-direction:column;gap:12px}
 .giua{flex:999 1 640px;min-width:0;display:flex;flex-direction:column;gap:10px}
 .phai-cot{flex:1 1 300px;max-width:360px;min-width:0}
-/* Màn rộng: đầu trang + thanh tìm đứng yên, mỗi cột tự cuộn, danh sách có thanh cuộn riêng (tiêu đề cột dính trên) */
+/* Màn rộng: cả trang cuộn bình thường, danh sách dài theo nội dung; thanh tìm + tiêu đề cột dính trên khi cuộn.
+   Bảng rộng hơn khung thì khung có thanh cuộn ngang (.cuon-ngang) — lúc đó tiêu đề cột không dính được theo trang. */
 @media (min-width:901px){
-  body{height:100vh;display:flex;flex-direction:column;overflow:hidden}
-  .dau,.tim{flex:none}
-  .khung{flex:1 1 auto;min-height:0;width:100%;flex-wrap:nowrap;align-items:stretch;padding-bottom:14px}
-  .trai{flex:0 0 220px;overflow-y:auto;padding-right:2px}
-  .giua{min-height:0}
-  .phai-cot{flex:0 0 340px;overflow-y:auto}
-  .bang-khung{flex:1 1 auto;min-height:0;overflow:auto}
-  .bang thead{position:sticky;top:0;z-index:2}
+  .tim{position:sticky;top:0;z-index:12}
+  .khung{flex-wrap:nowrap;align-items:flex-start;padding-bottom:24px}
+  .giua .bang-khung{overflow:visible}
+  .giua .bang-khung.cuon-ngang{overflow-x:auto}
+  .bang thead{position:sticky;top:var(--cao-tim,0px);z-index:2}
   .bang thead tr{background:#F7F8F6}
   .bang thead tr.loc-cot{box-shadow:0 1px 0 var(--vien)}
+  .giua .bang-khung.cuon-ngang .bang thead{position:static}
 }
 /* màn rộng nhưng thấp (laptop 1366×768, 1280×720): thu gọn phần đầu để bảng có thêm chỗ */
 @media (min-width:901px) and (max-height:800px){
@@ -831,7 +830,10 @@ var KHOA_LOC = '';
 function veDauBang() {
   var ds = cotHien();
   $('#cotNhom').innerHTML = ds.map(function (c) { var w = rongCot(c); return '<col data-col="' + c.id + '"' + (w ? ' style="width:' + w + 'px"' : '') + '>'; }).join('') + '<col style="width:92px">';
-  $('.bang').style.minWidth = (ds.reduce(function (t, c) { return t + (rongCot(c) || 260); }, 0) + 92) + 'px';
+  var rongBang = ds.reduce(function (t, c) { return t + (rongCot(c) || 260); }, 0) + 92;
+  $('.bang').style.minWidth = rongBang + 'px';
+  $('.bang-khung').classList.toggle('cuon-ngang', rongBang > $('.bang-khung').clientWidth);
+  document.documentElement.style.setProperty('--cao-tim', $('.tim').offsetHeight + 'px');
   $('#dauCot').innerHTML = ds.map(function (c) {
     return '<th scope="col" data-th="' + c.id + '"><button type="button" data-sap="' + c.id + '">' + esc(c.ten) + '<span>' + (S.sap === c.id ? (S.chieu > 0 ? ' ▲' : ' ▼') : '') + '</span></button>' +
       '<span class="keo" data-keo="' + c.id + '" title="Kéo để đổi độ rộng · bấm đúp để về mặc định" aria-hidden="true"></span></th>';
@@ -1201,7 +1203,7 @@ function capNhatDauXN() {
 function toiPhan(id) { var p = document.querySelector('.xn-phan[data-vb="' + CSS.escape(id) + '"]'); if (p) { $('#xemCuon').scrollTop += p.getBoundingClientRect().top - $('#xemCuon').getBoundingClientRect().top; S.xn.id = id; capNhatDauXN(); } }
 
 /* ---------- sự kiện ---------- */
-function datTrang1() { S.trang = 1; var k = $('.bang-khung'); if (k) k.scrollTop = 0; }
+function datTrang1() { S.trang = 1; }
 var hen;
 $('#oTim').addEventListener('input', function (e) {
   S.q = e.target.value; $('#xoaQ').hidden = !S.q;
@@ -1284,7 +1286,7 @@ function veHopCot() {
     '<div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="nut" data-cot-act="rong">Đặt lại độ rộng</button><button type="button" class="nut" data-cot-act="macDinh">Về mặc định</button></div>';
 }
 function moHopCot() { veHopCot(); $('#hopCot').hidden = false; }
-window.addEventListener('resize', function () { $('#goiYTim').hidden = true; });
+window.addEventListener('resize', function () { $('#goiYTim').hidden = true; if (DOCS.length) veDauBang(); });
 function doiCot() { luuCfg(); KHOA_LOC = ''; document.body.classList.toggle('trich-gon', CFG.trichGon); ve(); if (!$('#hopCot').hidden) veHopCot(); }
 document.body.classList.toggle('trich-gon', CFG.trichGon);
 $('#nutCot').addEventListener('click', function (e) { e.stopPropagation(); if ($('#hopCot').hidden) moHopCot(); else $('#hopCot').hidden = true; });
@@ -1331,7 +1333,8 @@ document.addEventListener('pointerup', function () {
   KEO.k.classList.remove('dang'); document.body.classList.remove('dang-keo'); KEO = null;
 });
 document.addEventListener('dblclick', function (e) { var k = e.target.closest && e.target.closest('[data-keo]'); if (k) { delete CFG.rong[k.dataset.keo]; luuCfg(); veDauBang(); } });
-function lenDau() { $('.bang-khung').scrollTop = 0; if (window.innerWidth <= 900) window.scrollTo({ top: 0 }); }
+/** Đổi trang: đưa đầu danh sách lên ngay dưới thanh tìm. */
+function lenDau() { var y = $('.giua').getBoundingClientRect().top + window.scrollY - (manNho() ? 0 : $('.tim').offsetHeight) - 8; if (window.scrollY > y) window.scrollTo({ top: y }); }
 /** Tải lần lượt mọi file của bộ qua Drive (cách nhau 0,7 giây để trình duyệt không gộp / chặn). */
 function taiCaBo(hs) {
   var ds = BO[hs].ds;
