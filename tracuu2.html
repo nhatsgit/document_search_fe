@@ -165,16 +165,18 @@ body.trich-gon .bang .trich{display:-webkit-box;-webkit-line-clamp:2;-webkit-box
 .o-file{font-size:12px;color:var(--chu-3)}
 .nut-cot{height:34px;padding:0 10px;border:1px solid var(--o);border-radius:8px;background:#fff;font-size:12.5px;cursor:pointer;color:var(--chu-2);display:inline-flex;align-items:center;gap:6px}
 .nut-cot:hover{border-color:var(--xanh);color:var(--xanh)}
-.hop-cot{position:fixed;z-index:25;width:340px;max-width:calc(100vw - 24px);max-height:calc(100vh - 80px);overflow-y:auto;background:#fff;border:1px solid var(--vien);border-radius:14px;box-shadow:0 16px 40px rgba(27,36,32,.2);padding:14px;display:flex;flex-direction:column;gap:12px}
+.hop-cot{position:fixed;z-index:25;top:50%;left:50%;transform:translate(-50%,-50%);width:440px;max-width:calc(100vw - 24px);max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px);box-sizing:border-box;overflow-y:auto;background:#fff;border:1px solid var(--vien);border-radius:14px;box-shadow:0 16px 40px rgba(27,36,32,.2);padding:14px 16px;display:flex;flex-direction:column;gap:10px}
 .hop-cot h3{font-size:13px;color:var(--chu-3);text-transform:uppercase;letter-spacing:.04em}
 .ds-cot{display:flex;flex-direction:column;gap:2px}
-.ds-cot .dong-cot{display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:8px}
+.ds-cot .dong-cot{display:flex;align-items:center;gap:6px;padding:1px 6px;border-radius:8px}
 .ds-cot .dong-cot:hover{background:#F4F7F5}
 .ds-cot label{flex:1;min-width:0;display:flex;align-items:center;gap:8px;font-size:13.5px;cursor:pointer}
 .ds-cot small{color:var(--chu-4);font-size:11.5px;white-space:nowrap}
 .ds-cot .nut-mui{width:26px;height:26px;border:1px solid var(--o-2);border-radius:6px;background:#fff;cursor:pointer;font-size:12px;color:var(--chu-3)}
 .ds-cot .nut-mui:disabled{opacity:.3;cursor:default}
 .lua-chon{display:flex;flex-wrap:wrap;gap:6px}
+.hai-cot-cot{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.hai-cot-cot .pill{min-height:30px;padding:0 10px;font-size:12.5px}
 .bang th:first-child,.bang thead td:first-child{padding-left:14px}
 .bang th button{border:0;background:none;padding:10px 0 6px;font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--chu-3);cursor:pointer;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis;display:block;text-align:left}
 .bang th button span{color:var(--xanh)}
@@ -1277,21 +1279,12 @@ function veHopCot() {
         '<button type="button" class="nut-mui" data-cot-xuong="' + i + '"' + (i === CFG.thuTu.length - 1 ? ' disabled' : '') + ' aria-label="Đưa ' + esc(c.ten) + ' xuống" title="Xuống">↓</button></div>';
     }).join('') + '</div>' +
     '<span style="font-size:12px;color:var(--chu-4)">Kéo mép phải tiêu đề cột để đổi độ rộng · bấm đúp mép để về mặc định.</span>' +
-    '<div><h3 style="margin-bottom:6px">Trích yếu</h3><div class="lua-chon"><button type="button" class="pill' + (CFG.trichGon ? '' : ' on') + '" data-cot-act="trichDu">Hiện đầy đủ</button><button type="button" class="pill' + (CFG.trichGon ? ' on' : '') + '" data-cot-act="trichGon">Rút gọn 2 dòng</button></div></div>' +
-    '<div><h3 style="margin-bottom:6px">Mật độ dòng</h3><div class="lua-chon"><button type="button" class="pill' + (document.body.classList.contains('gon') ? '' : ' on') + '" data-cot-act="thoang">Thoáng</button><button type="button" class="pill' + (document.body.classList.contains('gon') ? ' on' : '') + '" data-cot-act="gon">Gọn</button></div></div>' +
+    '<div class="hai-cot-cot"><div><h3 style="margin-bottom:6px">Trích yếu</h3><div class="lua-chon"><button type="button" class="pill' + (CFG.trichGon ? '' : ' on') + '" data-cot-act="trichDu">Hiện đầy đủ</button><button type="button" class="pill' + (CFG.trichGon ? ' on' : '') + '" data-cot-act="trichGon">Rút gọn 2 dòng</button></div></div>' +
+    '<div><h3 style="margin-bottom:6px">Mật độ dòng</h3><div class="lua-chon"><button type="button" class="pill' + (document.body.classList.contains('gon') ? '' : ' on') + '" data-cot-act="thoang">Thoáng</button><button type="button" class="pill' + (document.body.classList.contains('gon') ? ' on' : '') + '" data-cot-act="gon">Gọn</button></div></div></div>' +
     '<div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="nut" data-cot-act="rong">Đặt lại độ rộng</button><button type="button" class="nut" data-cot-act="macDinh">Về mặc định</button></div>';
 }
-function moHopCot() {
-  var h = $('#hopCot'), r = $('#nutCot').getBoundingClientRect();
-  veHopCot(); h.hidden = false;
-  // đặt ngay dưới nút; không đủ chỗ phía dưới thì kéo lên, luôn nằm gọn trong màn hình (phần dưới tự cuộn)
-  var cao = window.innerHeight, tren = r.bottom + 6;
-  h.style.maxHeight = Math.max(240, cao - tren - 12) + 'px';
-  if (cao - tren - 12 < 240) { tren = Math.max(12, cao - 252); h.style.maxHeight = (cao - tren - 12) + 'px'; }
-  h.style.top = tren + 'px';
-  h.style.left = Math.max(12, Math.min(r.right - h.offsetWidth, window.innerWidth - h.offsetWidth - 12)) + 'px';
-}
-window.addEventListener('resize', function () { $('#hopCot').hidden = true; $('#goiYTim').hidden = true; });
+function moHopCot() { veHopCot(); $('#hopCot').hidden = false; }
+window.addEventListener('resize', function () { $('#goiYTim').hidden = true; });
 function doiCot() { luuCfg(); KHOA_LOC = ''; document.body.classList.toggle('trich-gon', CFG.trichGon); ve(); if (!$('#hopCot').hidden) veHopCot(); }
 document.body.classList.toggle('trich-gon', CFG.trichGon);
 $('#nutCot').addEventListener('click', function (e) { e.stopPropagation(); if ($('#hopCot').hidden) moHopCot(); else $('#hopCot').hidden = true; });
