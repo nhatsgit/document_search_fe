@@ -1197,7 +1197,7 @@ function capNhatDauXN() {
 function toiPhan(id) { var p = document.querySelector('.xn-phan[data-vb="' + CSS.escape(id) + '"]'); if (p) { $('#xemCuon').scrollTop += p.getBoundingClientRect().top - $('#xemCuon').getBoundingClientRect().top; S.xn.id = id; capNhatDauXN(); } }
 
 /* ---------- sự kiện ---------- */
-function datTrang1() { S.trang = 1; }
+function datTrang1() { S.trang = 1; S.moPhai = false; }   // đổi từ khoá / bộ lọc: về trang 1, đóng thẻ chi tiết
 var hen;
 $('#oTim').addEventListener('input', function (e) {
   S.q = e.target.value; $('#xoaQ').hidden = !S.q;
@@ -1222,7 +1222,7 @@ $('#goiYTim').addEventListener('mousedown', function (e) { var b = e.target.clos
 $('#nutMatDo').addEventListener('click', function () { var g = !document.body.classList.contains('gon'); document.body.classList.toggle('gon', g); try { localStorage.setItem('tc2_gon', g ? '1' : ''); } catch (x) {} veThanh(); });
 try { if (localStorage.getItem('tc2_gon')) document.body.classList.add('gon'); } catch (x) {}
 $('#xoaQ').addEventListener('click', function () {
-  S.q = ''; $('#oTim').value = ''; this.hidden = true; S.sapTay = false;
+  S.q = ''; $('#oTim').value = ''; this.hidden = true; S.sapTay = false; S.moPhai = false;
   if (S.truongTuDong) { S.truong = 'tat'; S.truongTuDong = false; $('#chonTruong').value = 'tat'; }
   ve(); $('#oTim').focus();
 });
@@ -1339,6 +1339,8 @@ function taiCaBo(hs) {
 function buocXN(n) { var b = BO[S.xn.bo]; if (!b) return; var i = b.ds.indexOf(timDoc(S.xn.id)); var j = Math.min(b.ds.length - 1, Math.max(0, (i < 0 ? 0 : i) + n)); if (S.xn.caBo) { toiPhan(b.ds[j].id); return true; } S.xn = { bo: S.xn.bo, id: b.ds[j].id }; }
 document.addEventListener('click', function (e) {
   var t = e.target, el;
+  // bấm ra ngoài vùng dòng + thẻ chi tiết (và các popup mở từ đó): đóng thẻ
+  if (S.moPhai && !t.closest('#than tr, #cotPhai, #popup')) { S.moPhai = false; ve(); }
   if ((el = t.closest('[data-chep]'))) {
     var k = el.dataset.chep, v = CHEP[k];
     try { navigator.clipboard.writeText(v).catch(function () {}); } catch (x) {}
