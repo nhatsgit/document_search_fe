@@ -777,8 +777,9 @@ function tinh() {
 }
 
 /* ---------- vẽ ---------- */
-/** Thẻ chi tiết bên phải chỉ hiện khi đã bấm một dòng văn bản (màn rộng); màn nhỏ bấm dòng mở popup chi tiết. */
-function coPhai() { return !!S.moPhai && !manNho() && !!timDoc(S.sel); }
+/** Thẻ chi tiết bên phải chỉ hiện khi đã bấm một dòng văn bản hoặc bộ hồ sơ (màn rộng); màn nhỏ bấm dòng mở popup chi tiết. */
+function boDangXem() { return typeof S.sel === 'string' && S.sel.indexOf('bo:') === 0 ? BO[S.sel.slice(3)] : null; }
+function coPhai() { return !!S.moPhai && !manNho() && !!(boDangXem() || timDoc(S.sel)); }
 function ve() { tinh(); document.body.classList.toggle('co-phai', coPhai()); veTrai(); veThanh(); veBang(); vePhai(); vePopup(); }
 function veTrai() {
   var dem = {};
@@ -875,7 +876,7 @@ function dongVb(d, con, cuoi) {
     cotHien().map(function (c, i) { return oTd(c, i, c.vb(d, x)); }).join('') + NUT_VB(d) + '</tr>';
 }
 function dongBo(g) {
-  var b = BO[g.hs], xem = false, x = { tus: KQ.tus, tO: S.truong === 'tat' ? KQ.tus : [] };
+  var b = BO[g.hs], xem = coPhai() && S.sel === 'bo:' + g.hs, x = { tus: KQ.tus, tO: S.truong === 'tat' ? KQ.tus : [] };
   return '<tr class="bo' + (xem ? ' dang-xem' : '') + '" data-bo="' + esc(g.hs) + '">' + cotHien().map(function (c, i) { return oTd(c, i, c.bo(g, b, x)); }).join('') +
     '<td class="o-tt" style="padding:6px 8px 6px 0"><div class="thao-tac"><button type="button" class="nut-icon" data-xn-bo="' + esc(g.hs) + '" title="Xem nhanh cả bộ" aria-label="Xem nhanh cả bộ">' + IC.mat + '</button>' +
     '<button type="button" class="nut-icon" data-bo-ct="' + esc(g.hs) + '" title="Xem chi tiết bộ hồ sơ" aria-label="Xem chi tiết bộ hồ sơ">' + IC.mo + '</button></div></td></tr>';
@@ -1014,6 +1015,20 @@ function timDoc(id) { for (var i = 0; i < DOCS.length; i++) if (DOCS[i].id === i
 function vePhai() {
   var el = $('#cotPhai');
   if (!coPhai()) { el.innerHTML = ''; return; }
+  var b = boDangXem();
+  if (b) {
+    el.innerHTML = '<div class="the tom"><div style="display:flex;gap:6px;align-items:flex-start"><span style="flex:1;min-width:0"><span class="nhan-bo" style="font-size:12px;padding:2px 9px">' + IC.thu + 'Bộ hồ sơ · ' + b.ds.length + ' văn bản</span></span><button type="button" class="dong-phai" data-act="dongPhai" aria-label="Đóng thẻ chi tiết" title="Đóng">×</button></div>' +
+      '<div style="display:flex;gap:8px;align-items:flex-start"><h2 style="flex:1">' + esc(b.ten) + '</h2>' + nutChep('bo-ten', b.ten) + '</div>' +
+      dl([['Thùng', b.thung], ['Số trang', soVN(b.soTrang) + ' trang'], ['Khoảng ngày', ngayBo(b)], ['Cơ quan', khac(b, 'cq').join('; ')], ['Đối tác', khac(b, 'doiTac').join('; ')]], 'bo-') +
+      '<div style="display:flex;flex-direction:column;gap:6px"><span class="tieu-nho" style="margin:0">Các văn bản trong bộ</span>' +
+      '<div class="thanh-trang" aria-hidden="true">' + b.ds.map(function (d, i) { return '<span style="flex:' + Math.max(1, d.soTrang) + ' 1 0;background:' + MAU_VB[i % MAU_VB.length] + '"></span>'; }).join('') + '</div>' +
+      '<div class="ds-bo">' + b.ds.map(function (d, i) {
+        return '<button type="button" data-chon-con="' + esc(d.id) + '"><span class="cham" style="background:' + MAU_VB[i % MAU_VB.length] + '"></span><span style="flex:1;min-width:0"><b>' + esc(d.loai) + '</b> ' + (d.so ? '<span class="ma" style="font-size:12px">' + esc(d.so) + '</span>' : '') + '<br>' + esc(d.trich) + '</span><span class="so" style="font-size:12px;color:var(--chu-4);white-space:nowrap">' + d.soTrang + ' tr.</span></button>';
+      }).join('') + '</div></div>' +
+      '<div style="display:flex;flex-direction:column;gap:8px"><button type="button" class="nut-to" data-bo-ct="' + esc(b.ma) + '">Xem chi tiết bộ hồ sơ</button>' +
+      '<button type="button" class="nut-to vien" data-xn-bo="' + esc(b.ma) + '">' + IC.mat + 'Xem nhanh cả bộ · ' + soVN(b.soTrang) + ' trang</button></div></div>';
+    return;
+  }
   var d = timDoc(S.sel);
   el.innerHTML = '<div class="the tom"><div style="display:flex;gap:6px;align-items:flex-start"><div style="flex:1;min-width:0;display:flex;flex-wrap:wrap;gap:6px"><span class="loai" style="font-size:12px;max-width:100%">' + esc(d.loai) + '</span><span class="tt">' + esc(d.phong + ' · ' + d.cty) + '</span></div><button type="button" class="dong-phai" data-act="dongPhai" aria-label="Đóng thẻ chi tiết" title="Đóng">×</button></div>' +
     '<div style="display:flex;align-items:center;gap:6px"><span class="ma" style="font-size:14px">' + esc(d.so || 'Chưa có số hiệu') + '</span>' + nutChep('xem-so', d.so) + '</div>' +
@@ -1387,7 +1402,9 @@ document.addEventListener('click', function (e) {
   if ((el = t.closest('[data-xn]'))) { var d = timDoc(el.dataset.xn); S.xn = { id: d.id, bo: d.hs || '' }; if (!S.ct) S.sel = d.id; ve(); return; }
   if ((el = t.closest('[data-ct]'))) { S.ct = S.sel = el.dataset.ct; if (!el.dataset.giuTab) S.tab = 'tt'; if (el.dataset.tuXn) S.xn = null; ve(); return; }
   if ((el = t.closest('[data-chon-con]'))) { var dc = timDoc(el.dataset.chonCon); S.sel = dc.id; if (dc.hs) S.mo[dc.hs] = true; ve(); return; }
-  if ((el = t.closest('[data-bo-mo]')) || (el = t.closest('tr[data-bo]'))) { var hs = el.dataset.boMo || el.dataset.bo; S.mo[hs] = !laMo(hs); ve(); return; }
+  if ((el = t.closest('[data-bo-mo]')) || (el = t.closest('tr[data-bo]'))) { var hs = el.dataset.boMo || el.dataset.bo, moLai = !laMo(hs); S.mo[hs] = moLai;
+    if (S.moPhai && S.sel === 'bo:' + hs && !moLai) S.moPhai = false; else { S.sel = 'bo:' + hs; S.moPhai = true; }
+    ve(); return; }
   if ((el = t.closest('[data-chon-vb]')) || (el = t.closest('tr[data-chon]'))) { var idv = el.dataset.chonVb || el.dataset.chon;
     if (manNho()) { S.sel = idv; S.ct = idv; S.tab = 'tt'; }
     else if (S.moPhai && S.sel === idv) S.moPhai = false;   // bấm lại đúng dòng đang mở: đóng thẻ
