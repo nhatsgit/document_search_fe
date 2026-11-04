@@ -590,20 +590,27 @@ function dongNk(e) {
    ===================================================================== */
 function dsSo() { return DS_SO; }
 function timSo(id) { return dsSo().filter(function (s) { return s.id === id; })[0]; }
+/** Số tăng dần mà ngày lùi: giữ dãy dài nhất có ngày không giảm, báo các dòng còn lại. Một ngày nhập lệch chỉ báo đúng dòng đó, không kéo theo cả sổ. Bỏ số có hậu tố vì chèn cho quá khứ là đúng quy tắc. */
+function dongLechNgay(ds) {
+  var ngayCua = function (p) { return Math.floor((p.tao + 7 * GIO) / (24 * GIO)); }, duoi = [], truoc = [], chiSo = [];
+  ds.forEach(function (p, i) {
+    var d = ngayCua(p), lo = 0, hi = duoi.length;
+    while (lo < hi) { var m = (lo + hi) >> 1; if (duoi[m] <= d) lo = m + 1; else hi = m; }
+    duoi[lo] = d; chiSo[lo] = i; truoc[i] = lo ? chiSo[lo - 1] : -1;
+  });
+  var giu = {}, k = duoi.length ? chiSo[duoi.length - 1] : -1;
+  while (k >= 0) { giu[k] = 1; k = truoc[k]; }
+  return ds.filter(function (p, i) { return !giu[i]; });
+}
 function chiSoSo(id) {
   var so0 = timSo(id) || { chieu: String(id).split('|')[0], dv: String(id).split('|')[1] };
   var vb = DS.filter(function (p) { return p.soId === id && p.so != null && layNam(p.tao) === S.nam; })
     .sort(function (x, y) { return y.so - x.so || (y.hau > x.hau ? 1 : -1); });
-  var so = vb.map(function (p) { return p.so; }), dau = vb.length ? Math.min.apply(null, so) : 0, cuoi = vb.length ? Math.max.apply(null, so) : 0, lo = [], dem = {}, trung = [], sai = [], moiNhat = 0;
+  var so = vb.map(function (p) { return p.so; }), dau = vb.length ? Math.min.apply(null, so) : 0, cuoi = vb.length ? Math.max.apply(null, so) : 0, lo = [], dem = {}, trung = [], sai = [];
   if (vb.length) for (var n = dau; n <= cuoi; n++) if (so.indexOf(n) < 0) lo.push(n);
   vb.forEach(function (p) { if (!p.huy) dem[p.khoa] = (dem[p.khoa] || 0) + 1; });
   Object.keys(dem).forEach(function (k) { if (dem[k] > 1) trung.push(k); });
-  vb.slice().reverse().forEach(function (p) {   // số tăng mà ngày lùi: bỏ qua số có hậu tố vì chèn cho quá khứ là đúng quy tắc
-    if (p.huy) return;
-    var ngayP = Math.floor((p.tao + 7 * GIO) / (24 * GIO));
-    if (!p.hau && p.ngay && ngayP < moiNhat) sai.push(p);
-    if (p.ngay) moiNhat = Math.max(moiNhat, ngayP);
-  });
+  sai = dongLechNgay(vb.slice().reverse().filter(function (p) { return !p.huy && !p.hau && p.ngay; }));
   return { vb: vb, dau: dau, cuoi: cuoi, lo: lo, trung: trung, sai: sai, chieu: so0.chieu, dv: so0.dv,
     giu: GIU_SO.filter(function (g) { return g.soId === id && g.nam === S.nam; }), lech: vb.filter(function (p) { return p.tt === 'lech' || p.tt === 'loi'; }) };
 }
