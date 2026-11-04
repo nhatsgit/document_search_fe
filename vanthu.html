@@ -692,18 +692,27 @@ var COT_SO = [
   { id: 'hd', ten: 'Hành động', rong: 92, tim: false, sap: false, o: function (p) { return nutLienKet(p); } },
 ];
 var COT_SO_MAP = {}; COT_SO.forEach(function (c) { COT_SO_MAP[c.id] = c; });
-function cfgSoMac() { return { thuTu: COT_SO.map(function (c) { return c.id; }), an: COT_SO.reduce(function (m, c) { if (c.an) m[c.id] = 1; return m; }, {}), rong: {} }; }
-var CFG_SO = (function () {
+// Mặc định riêng từng nhánh: văn thư đến ẩn luồng, người ký, tình trạng; văn thư đi ẩn số gốc, cơ quan
+var AN_THEM = { den: ['luong', 'nguoiKy', 'tt'], di: ['soGoc', 'coQuan'] };
+function cfgSoMac(ch) {
+  var an = COT_SO.reduce(function (m, c) { if (c.an) m[c.id] = 1; return m; }, {});
+  AN_THEM[ch].forEach(function (id) { an[id] = 1; });
+  return { thuTu: COT_SO.map(function (c) { return c.id; }), an: an, rong: {} };
+}
+function docCfgSo(ch) {
   try {
-    var x = JSON.parse(localStorage.getItem('vt_cot') || 'null'), m = cfgSoMac();
+    var x = JSON.parse(localStorage.getItem('vt_cot_' + ch) || 'null'), m = cfgSoMac(ch);
     if (!x) return m;
     var co = (x.thuTu || []).filter(function (i) { return COT_SO_MAP[i]; });
     m.thuTu.forEach(function (i) { if (co.indexOf(i) < 0) co.push(i); });
     return { thuTu: co, an: x.an || m.an, rong: x.rong || {} };
-  } catch (e) { return cfgSoMac(); }
-})();
-function luuCfgSo() { try { localStorage.setItem('vt_cot', JSON.stringify(CFG_SO)); } catch (e) {} }
-function cotSoHien() { return CFG_SO.thuTu.filter(function (i) { return !CFG_SO.an[i]; }).map(function (i) { return COT_SO_MAP[i]; }); }
+  } catch (e) { return cfgSoMac(ch); }
+}
+var CFG_NHANH = { den: docCfgSo('den'), di: docCfgSo('di') };
+function chieuSo() { return (timSo(S.so) || {}).chieu === 'den' ? 'den' : 'di'; }
+function cfgSo() { return CFG_NHANH[chieuSo()]; }
+function luuCfgSo() { try { localStorage.setItem('vt_cot_' + chieuSo(), JSON.stringify(cfgSo())); } catch (e) {} }
+function cotSoHien() { return cfgSo().thuTu.filter(function (i) { return !cfgSo().an[i]; }).map(function (i) { return COT_SO_MAP[i]; }); }
 
 /* Bộ lọc: 4 nhóm hiện sẵn, các nhóm khác mở bằng "Thêm trường lọc" */
 var LOC_SO = [['nguon', 'Nguồn', function (p) { return p.root ? 'Phiếu Base' : 'Sổ cũ ghi tay'; }], ['tt', 'Tình trạng', function (p) { return p.root ? TT[p.tt] : 'Sổ cũ'; }], ['loai', 'Loại văn thư', function (p) { return p.loai[1]; }], ['thang', 'Tháng', function (p) { return p.ngay ? 'Tháng ' + (new Date(p.ngay).getMonth() + 1) : ''; }],
@@ -815,7 +824,7 @@ function veDsSoVb() {
   var ds = sapHang(locHang()), tong = nguonSo().length, co = 20, soTrang = Math.max(1, Math.ceil(ds.length / co));
   S.trangSo = Math.min(S.trangSo, soTrang);
   var cot = cotSoHien().slice(), khac = S.pvSo !== 'so', rongTong = 0;
-  cot.forEach(function (c) { rongTong += CFG_SO.rong[c.id] || c.rong || 300; });
+  cot.forEach(function (c) { rongTong += cfgSo().rong[c.id] || c.rong || 300; });
   if (khac) rongTong += 150;
   var sap = S.sapSo, x = tuDanhDau;
   var nb = $('#svNutLoc'); if (nb) nb.textContent = 'Bộ lọc' + (soLoc() ? ' (' + soLoc() + ')' : '');
@@ -823,7 +832,7 @@ function veDsSoVb() {
     (ds.length ? '<div class="bang"><table class="sv-bang" style="min-width:' + rongTong + 'px;width:100%"><thead><tr>' +
       (khac ? '<th style="width:150px">Sổ</th>' : '') +
       cot.map(function (c) {
-        var w = CFG_SO.rong[c.id] || c.rong, mt = sap && sap.id === c.id ? (sap.chieu > 0 ? ' ▲' : ' ▼') : '';
+        var w = cfgSo().rong[c.id] || c.rong, mt = sap && sap.id === c.id ? (sap.chieu > 0 ? ' ▲' : ' ▼') : '';
         return '<th' + (c.sap === false ? '' : ' class="sap" data-sv="sap" data-c="' + c.id + '" title="Bấm để sắp xếp"') + (w ? ' style="width:' + w + 'px"' : '') + '>' + esc(c.ten) + mt + '</th>'; }).join('') + '</tr></thead><tbody>' +
       ds.slice((S.trangSo - 1) * co, S.trangSo * co).map(function (h) {
         var p = h.p, ten = khac ? (timSo(p.soId) || {}).ten || '' : '';
@@ -882,11 +891,11 @@ function veHopLoc() {
 function docBoLoc() { try { return JSON.parse(localStorage.getItem('vt_bo_loc') || '[]'); } catch (e) { return []; } }
 function ghiBoLoc(ds) { try { localStorage.setItem('vt_bo_loc', JSON.stringify(ds)); } catch (e) {} }
 function veHopCot() {
-  var giu = $('.sv-than'), cuon = giu ? giu.scrollTop : 0, n = CFG_SO.thuTu.length;
-  hopSo('<div class="sv-dau"><h2>Tuỳ chỉnh cột</h2><button class="nut" data-sv="dong" aria-label="Đóng">×</button></div><div class="sv-than">' +
-    CFG_SO.thuTu.map(function (id, i) {
-      var c = COT_SO_MAP[id], r = CFG_SO.rong[id] || c.rong || 0;
-      return '<div class="sv-cot"><label><input type="checkbox" data-svcot="' + id + '"' + (CFG_SO.an[id] ? '' : ' checked') + '>' + esc(c.ten) + '</label>' +
+  var giu = $('.sv-than'), cuon = giu ? giu.scrollTop : 0, n = cfgSo().thuTu.length;
+  hopSo('<div class="sv-dau"><h2>Tuỳ chỉnh cột · ' + (chieuSo() === 'den' ? 'Văn thư đến' : 'Văn thư đi') + '</h2><button class="nut" data-sv="dong" aria-label="Đóng">×</button></div><div class="sv-than">' +
+    cfgSo().thuTu.map(function (id, i) {
+      var c = COT_SO_MAP[id], r = cfgSo().rong[id] || c.rong || 0;
+      return '<div class="sv-cot"><label><input type="checkbox" data-svcot="' + id + '"' + (cfgSo().an[id] ? '' : ' checked') + '>' + esc(c.ten) + '</label>' +
         (c.rong ? '<input type="range" min="60" max="400" step="10" value="' + r + '" data-svrong="' + id + '" aria-label="Độ rộng ' + esc(c.ten) + '">' : '<small class="phu">co giãn</small>') +
         '<button class="sv-mt" data-sv="len" data-c="' + id + '"' + (i ? '' : ' disabled') + ' aria-label="Đưa ' + esc(c.ten) + ' lên">↑</button><button class="sv-mt" data-sv="xuong" data-c="' + id + '"' + (i < n - 1 ? '' : ' disabled') + ' aria-label="Đưa ' + esc(c.ten) + ' xuống">↓</button></div>';
     }).join('') + '</div><div class="sv-chan"><button class="nut" data-sv="macDinh">Về mặc định</button><button class="nut xanh" data-sv="dong">Xong</button></div>', true);
@@ -909,8 +918,8 @@ document.addEventListener('click', function (e) {
   else if (a === 'luuLoc') { var ten = ($('#svTenLuu').value || '').trim(); if (!ten) { $('#svTenLuu').focus(); return; } var ls = docBoLoc().filter(function (x) { return x.ten !== ten; }); ls.push({ ten: ten, q: S.qSoVb, truong: S.truongSo, loc: S.locSo, tt: S.locTT, tu: S.tuNgay, den: S.denNgay }); ghiBoLoc(ls); veHopLoc(); }
   else if (a === 'dungLuu') { var x = docBoLoc()[Number(t.dataset.i)]; if (x) { S.qSoVb = x.q || ''; S.truongSo = x.truong || 'tat'; S.locSo = x.loc || {}; S.locTT = x.tt || ''; S.tuNgay = x.tu || ''; S.denNgay = x.den || ''; S.trangSo = 1; hopSo(''); veThanhSo($('#noiSo')); } }
   else if (a === 'xoaLuu') { var l2 = docBoLoc(); l2.splice(Number(t.dataset.i), 1); ghiBoLoc(l2); veHopLoc(); }
-  else if (a === 'len' || a === 'xuong') { var o = CFG_SO.thuTu, i = o.indexOf(t.dataset.c), j = i + (a === 'len' ? -1 : 1); if (j >= 0 && j < o.length) { o[i] = o[j]; o[j] = t.dataset.c; luuCfgSo(); ds(); veHopCot(); } }
-  else if (a === 'macDinh') { CFG_SO = cfgSoMac(); luuCfgSo(); ds(); veHopCot(); }
+  else if (a === 'len' || a === 'xuong') { var o = cfgSo().thuTu, i = o.indexOf(t.dataset.c), j = i + (a === 'len' ? -1 : 1); if (j >= 0 && j < o.length) { o[i] = o[j]; o[j] = t.dataset.c; luuCfgSo(); ds(); veHopCot(); } }
+  else if (a === 'macDinh') { CFG_NHANH[chieuSo()] = cfgSoMac(chieuSo()); luuCfgSo(); ds(); veHopCot(); }
 }, true);
 document.addEventListener('change', function (e) {
   var t = e.target, d = t.dataset || {}, ds = function () { S.trangSo = 1; if ($('#dsSoVb')) veDsSoVb(); };
@@ -920,8 +929,8 @@ document.addEventListener('change', function (e) {
   else if (t.id === 'svTu') { S.tuNgay = t.value; ds(); veHopLoc(); }
   else if (t.id === 'svDen') { S.denNgay = t.value; ds(); veHopLoc(); }
   else if (t.id === 'svThem' && t.value) { S.themLoc = (S.themLoc || []).concat([t.value]); veHopLoc(); }
-  else if (d.svcot) { if (t.checked) delete CFG_SO.an[d.svcot]; else CFG_SO.an[d.svcot] = 1; luuCfgSo(); if ($('#dsSoVb')) veDsSoVb(); }
-  else if (d.svrong) { CFG_SO.rong[d.svrong] = Number(t.value); luuCfgSo(); if ($('#dsSoVb')) veDsSoVb(); }
+  else if (d.svcot) { if (t.checked) delete cfgSo().an[d.svcot]; else cfgSo().an[d.svcot] = 1; luuCfgSo(); if ($('#dsSoVb')) veDsSoVb(); }
+  else if (d.svrong) { cfgSo().rong[d.svrong] = Number(t.value); luuCfgSo(); if ($('#dsSoVb')) veDsSoVb(); }
 });
 document.addEventListener('keydown', function (e) {
   if (e.key === 'Escape' && $('#hopSoVt') && $('#hopSoVt').innerHTML) { hopSo(''); e.stopImmediatePropagation(); return; }
