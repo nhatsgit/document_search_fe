@@ -665,14 +665,7 @@ function veSo() {
       '<div class="ds-so" id="dsSo">' + veDsSo() + '</div></aside>' +
     '<section class="the"><div style="padding:14px 16px;display:flex;flex-direction:column;gap:12px">' +
       '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;justify-content:space-between"><div style="display:flex;flex-direction:column;gap:2px"><h2 style="font-size:17px">' + esc(so.ten) + ' · ' + esc(so.dv) + ' ' + S.nam + '</h2><span class="phu">' + (so.ky ? 'Gồm: ' + esc(so.ky) + ' · ' : '') + (so.donViSo ? esc(so.donViSo) + ' · ' : '') + 'sổ cái trên Google Sheet</span></div>' + chipChieu(so.chieu, true) + '</div>' +
-      '<div class="chi-so">' +
-        '<div><span>Đã cấp</span><b class="so">' + (c.vb.length ? c.dau + '–' + c.cuoi : '—') + '</b></div>' +
-        '<div><span>Số kế tiếp</span><b class="so">' + (c.cuoi + 1) + '</b></div>' +
-        '<div><span>Đã dùng</span><b class="so">' + c.vb.length + '</b></div>' +
-        '<div><span>Giữ số</span><b class="so" style="color:#3730A3">' + c.giu.length + '</b></div>' +
-        '<div><span>Nhảy số</span><b class="so" style="' + (c.lo.length ? 'color:#9F1D1D' : '') + '">' + c.lo.length + '</b></div>' +
-        '<div><span>Trùng số</span><b class="so" style="' + (c.trung.length ? 'color:#9F1D1D' : '') + '">' + c.trung.length + '</b></div>' +
-      '</div></div>' +
+      '</div>' +
       '<div class="tabs" role="tablist">' + [['vb', 'Văn bản', c.vb.length], ['luoi', 'Lưới số'], ['vd', 'Vấn đề', c.lo.length + c.lech.length + c.trung.length + c.sai.length, true]].map(function (t) {
         return '<button role="tab" aria-selected="' + (S.tabSo === t[0]) + '" class="' + (S.tabSo === t[0] ? 'chon' : '') + '" data-tabso="' + t[0] + '">' + t[1] +
           (t[2] != null ? '<span class="dem' + (t[3] && t[2] ? ' do' : '') + '">' + t[2] + '</span>' : '') + '</button>'; }).join('') + '</div>' +
