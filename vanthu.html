@@ -727,9 +727,9 @@ function veNoiSo() {
     var ghiSai = function (x) { return laSai[x.id] ? 'Sai thời gian: ngày ' + ngay(x.ngay) + ' không khớp thứ tự số trong sổ. ' : ''; };
     var ngayO = function (x) { return '<small>' + (x && x.ngay ? ngay(x.ngay).slice(0, 5) : '—') + '</small>'; };
     var o = [], VIEN = { qua: '#E07B12', loi: '#D64545', lech: '#6366F1', dung: '#1F8A55', xong: '#E1E6EE' };
-    for (var n = c.dau; c.vb.length && n <= c.cuoi; n++) {
+    for (var n = c.cuoi; c.vb.length && n >= c.dau; n--) {   // số lớn (mới nhất) hiện trước
       if (!theoSo[n]) { o.push('<span class="lo" title="Nhảy số: chưa có văn bản dùng số này">' + n + ngayO(null) + '</span>'); continue; }
-      theoSo[n].slice().sort(function (x, y) { return x.hau > y.hau ? 1 : -1; }).forEach(function (p) {
+      theoSo[n].slice().sort(function (x, y) { return y.hau > x.hau ? 1 : -1; }).forEach(function (p) {
         o.push(p.giu ? '<a class="giu' + (laSai[p.id] ? ' sai-tg' : '') + '" href="#/phieu/' + esc(p.id) + '" title="' + esc(ghiSai(p) + p.trich) + '" style="color:inherit;text-decoration:none">' + esc(p.khoa) + ngayO(p) + '</a>'
           : '<button' + (laSai[p.id] ? ' class="sai-tg"' : '') + ' data-mo="' + esc(p.id) + '" title="' + (p.huy ? 'Đã huỷ: ' : '') + esc(ghiSai(p) + p.trich) + '" style="' + (p.huy ? 'border-color:#B8C0CC;text-decoration:line-through;color:var(--chu-4)' : c.trung.indexOf(p.khoa) >= 0 ? 'border:2px solid #D64545;background:#FDECEC' : !p.root ? 'border-color:#E1E6EE;background:#F1F3F6' : 'border-color:' + VIEN[p.tt]) + '">' + esc(p.khoa) + ngayO(p) + '</button>');
       });
