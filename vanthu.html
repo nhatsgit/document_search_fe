@@ -200,7 +200,6 @@ table.sv-bang .tim-o th{top:38px;height:40px;box-shadow:0 1px 0 var(--vien)}
   body.trang-so #man{padding-bottom:0}
   body.trang-so .so-bo{flex-wrap:nowrap;height:calc(100dvh - var(--vt-tren,90px) - 14px)}
   body.trang-so .so-bo>aside,body.trang-so .so-bo>section{height:100%;min-height:0;display:flex;flex-direction:column}
-  body.trang-so .so-bo>aside{flex:0 0 300px}
   body.trang-so .so-bo>section{flex:1 1 0}
   body.trang-so .ds-so{flex:1;min-height:0;overflow-y:auto}
   body.trang-so #noiSo{flex:1;min-height:0;overflow-y:auto}
@@ -209,6 +208,18 @@ table.sv-bang .tim-o th{top:38px;height:40px;box-shadow:0 1px 0 var(--vien)}
   body.trang-so #dsSoVb .bang{flex:1;min-height:0;max-height:none}
   body.trang-so .chi-so div{padding-top:6px;padding-bottom:6px}
   body.trang-so .phan-trang{flex:none}
+}
+.so-chon{display:flex;gap:8px}
+.so-chon select{flex:1;min-width:0}
+@media (min-width:901px){
+  .so-bo{flex-wrap:nowrap}
+  .so-bo>aside{flex:0 0 150px;max-width:150px}
+  .so-bo>section{flex:1 1 0}
+  .so-chon{flex-direction:column;gap:6px}
+  .so-bo>aside h2{font-size:14px!important}
+  .ds-so button{padding:8px!important}
+  .ds-so button b{font-size:13px!important;overflow-wrap:anywhere}
+  .ds-so button .phu{font-size:12px}
 }
 /* ---------- tìm kiếm trong sổ ---------- */
 .sv-thanh{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
@@ -420,7 +431,7 @@ function tick(ok, coDuLieu) { return 'chip nhe ' + (!coDuLieu ? 'tt-xong' : ok ?
 
 /* ---------- trạng thái giao diện ---------- */
 var S = { dv: 'Tất cả', chieu: 'tat', tab: 'can', locCanh: 'tat', locPhieu: 'tat', locBuoc: null, q: '', trang: 1,
-  so: 'den|BHCK', dvSo: 'BHCK', qSo: '', tabSo: 'vb', locThang: '', locKy: '', locLuong: '', locTT: '', qSoVb: '', trangSo: 1, tabCt: 'tien', ctId: null, thuQt: {}, ngan: null };
+  so: 'den|BHCK', dvSo: 'BHCK', tabSo: 'vb', locThang: '', locKy: '', locLuong: '', locTT: '', qSoVb: '', trangSo: 1, tabCt: 'tien', ctId: null, thuQt: {}, ngan: null };
 
 function dsChon() { return DS.filter(function (p) { return (S.dv === 'Tất cả' || p.dv === S.dv) && (S.chieu === 'tat' || p.chieu === S.chieu); }); }
 function dsMo() { return dsChon().filter(function (p) { return p.tt !== 'xong' && p.tt !== 'giu'; }); }
@@ -654,9 +665,8 @@ function veSo() {
   var so = timSo(S.so) || { ten: 'Chưa có sổ', dv: S.dvSo, ky: '' }, c = chiSoSo(S.so);
   $('#man').innerHTML = '<div class="so-bo">' +
     '<aside class="the"><div style="padding:14px 14px 10px;display:flex;flex-direction:column;gap:8px"><h2 style="font-size:15px">Sổ văn thư</h2>' +
-      '<div class="hang" style="gap:8px;flex-wrap:nowrap"><select class="o" id="chonDvSo" aria-label="Công ty" style="flex:1;min-width:0">' + DV.map(function (d) { return '<option' + (d === S.dvSo ? ' selected' : '') + '>' + esc(d) + '</option>'; }).join('') + '</select>' +
-      '<select class="o" id="chonNam" aria-label="Năm">' + namCoDuLieu().map(function (n) { return '<option' + (n === S.nam ? ' selected' : '') + '>' + n + '</option>'; }).join('') + '</select></div>' +
-      '<input class="o" id="oTimSo" type="search" placeholder="Tìm sổ (vd: quyết định, cv)" value="' + esc(S.qSo) + '" aria-label="Tìm sổ"></div>' +
+      '<div class="so-chon"><select class="o" id="chonDvSo" aria-label="Công ty">' + DV.map(function (d) { return '<option' + (d === S.dvSo ? ' selected' : '') + '>' + esc(d) + '</option>'; }).join('') + '</select>' +
+      '<select class="o" id="chonNam" aria-label="Năm">' + namCoDuLieu().map(function (n) { return '<option' + (n === S.nam ? ' selected' : '') + '>' + n + '</option>'; }).join('') + '</select></div></div>' +
       '<div class="ds-so" id="dsSo">' + veDsSo() + '</div></aside>' +
     '<section class="the"><div style="padding:14px 16px;display:flex;flex-direction:column;gap:12px">' +
       '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;justify-content:space-between"><div style="display:flex;flex-direction:column;gap:2px"><h2 style="font-size:17px">' + esc(so.ten) + ' · ' + esc(so.dv) + ' ' + S.nam + '</h2><span class="phu">' + (so.ky ? 'Gồm: ' + esc(so.ky) + ' · ' : '') + (so.donViSo ? esc(so.donViSo) + ' · ' : '') + 'sổ cái trên Google Sheet</span></div>' + chipChieu(so.chieu, true) + '</div>' +
@@ -675,7 +685,7 @@ function veSo() {
   veNoiSo();
 }
 function veDsSo() {
-  var ds = dsSo().filter(function (s) { return s.dv === S.dvSo && (!S.qSo || boDau(s.ten + ' ' + s.ky).indexOf(boDau(S.qSo)) >= 0); });
+  var ds = dsSo().filter(function (s) { return s.dv === S.dvSo; });
   var nhom = function (c, tieuDe) {
     var x = ds.filter(function (s) { return s.chieu === c; });
     return x.length ? '<div style="font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;color:var(--chu-3);padding:6px 2px 0">' + tieuDe + '</div>' + x.map(function (s) {
@@ -1140,7 +1150,7 @@ document.addEventListener('click', function (e) {
   else if (d.buoc) { var b = d.buoc.split(':'); S.locBuoc = [b[0], Number(b[1])]; S.locPhieu = 'tat'; S.tab = 'phieu'; S.trang = 1; veTongQuan(); }
   else if (d.mo) { location.hash = '#/phieu/' + d.mo; }
   else if (d.trang) { S.trang = Number(d.trang); veNoiTab(); }
-  else if (d.so) { e.preventDefault(); S.so = d.so; S.dvSo = d.so.split('|')[1]; S.qSo = ''; S.trangSo = 1; datLaiLocSo(); if (location.hash !== '#/so') location.hash = '#/so'; else veSo(); }
+  else if (d.so) { e.preventDefault(); S.so = d.so; S.dvSo = d.so.split('|')[1]; S.trangSo = 1; datLaiLocSo(); if (location.hash !== '#/so') location.hash = '#/so'; else veSo(); }
   else if (d.tabso) { S.tabSo = d.tabso; veSo(); }
   else if (d.loctt != null) { S.locTT = d.loctt; S.trangSo = 1; veNoiSo(); }
   else if (d.trangso) { S.trangSo = Number(d.trangso); veDsSoVb(); }
@@ -1155,12 +1165,11 @@ document.addEventListener('keydown', function (e) {
 document.addEventListener('input', function (e) {
   var t = e.target;
   if (t.id === 'oTim') { S.q = t.value; S.trang = 1; var vt = t.selectionStart; veNoiTab(); var o = $('#oTim'); o.focus(); o.setSelectionRange(vt, vt); }
-  else if (t.id === 'oTimSo') { S.qSo = t.value; $('#dsSo').innerHTML = veDsSo(); }
   else if (t.id === 'oTimSoVb') { S.qSoVb = t.value; S.trangSo = 1; veDsSoVb(); veGoiYSo(); }
 });
 document.addEventListener('change', function (e) {
   var t = e.target;
-  if (t.id === 'chonDvSo') { S.dvSo = t.value; S.qSo = ''; chonSoDau(); S.trangSo = 1; datLaiLocSo(); veSo(); }
+  if (t.id === 'chonDvSo') { S.dvSo = t.value; chonSoDau(); S.trangSo = 1; datLaiLocSo(); veSo(); }
   else if (t.id === 'chonNam') { S.nam = Number(t.value); S.trangSo = 1; datLaiLocSo(); veSo(); }
 });
 
