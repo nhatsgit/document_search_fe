@@ -625,18 +625,22 @@ function veNoiSo() {
     for (var n = c.dau; c.vb.length && n <= c.cuoi; n++) {
       if (!theoSo[n]) { o.push('<span class="lo" title="Nhảy số: chưa có văn bản dùng số này">' + n + '</span>'); continue; }
       theoSo[n].slice().sort(function (x, y) { return x.hau > y.hau ? 1 : -1; }).forEach(function (p) {
-        o.push(p.giu ? '<span class="giu" title="' + esc(p.trich) + '">' + esc(p.khoa) + '</span>'
+        o.push(p.giu ? '<a class="giu" href="#/phieu/' + esc(p.id) + '" title="' + esc(p.trich) + '" style="color:inherit;text-decoration:none">' + esc(p.khoa) + '</a>'
           : '<button data-mo="' + esc(p.id) + '" title="' + esc(p.trich) + '" style="border-color:' + (c.trung.indexOf(p.khoa) >= 0 ? '#D64545' : VIEN[p.tt]) + '">' + esc(p.khoa) + '</button>');
       });
     }
     el.innerHTML = '<span class="phu">Viền màu theo tình trạng phiếu · ô đỏ: nhảy số · ô tím nét đứt: giữ số. Bấm một số để xem phiếu.</span>' + (o.length ? '<div class="luoi-so">' + o.join('') + '</div>' : '<div class="rong">Sổ chưa cấp số nào</div>');
   } else {
-    var vd = c.trung.map(function (k) { return '<tr><td><span class="chip tt-loi">Trùng số</span></td><td class="so">' + esc(k) + '</td><td>' + c.vb.filter(function (p) { return p.khoa === k; }).map(function (p) { return '<a href="#/phieu/' + esc(p.id) + '">' + esc(p.ma || p.khoa) + '</a> ' + esc(p.trich.slice(0, 70)); }).join('<br>') + '</td><td></td></tr>'; })
-      .concat(c.sai.map(function (p) { return '<tr class="bam" data-mo="' + esc(p.id) + '"><td><span class="chip tt-qua">Sai thời gian</span></td><td class="so">' + esc(p.khoa) + '</td><td>Ngày ' + ngay(p.tao) + ' sớm hơn văn bản số nhỏ hơn trong sổ<div class="phu">' + esc(p.trich) + '</div></td><td><a href="#/phieu/' + esc(p.id) + '">Xem</a></td></tr>'; }))
-      .concat(c.lo.map(function (n) { return '<tr><td><span class="chip tt-loi">Nhảy số</span></td><td class="so">' + n + '</td><td>Không có văn bản nào dùng số này: kiểm tra phiếu bị huỷ hoặc cấp nhầm.</td><td></td></tr>'; }))
-      .concat(c.lech.map(function (p) { return '<tr class="bam" data-mo="' + esc(p.id) + '"><td>' + chipTT(p.tt) + '</td><td class="so">' + esc(p.khoa) + '</td><td>' + esc(moTa(p)) + '<div class="phu">' + esc(p.trich) + '</div></td><td><a href="#/phieu/' + esc(p.id) + '">Xem</a></td></tr>'; }))
-      .concat(c.giu.map(function (g) { return '<tr><td><span class="chip c-giu">Giữ số</span></td><td class="so">' + g.so + '</td><td>' + esc(g.ly) + ' · ' + esc(g.nguoi) + '</td><td></td></tr>'; }));
-    el.innerHTML = vd.length ? '<div class="bang"><table><thead><tr><th>Loại</th><th>Số</th><th>Mô tả</th><th></th></tr></thead><tbody>' + vd.join('') + '</tbody></table></div>' : '<div class="rong" style="color:#1F6B44">Sổ này không có vấn đề</div>';
+    var dong = function (chip, so, moTaDong, x) {   // x: phiếu của dòng; bấm dòng mở chi tiết, nhảy số thì không có phiếu để mở
+      return '<tr' + (x ? ' class="bam" data-mo="' + esc(x.id) + '"' : '') + '><td>' + chip + '</td><td class="so">' + esc(so) + '</td><td>' + moTaDong + '</td><td>' + (x ? nutLienKet(x) : '') + '</td></tr>';
+    };
+    var vd = [].concat.apply([], c.trung.map(function (k) { return c.vb.filter(function (x) { return x.khoa === k; }).map(function (x) {
+        return dong('<span class="chip tt-loi">Trùng số</span>', k, esc(x.ma || k) + '<div class="phu">' + esc(x.trich) + '</div>', x); }); }))
+      .concat(c.sai.map(function (x) { return dong('<span class="chip tt-qua">Sai thời gian</span>', x.khoa, 'Ngày ' + ngay(x.tao) + ' sớm hơn văn bản số nhỏ hơn trong sổ<div class="phu">' + esc(x.trich) + '</div>', x); }))
+      .concat(c.lech.map(function (x) { return dong(chipPhieu(x), x.khoa, esc(moTa(x)) + '<div class="phu">' + esc(x.trich) + '</div>', x); }))
+      .concat(c.giu.map(function (g) { var x = timPhieu(g.id); return dong('<span class="chip c-giu">Giữ số</span>', g.so, esc(g.ly) + '<div class="phu">' + esc(g.nguoi) + '</div>', x); }))
+      .concat(c.lo.map(function (n) { return dong('<span class="chip tt-loi">Nhảy số</span>', n, 'Không có văn bản nào dùng số này: kiểm tra phiếu bị huỷ hoặc cấp nhầm.', null); }));
+    el.innerHTML = vd.length ? '<div class="bang"><table style="min-width:680px"><thead><tr><th>Loại</th><th>Số</th><th>Mô tả</th><th>Hành động</th></tr></thead><tbody>' + vd.join('') + '</tbody></table></div>' : '<div class="rong" style="color:#1F6B44">Sổ này không có vấn đề</div>';
   }
 }
 function veDsSoVb() {
