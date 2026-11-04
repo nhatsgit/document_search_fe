@@ -369,7 +369,7 @@ var TT = { loi: 'Lỗi', qua: 'Treo lâu', lech: 'Lệch dữ liệu', dung: 'Đ
 var THU_TU_TT = { loi: 0, qua: 1, lech: 2, dung: 3, xong: 4 };
 function chipTT(tt) { return '<span class="chip tt-' + tt + '">' + TT[tt] + '</span>'; }
 function chipChieu(c, dai) { return '<span class="chip ' + (c === 'den' ? 'c-den">' + (dai ? 'Văn thư đến' : 'Đến') : 'c-di">' + (dai ? 'Văn thư đi' : 'Đi')) + '</span>'; }
-function tenBuoc(p) { return !p.root ? 'Sổ cũ ghi tay' : p.tt === 'xong' ? (p.huy ? 'Đã huỷ' : p.giu ? 'Giữ số' : 'Đã xong') : BUOC[p.chieu][p.b][0]; }
+function tenBuoc(p) { return p.huy ? 'Đã huỷ' : !p.root ? 'Sổ cũ ghi tay' : p.tt === 'xong' ? (p.huy ? 'Đã huỷ' : p.giu ? 'Giữ số' : 'Đã xong') : BUOC[p.chieu][p.b][0]; }
 function nguoiGiu(p) { return p.tt === 'xong' ? '—' : NGUOI[p.chieu][p.b]; }
 function nutLienKet(p) {
   var mot = function (u, anh, ten) {
@@ -378,7 +378,7 @@ function nutLienKet(p) {
   };
   return '<span class="hd-lk">' + mot(p.linkBase, 'base-service.png', 'Service') + mot(p.linkOffice, 'base-office.png', 'Office') + '</span>';
 }
-function chipPhieu(p) { return p.root ? chipTT(p.tt) : '<span class="chip tt-xong" title="Ghi tay trước khi dùng hệ thống Base">Sổ cũ</span>'; }
+function chipPhieu(p) { return p.huy ? '<span class="chip tt-xong" style="text-decoration:line-through">Đã huỷ</span>' : p.root ? chipTT(p.tt) : '<span class="chip tt-xong" title="Ghi tay trước khi dùng hệ thống Base">Sổ cũ</span>'; }
 function maHien(p) { return p.ma || 'Chưa cấp'; }
 function tenPhieu(p) { return p.ten || ((p.chieu === 'den' ? 'VT Đến - ' : 'VT Đi - ') + (p.ma ? '[' + p.ma + '] ' : '') + p.trich); }
 function moTa(p) {
@@ -589,13 +589,14 @@ function dsSo() { return DS_SO; }
 function timSo(id) { return dsSo().filter(function (s) { return s.id === id; })[0]; }
 function chiSoSo(id) {
   var so0 = timSo(id) || { chieu: String(id).split('|')[0], dv: String(id).split('|')[1] };
-  var vb = DS.filter(function (p) { return p.soId === id && p.so != null && !p.huy && layNam(p.tao) === S.nam; })
+  var vb = DS.filter(function (p) { return p.soId === id && p.so != null && layNam(p.tao) === S.nam; })
     .sort(function (x, y) { return y.so - x.so || (y.hau > x.hau ? 1 : -1); });
   var so = vb.map(function (p) { return p.so; }), dau = vb.length ? Math.min.apply(null, so) : 0, cuoi = vb.length ? Math.max.apply(null, so) : 0, lo = [], dem = {}, trung = [], sai = [], moiNhat = 0;
   if (vb.length) for (var n = dau; n <= cuoi; n++) if (so.indexOf(n) < 0) lo.push(n);
-  vb.forEach(function (p) { dem[p.khoa] = (dem[p.khoa] || 0) + 1; });
+  vb.forEach(function (p) { if (!p.huy) dem[p.khoa] = (dem[p.khoa] || 0) + 1; });
   Object.keys(dem).forEach(function (k) { if (dem[k] > 1) trung.push(k); });
   vb.slice().reverse().forEach(function (p) {   // số tăng mà ngày lùi: bỏ qua số có hậu tố vì chèn cho quá khứ là đúng quy tắc
+    if (p.huy) return;
     var ngayP = Math.floor((p.tao + 7 * GIO) / (24 * GIO));
     if (!p.hau && p.ngay && ngayP < moiNhat) sai.push(p);
     if (p.ngay) moiNhat = Math.max(moiNhat, ngayP);
@@ -655,10 +656,10 @@ function veNoiSo() {
       if (!theoSo[n]) { o.push('<span class="lo" title="Nhảy số: chưa có văn bản dùng số này">' + n + '</span>'); continue; }
       theoSo[n].slice().sort(function (x, y) { return x.hau > y.hau ? 1 : -1; }).forEach(function (p) {
         o.push(p.giu ? '<a class="giu" href="#/phieu/' + esc(p.id) + '" title="' + esc(p.trich) + '" style="color:inherit;text-decoration:none">' + esc(p.khoa) + '</a>'
-          : '<button data-mo="' + esc(p.id) + '" title="' + esc(p.trich) + '" style="border-color:' + (c.trung.indexOf(p.khoa) >= 0 ? '#D64545' : VIEN[p.tt]) + '">' + esc(p.khoa) + '</button>');
+          : '<button data-mo="' + esc(p.id) + '" title="' + (p.huy ? 'Đã huỷ: ' : '') + esc(p.trich) + '" style="border-color:' + (p.huy ? '#B8C0CC' : c.trung.indexOf(p.khoa) >= 0 ? '#D64545' : VIEN[p.tt]) + (p.huy ? ';text-decoration:line-through;color:var(--chu-4)' : '') + '">' + esc(p.khoa) + '</button>');
       });
     }
-    el.innerHTML = '<span class="phu">Viền màu theo tình trạng phiếu · ô đỏ: nhảy số · ô tím nét đứt: giữ số. Bấm một số để xem phiếu.</span>' + (o.length ? '<div class="luoi-so">' + o.join('') + '</div>' : '<div class="rong">Sổ chưa cấp số nào</div>');
+    el.innerHTML = '<span class="phu">Viền màu theo tình trạng phiếu · ô đỏ: nhảy số · ô tím nét đứt: giữ số · gạch ngang: đã huỷ. Bấm một số để xem phiếu.</span>' + (o.length ? '<div class="luoi-so">' + o.join('') + '</div>' : '<div class="rong">Sổ chưa cấp số nào</div>');
   } else {
     var dong = function (chip, so, moTaDong, x) {   // x: phiếu của dòng; bấm dòng mở chi tiết, nhảy số thì không có phiếu để mở
       return '<tr' + (x ? ' class="bam" data-mo="' + esc(x.id) + '"' : '') + '><td>' + chip + '</td><td class="so">' + esc(so) + '</td><td>' + moTaDong + '</td><td>' + (x ? nutLienKet(x) : '') + '</td></tr>';
@@ -688,7 +689,7 @@ var COT_SO = [
   { id: 'thoiHan', ten: 'Thời hạn', rong: 90, an: true, lay: function (p) { return p.thoiHan; } },
   { id: 'phanLoai', ten: 'Phân loại', rong: 120, an: true, lay: function (p) { return p.phanLoai; } },
   { id: 'soTrang', ten: 'Số trang', rong: 70, an: true, lay: function (p) { return p.soTrang; }, gt: function (p) { return Number(p.soTrang) || 0; } },
-  { id: 'tt', ten: 'Tình trạng', rong: 100, tim: false, gt: function (p) { return p.root ? THU_TU_TT[p.tt] : 9; }, o: function (p) { return chipPhieu(p); } },
+  { id: 'tt', ten: 'Tình trạng', rong: 100, tim: false, gt: function (p) { return p.huy ? 10 : p.root ? THU_TU_TT[p.tt] : 9; }, o: function (p) { return chipPhieu(p); } },
   { id: 'hd', ten: 'Hành động', rong: 92, tim: false, sap: false, o: function (p) { return nutLienKet(p); } },
 ];
 var COT_SO_MAP = {}; COT_SO.forEach(function (c) { COT_SO_MAP[c.id] = c; });
@@ -715,7 +716,7 @@ function luuCfgSo() { try { localStorage.setItem('vt_cot_' + chieuSo(), JSON.str
 function cotSoHien() { return cfgSo().thuTu.filter(function (i) { return !cfgSo().an[i]; }).map(function (i) { return COT_SO_MAP[i]; }); }
 
 /* Bộ lọc: 4 nhóm hiện sẵn, các nhóm khác mở bằng "Thêm trường lọc" */
-var LOC_SO = [['nguon', 'Nguồn', function (p) { return p.root ? 'Phiếu Base' : 'Sổ cũ ghi tay'; }], ['tt', 'Tình trạng', function (p) { return p.root ? TT[p.tt] : 'Sổ cũ'; }], ['loai', 'Loại văn thư', function (p) { return p.loai[1]; }], ['thang', 'Tháng', function (p) { return p.ngay ? 'Tháng ' + (new Date(p.ngay).getMonth() + 1) : ''; }],
+var LOC_SO = [['nguon', 'Nguồn', function (p) { return p.root ? 'Phiếu Base' : 'Sổ cũ ghi tay'; }], ['tt', 'Tình trạng', function (p) { return p.huy ? 'Đã huỷ' : p.root ? TT[p.tt] : 'Sổ cũ'; }], ['loai', 'Loại văn thư', function (p) { return p.loai[1]; }], ['thang', 'Tháng', function (p) { return p.ngay ? 'Tháng ' + (new Date(p.ngay).getMonth() + 1) : ''; }],
   ['nguoiKy', 'Người ký', function (p) { return p.nguoiKy; }], ['nguoiSoan', 'Người soạn', function (p) { return p.nguoiSoan; }], ['coQuan', 'Cơ quan, đơn vị', function (p) { return p.coQuan; }], ['luong', 'Luồng', function (p) { return p.luong; }], ['donViNhan', 'Nhận, thực hiện', function (p) { return p.donViNhan; }], ['thoiHan', 'Thời hạn bảo quản', function (p) { return p.thoiHan; }], ['phanLoai', 'Phân loại', function (p) { return p.phanLoai; }], ['buoc', 'Bước', function (p) { return tenBuoc(p); }]];
 var LOC_SO_MAP = {}; LOC_SO.forEach(function (l) { LOC_SO_MAP[l[0]] = l; });
 var LOC_SAN = ['nguon', 'tt', 'loai', 'thang'];
@@ -744,7 +745,7 @@ function diemTim(p, P, truong) {
 }
 function nguonSo() {
   if (S.pvSo === 'so') return chiSoSo(S.so).vb;
-  return DS.filter(function (p) { return !p.huy && layNam(p.tao) === S.nam && (S.pvSo === 'tat' || p.dv === S.dvSo); });
+  return DS.filter(function (p) { return layNam(p.tao) === S.nam && (S.pvSo === 'tat' || p.dv === S.dvSo); });
 }
 /** Hàng qua tìm kiếm và bộ lọc; boQua: nhóm lọc không xét, dùng để đếm số trong chính nhóm đó. */
 function locHang(boQua) {
@@ -752,7 +753,7 @@ function locHang(boQua) {
   nguonSo().forEach(function (p) {
     var d = P.rong ? 0 : diemTim(p, P, S.truongSo || 'tat');
     if (d < 0) return;
-    if (S.locTT === 'cu' ? !!p.root : S.locTT && (!p.root || p.tt !== S.locTT)) return;
+    if (S.locTT === 'huy' ? !p.huy : S.locTT === 'cu' ? !!p.root || p.huy : S.locTT && (!p.root || p.huy || p.tt !== S.locTT)) return;
     if (S.tuNgay && (!p.ngay || p.ngay < Date.parse(S.tuNgay + 'T00:00:00+07:00'))) return;
     if (S.denNgay && (!p.ngay || p.ngay > Date.parse(S.denNgay + 'T23:59:59+07:00'))) return;
     for (var k in loc) if (k !== boQua && loc[k].length && loc[k].indexOf(LOC_SO_MAP[k][2](p)) < 0) return;
@@ -793,7 +794,7 @@ function veThanhSo(el) {
       '<div class="sv-o"><input class="o" id="oTimSoVb" type="search" autocomplete="off" placeholder="Tìm số, trích yếu, người ký… gõ không dấu; &quot;cụm từ&quot;; -loại trừ" value="' + esc(S.qSoVb || '') + '" aria-label="Tìm văn bản"><div class="sv-goi" id="svGoi" hidden></div></div>' +
       '<select class="o" id="svPham" aria-label="Phạm vi tìm" style="flex:0 1 150px">' + [['so', 'Sổ này'], ['dv', 'Cả đơn vị ' + S.dvSo], ['tat', 'Tất cả đơn vị']].map(function (x) { return '<option value="' + x[0] + '"' + (S.pvSo === x[0] ? ' selected' : '') + '>' + esc(x[1]) + '</option>'; }).join('') + '</select>' +
       '<button class="nut" data-sv="moLoc" id="svNutLoc">Bộ lọc' + (soLoc() ? ' (' + soLoc() + ')' : '') + '</button><button class="nut" data-sv="moCot">Tuỳ chỉnh cột</button></div>' +
-    '<div class="hang">' + [['', 'Tất cả'], ['dung', 'Đúng hạn'], ['qua', 'Treo lâu'], ['lech', 'Lệch dữ liệu'], ['loi', 'Lỗi'], ['xong', 'Xong'], ['cu', 'Sổ cũ']].map(function (t) {
+    '<div class="hang">' + [['', 'Tất cả'], ['dung', 'Đúng hạn'], ['qua', 'Treo lâu'], ['lech', 'Lệch dữ liệu'], ['loi', 'Lỗi'], ['xong', 'Xong'], ['huy', 'Đã huỷ'], ['cu', 'Sổ cũ']].map(function (t) {
         return '<button class="nut tron' + ((S.locTT || '') === t[0] ? ' chon' : '') + '" data-loctt="' + t[0] + '">' + t[1] + '</button>'; }).join('') +
       '<button class="nut tron" id="xoaLocSo" style="margin-left:auto">Xoá lọc</button></div>' +
     '<div id="dsSoVb" style="display:flex;flex-direction:column;gap:10px"></div>';
