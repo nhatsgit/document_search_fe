@@ -740,16 +740,17 @@ var COT_SO = [
   { id: 'hd', ten: 'Hành động', rong: 92, tim: false, sap: false, o: function (p) { return nutLienKet(p); } },
 ];
 var COT_SO_MAP = {}; COT_SO.forEach(function (c) { COT_SO_MAP[c.id] = c; });
-// Mặc định riêng từng nhánh: văn thư đến ẩn luồng, người ký, tình trạng; văn thư đi ẩn số gốc, cơ quan
-var AN_THEM = { den: ['luong', 'nguoiKy', 'tt'], di: ['soGoc', 'coQuan'] };
+// Mặc định riêng từng nhánh: văn thư đến ẩn luồng, người ký, tình trạng; văn thư đi ẩn số gốc, cơ quan, người ký và hiện người soạn
+var AN_THEM = { den: ['luong', 'nguoiKy', 'tt'], di: ['soGoc', 'coQuan', 'nguoiKy'] }, HIEN_THEM = { den: [], di: ['nguoiSoan'] };
 function cfgSoMac(ch) {
   var an = COT_SO.reduce(function (m, c) { if (c.an) m[c.id] = 1; return m; }, {});
   AN_THEM[ch].forEach(function (id) { an[id] = 1; });
+  HIEN_THEM[ch].forEach(function (id) { delete an[id]; });
   return { thuTu: COT_SO.map(function (c) { return c.id; }), an: an, rong: {} };
 }
 function docCfgSo(ch) {
   try {
-    var x = JSON.parse(localStorage.getItem('vt_cot_' + ch) || 'null'), m = cfgSoMac(ch);
+    var x = JSON.parse(localStorage.getItem('vt_cot2_' + ch) || 'null'), m = cfgSoMac(ch);
     if (!x) return m;
     var co = (x.thuTu || []).filter(function (i) { return COT_SO_MAP[i]; });
     var an = x.an || m.an;
@@ -760,7 +761,7 @@ function docCfgSo(ch) {
 var CFG_NHANH = { den: docCfgSo('den'), di: docCfgSo('di') };
 function chieuSo() { return (timSo(S.so) || {}).chieu === 'den' ? 'den' : 'di'; }
 function cfgSo() { return CFG_NHANH[chieuSo()]; }
-function luuCfgSo() { try { localStorage.setItem('vt_cot_' + chieuSo(), JSON.stringify(cfgSo())); } catch (e) {} }
+function luuCfgSo() { try { localStorage.setItem('vt_cot2_' + chieuSo(), JSON.stringify(cfgSo())); } catch (e) {} }
 function cotSoHien() { return cfgSo().thuTu.filter(function (i) { return !cfgSo().an[i]; }).map(function (i) { return COT_SO_MAP[i]; }); }
 
 /* Bộ lọc: 4 nhóm hiện sẵn, các nhóm khác mở bằng "Thêm trường lọc" */
