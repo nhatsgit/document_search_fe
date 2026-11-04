@@ -139,7 +139,11 @@ td a.ten{text-decoration:none;font-weight:500}
 .tom span{font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;color:var(--chu-3)}
 .tom b{font-size:14px;font-weight:600}
 .ct-than{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start}
-.ct-than>section{flex:999 1 640px;min-width:0}
+.ct-trai{flex:999 1 640px;min-width:0;display:flex;flex-direction:column;gap:14px}
+.xem-file{display:flex;flex-direction:column}
+.xem-file-dau{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--vien-2)}
+.xem-file-dau h2{margin:0}
+.xem-file iframe{display:block;width:100%;height:82vh;min-height:520px;border:0;border-radius:0 0 12px 12px;background:#E9ECE8}
 .ct-than>aside{flex:1 1 360px;min-width:0;display:flex;flex-direction:column;gap:14px}
 .ct-than h2{font-size:15px;margin-bottom:8px}
 dl.tt{display:grid;grid-template-columns:128px minmax(0,1fr);gap:6px 10px;margin:0;font-size:13px}
@@ -1106,10 +1110,17 @@ function veChiTiet(id) {
         '<div class="hang" style="gap:8px">' + nut('Mở phiếu Base', p.linkBase, true) + nut('Base Office', p.linkOffice) + nut('Drive', p.linkDrive) + '</div>' +
         '<div class="hang" style="gap:8px"><button class="nut" data-chep="' + esc(p.ma) + '"' + (p.ma ? '' : ' disabled') + '>Sao chép số</button></div>' +
       '</div></section>' +
-    '<div class="ct-than"><section class="the"><div class="tabs" role="tablist" aria-label="Chi tiết phiếu">' + tabs.map(function (t) {
+    '<div class="ct-than"><div class="ct-trai"><section class="the"><div class="tabs" id="tabsCt" role="tablist" aria-label="Chi tiết phiếu">' + tabs.map(function (t) {
         return '<button role="tab" aria-selected="' + (S.tabCt === t[0]) + '" class="' + (S.tabCt === t[0] ? 'chon' : '') + '" data-tabct="' + t[0] + '">' + t[1] + '</button>'; }).join('') + '</div>' +
-      '<div style="padding:16px 18px">' + noiChiTiet(p, ls) + '</div></section>' +
+      '<div id="noiCt" style="padding:16px 18px">' + noiChiTiet(p, ls) + '</div></section>' + xemFile(p) + '</div>' +
       '<aside>' + benChiTiet(p) + '</aside></div>';
+}
+/* Xem file ngay trên trang bằng khung xem của Drive: quyền xem vẫn theo tài khoản Google của người mở */
+function xemFile(p) {
+  var m = /\/d\/([\w-]+)/.exec(p.linkDrive || '') || /[?&]id=([\w-]+)/.exec(p.linkDrive || '');
+  if (!m) return '<section class="the"><div class="rong">' + (p.root ? 'Phiếu này chưa có file trên Drive' : 'Sổ cũ ghi tay chưa có file trên Drive') + '</div></section>';
+  return '<section class="the xem-file"><div class="xem-file-dau"><h2>File văn bản</h2><a href="' + esc(p.linkDrive) + '" target="_blank" rel="noopener">Mở trong Drive</a></div>' +
+    '<iframe title="File văn bản ' + esc(p.ma || '') + '" src="https://drive.google.com/file/d/' + encodeURIComponent(m[1]) + '/preview" allow="autoplay"></iframe></section>';
 }
 function noiChiTiet(p, ls) {
   if (S.tabCt === 'tien') {
@@ -1188,7 +1199,11 @@ document.addEventListener('click', function (e) {
   else if (d.loctt != null) { S.locTT = d.loctt; S.trangSo = 1; veNoiSo(); }
   else if (d.trangso) { S.trangSo = Number(d.trangso); veDsSoVb(); }
   else if (t.id === 'xoaLocSo') { datLaiLocSo(); S.trangSo = 1; veNoiSo(); }
-  else if (d.tabct) { S.tabCt = d.tabct; veChiTiet(S.ctId); }
+  else if (d.tabct) {
+    S.tabCt = d.tabct;
+    document.querySelectorAll('#tabsCt [data-tabct]').forEach(function (b) { var chon = b.dataset.tabct === S.tabCt; b.classList.toggle('chon', chon); b.setAttribute('aria-selected', chon); });
+    var pCt = timPhieu(S.ctId); $('#noiCt').innerHTML = noiChiTiet(pCt, lichSu(pCt));
+  }
   else if (d.chep) { try { navigator.clipboard.writeText(d.chep); } catch (x) {} t.textContent = 'Đã sao chép ✓'; }
 });
 document.addEventListener('keydown', function (e) {
