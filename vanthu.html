@@ -189,6 +189,27 @@ td.lech{background:#FDECEC;color:#9F1D1D;font-weight:600}
   .nav-duoi a{display:flex;flex-direction:column;align-items:center;gap:3px;min-height:54px;justify-content:center;text-decoration:none;color:var(--chu-4);font-size:11.5px}
   .nav-duoi a.chon{color:var(--xanh-dam);font-weight:700}
 }
+/* ---------- danh sách có vùng cuộn riêng, tên cột và ô tìm luôn hiện ---------- */
+.sv-bang,.bang-cuon table{border-collapse:separate;border-spacing:0}
+table.sv-bang thead th,.bang-cuon thead th{position:sticky;top:0;z-index:3;background:var(--nhat);box-sizing:border-box}
+table.sv-bang thead tr:first-child th{height:38px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+table.sv-bang .tim-o th{top:38px;height:40px;box-shadow:0 1px 0 var(--vien)}
+#dsSoVb .bang,.bang-cuon{overflow:auto;max-height:calc(100dvh - 150px)}
+@media (min-width:901px) and (min-height:600px){
+  body.trang-so{overflow:hidden}
+  body.trang-so #man{padding-bottom:0}
+  body.trang-so .so-bo{flex-wrap:nowrap;height:calc(100dvh - var(--vt-tren,90px) - 14px)}
+  body.trang-so .so-bo>aside,body.trang-so .so-bo>section{height:100%;min-height:0;display:flex;flex-direction:column}
+  body.trang-so .so-bo>aside{flex:0 0 300px}
+  body.trang-so .so-bo>section{flex:1 1 0}
+  body.trang-so .ds-so{flex:1;min-height:0;overflow-y:auto}
+  body.trang-so #noiSo{flex:1;min-height:0;overflow-y:auto}
+  body.trang-so #noiSo.co-ds{overflow:hidden;display:flex;flex-direction:column}
+  body.trang-so #dsSoVb{flex:1;min-height:0}
+  body.trang-so #dsSoVb .bang{flex:1;min-height:0;max-height:none}
+  body.trang-so .chi-so div{padding-top:6px;padding-bottom:6px}
+  body.trang-so .phan-trang{flex:none}
+}
 /* ---------- tìm kiếm trong sổ ---------- */
 .sv-thanh{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .sv-o{position:relative;flex:1 1 300px;min-width:0}
@@ -567,7 +588,7 @@ function veNoiTab() {
 
 function bangPhieu(ds) {
   if (!ds.length) return '<div class="rong">Không có phiếu nào khớp</div>';
-  return '<div class="bang"><table style="min-width:1090px"><thead><tr><th>Phiếu</th><th>Loại</th><th>Đơn vị</th><th>Bước hiện tại</th><th style="width:140px">Thời gian ở bước</th><th>Số / mã</th><th>Sheet · Base · Office</th><th>Tình trạng</th><th>Hành động</th></tr></thead><tbody>' +
+  return '<div class="bang bang-cuon"><table style="min-width:1090px"><thead><tr><th>Phiếu</th><th>Loại</th><th>Đơn vị</th><th>Bước hiện tại</th><th style="width:140px">Thời gian ở bước</th><th>Số / mã</th><th>Sheet · Base · Office</th><th>Tình trạng</th><th>Hành động</th></tr></thead><tbody>' +
     ds.map(function (p) {
       var qua = p.gio > p.sla;
       return '<tr class="bam" data-mo="' + esc(p.id) + '"><td style="max-width:320px"><a class="ten" href="#/phieu/' + esc(p.id) + '">' + esc(tenPhieu(p)) + '</a></td><td>' + chipChieu(p.chieu) + '</td><td>' + esc(p.dv) + '</td>' +
@@ -667,6 +688,7 @@ function veDsSo() {
 }
 function veNoiSo() {
   var c = chiSoSo(S.so), el = $('#noiSo');
+  el.classList.remove('co-ds');
   if (S.tabSo === 'vb') {
     veThanhSo(el);
   } else if (S.tabSo === 'luoi') {
@@ -832,6 +854,7 @@ function tuTo(id) {
 }
 function soLoc() { var n = (S.tuNgay ? 1 : 0) + (S.denNgay ? 1 : 0); for (var k in S.locSo || {}) n += S.locSo[k].length; return n; }
 function veThanhSo(el) {
+  el.classList.add('co-ds');
   var c = chiSoSo(S.so);
   el.innerHTML = '<div class="sv-thanh">' +
       '<select class="o" id="svTruong" aria-label="Tìm trong trường" style="flex:0 1 170px"><option value="tat">Tất cả trường</option>' + ID_TIM.map(function (i) { return '<option value="' + i + '"' + (S.truongSo === i ? ' selected' : '') + '>' + COT_SO_MAP[i].ten + '</option>'; }).join('') + '</select>' +
@@ -1078,6 +1101,8 @@ function benChiTiet(p) {
 /* =====================================================================
    ĐIỀU HƯỚNG + SỰ KIỆN
    ===================================================================== */
+function doChoTrang() { var m = $('#man'); if (m) document.documentElement.style.setProperty('--vt-tren', Math.round(m.getBoundingClientRect().top + window.scrollY) + 'px'); }
+window.addEventListener('resize', doChoTrang);
 function dinhTuyen() {
   if (!DS.length) return;
   if (S.ngan) { S.ngan = null; veNgan(); }
@@ -1088,6 +1113,8 @@ function dinhTuyen() {
   else if (phan[0] === 'phieu') { nav = 'phieu'; S.tab = 'phieu'; veTongQuan(); document.title = 'Phiếu · Theo dõi văn thư'; }
   else { veTongQuan(); document.title = 'Theo dõi văn thư'; }
   document.querySelectorAll('[data-nav]').forEach(function (a) { a.classList.toggle('chon', a.dataset.nav === nav); });
+  document.body.classList.toggle('trang-so', nav === 'so');
+  doChoTrang();
   window.scrollTo(0, 0);
 }
 window.addEventListener('hashchange', dinhTuyen);
