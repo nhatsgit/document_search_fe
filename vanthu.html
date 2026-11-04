@@ -126,8 +126,7 @@ td a.ten{text-decoration:none;font-weight:500}
 .luoi-so .giu{background:#EEF2FF;color:#3730A3;border:1px dashed #A5B0F0}
 .cg-luoi{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--chu-3)}
 .cg-luoi span{display:inline-flex;align-items:center;gap:6px}
-.cg-luoi i{flex:none;width:30px;height:20px;border-radius:5px;border:1px solid var(--vien);background:#fff;font:600 10.5px/18px inherit;font-style:normal;text-align:center;color:var(--chu)}
-.cg-luoi b{font-weight:600;color:var(--chu)}
+.cg-luoi i{flex:none;box-sizing:border-box;min-width:30px;padding:0 5px;height:22px;border-radius:5px;border:1px solid var(--vien);background:#fff;font-size:11.5px;font-weight:600;line-height:20px;font-style:normal;text-align:center;color:var(--chu)}
 
 /* ---------- chi tiết ---------- */
 .ct-dau{display:flex;flex-wrap:wrap;gap:14px 24px;align-items:flex-start;padding:16px 18px}
@@ -667,7 +666,7 @@ function veNoiSo() {
     var cg = [['Hoàn tất', 'border-color:#E1E6EE', demO(function (x) { return x.root && !x.huy && x.tt === 'xong'; })], ['Sổ cũ ghi tay', 'border-color:#E1E6EE;background:#F1F3F6', demO(function (x) { return !x.root && !x.huy && !x.giu; })], ['Đúng hạn', 'border-color:#1F8A55', demO(function (x) { return !x.huy && x.tt === 'dung'; })],
       ['Treo lâu', 'border-color:#E07B12', demO(function (x) { return !x.huy && x.tt === 'qua'; })], ['Lệch dữ liệu', 'border-color:#6366F1', demO(function (x) { return !x.huy && x.tt === 'lech'; })], ['Lỗi', 'border-color:#D64545', demO(function (x) { return !x.huy && x.tt === 'loi'; })],
       ['Trùng số', 'border:2px solid #D64545;background:#FDECEC', c.trung.length], ['Giữ số', 'background:#EEF2FF;color:#3730A3;border:1px dashed #A5B0F0', demO(function (x) { return x.giu && !x.huy; })], ['Đã huỷ', 'border-color:#B8C0CC;color:var(--chu-4);text-decoration:line-through', demO(function (x) { return x.huy; })], ['Nhảy số', 'background:#FDECEC;color:#9F1D1D;border-color:#F0B4B4', c.lo.length]];
-    el.innerHTML = '<div class="cg-luoi" aria-label="Chú thích lưới số">' + cg.map(function (x) { return '<span><i style="' + x[1] + '">12</i>' + x[0] + ' <b class="so">' + x[2] + '</b></span>'; }).join('') + '</div><span class="phu">Bấm một số để xem chi tiết phiếu. Riêng ô Nhảy số không có phiếu để mở.</span>' + (o.length ? '<div class="luoi-so">' + o.join('') + '</div>' : '<div class="rong">Sổ chưa cấp số nào</div>');
+    el.innerHTML = '<div class="cg-luoi" aria-label="Chú thích lưới số">' + cg.map(function (x) { return '<span><i class="so" style="' + x[1] + '">' + x[2] + '</i>' + x[0] + '</span>'; }).join('') + '</div><span class="phu">Bấm một số để xem chi tiết phiếu. Riêng ô Nhảy số không có phiếu để mở.</span>' + (o.length ? '<div class="luoi-so">' + o.join('') + '</div>' : '<div class="rong">Sổ chưa cấp số nào</div>');
   } else {
     var dong = function (chip, so, moTaDong, x) {   // x: phiếu của dòng; bấm dòng mở chi tiết, nhảy số thì không có phiếu để mở
       return '<tr' + (x ? ' class="bam" data-mo="' + esc(x.id) + '"' : '') + '><td>' + chip + '</td><td class="so">' + esc(so) + '</td><td>' + moTaDong + '</td><td>' + (x ? nutLienKet(x) : '') + '</td></tr>';
