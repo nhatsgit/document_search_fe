@@ -49,7 +49,7 @@ h1,h2,h3{margin:0;line-height:1.3}
 .chip{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;font-weight:600;white-space:nowrap}
 .chip.nhe{font-weight:500}
 .tt-loi{background:#FDECEC;color:#9F1D1D}.tt-qua{background:#FFF1E0;color:#8A4300}.tt-lech{background:#EEF2FF;color:#3730A3}
-.tt-dung{background:#E8F5EE;color:#1F6B44}.tt-xong{background:#F1F3F6;color:var(--chu-3)}
+.tt-giu{background:#EEE9FB;color:#5B3BA8}.tt-dung{background:#E8F5EE;color:#1F6B44}.tt-xong{background:#F1F3F6;color:var(--chu-3)}
 .c-den{background:var(--xanh-nhat);color:var(--xanh)}.c-di{background:#FFF1E0;color:#8A4300}.c-giu{background:#EEF2FF;color:#3730A3}
 .nut{padding:8px 14px;min-height:38px;border-radius:8px;border:1px solid var(--o);background:#fff;color:var(--chu);cursor:pointer;font-size:13.5px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .nut:hover{border-color:#9AA6BA}
@@ -365,11 +365,11 @@ function gioChu(g) { if (g < 1) return Math.round(g * 60) + ' phút'; var h = Ma
 function gioNgan(g) { return String(Math.round(g * 10) / 10).replace('.', ','); }
 function ngay(t) { var d = new Date(t); return ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2) + '/' + d.getFullYear(); }
 function luc(t) { var d = new Date(t); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2) + ' ' + ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2); }
-var TT = { loi: 'Lỗi', qua: 'Treo lâu', lech: 'Lệch dữ liệu', dung: 'Đúng hạn', xong: 'Xong' };
-var THU_TU_TT = { loi: 0, qua: 1, lech: 2, dung: 3, xong: 4 };
+var TT = { loi: 'Lỗi', qua: 'Treo lâu', lech: 'Lệch dữ liệu', dung: 'Đúng hạn', giu: 'Giữ số', xong: 'Hoàn tất' };
+var THU_TU_TT = { loi: 0, qua: 1, lech: 2, dung: 3, giu: 4, xong: 5 };
 function chipTT(tt) { return '<span class="chip tt-' + tt + '">' + TT[tt] + '</span>'; }
 function chipChieu(c, dai) { return '<span class="chip ' + (c === 'den' ? 'c-den">' + (dai ? 'Văn thư đến' : 'Đến') : 'c-di">' + (dai ? 'Văn thư đi' : 'Đi')) + '</span>'; }
-function tenBuoc(p) { return p.huy ? 'Đã huỷ' : !p.root ? 'Sổ cũ ghi tay' : p.tt === 'xong' ? (p.huy ? 'Đã huỷ' : p.giu ? 'Giữ số' : 'Đã xong') : BUOC[p.chieu][p.b][0]; }
+function tenBuoc(p) { return p.huy ? 'Đã huỷ' : !p.root ? 'Sổ cũ ghi tay' : p.tt === 'xong' ? 'Hoàn tất' : p.tt === 'giu' ? 'Giữ số, chờ hồ sơ' : BUOC[p.chieu][p.b][0]; }
 function nguoiGiu(p) { return p.tt === 'xong' ? '—' : NGUOI[p.chieu][p.b]; }
 function nutLienKet(p) {
   var mot = function (u, anh, ten) {
@@ -394,7 +394,7 @@ var S = { dv: 'Tất cả', chieu: 'tat', tab: 'can', locCanh: 'tat', locPhieu: 
   so: 'den|BHCK', dvSo: 'BHCK', qSo: '', tabSo: 'vb', locThang: '', locKy: '', locLuong: '', locTT: '', qSoVb: '', trangSo: 1, tabCt: 'tien', ctId: null, thuQt: {}, ngan: null };
 
 function dsChon() { return DS.filter(function (p) { return (S.dv === 'Tất cả' || p.dv === S.dv) && (S.chieu === 'tat' || p.chieu === S.chieu); }); }
-function dsMo() { return dsChon().filter(function (p) { return p.tt !== 'xong'; }); }
+function dsMo() { return dsChon().filter(function (p) { return p.tt !== 'xong' && p.tt !== 'giu'; }); }
 
 /* =====================================================================
    TỔNG QUAN
@@ -456,7 +456,7 @@ function veTongQuan() {
     ['Lỗi hệ thống', dem('loi'), 'AI, file, trùng số', '#9F1D1D', 'can:loi'],
     ['Lệch dữ liệu', dem('lech'), 'tới bước cuối, chưa có Office', '#3730A3', 'can:lech'],
     ['Giữ số chưa dùng', giu, 'trong năm ' + S.nam, '#5B3BA8', 'dayso:'],
-    ['Ban hành T' + (thangNay + 1), banHanh, 'đã lưu Office', '#1F6B44', 'tk:'],
+    ['Ban hành T' + (thangNay + 1), banHanh, 'có Base Office', '#1F6B44', 'tk:'],
   ];
   var tabs = [['can', 'Cần xử lý', can, true], ['buoc', 'Theo bước'], ['phieu', 'Danh sách phiếu', mo.length], ['dayso', 'Dãy số'], ['tk', 'Thống kê'], ['nk', 'Nhật ký']];
   $('#man').innerHTML =
@@ -794,7 +794,7 @@ function veThanhSo(el) {
       '<div class="sv-o"><input class="o" id="oTimSoVb" type="search" autocomplete="off" placeholder="Tìm số, trích yếu, người ký… gõ không dấu; &quot;cụm từ&quot;; -loại trừ" value="' + esc(S.qSoVb || '') + '" aria-label="Tìm văn bản"><div class="sv-goi" id="svGoi" hidden></div></div>' +
       '<select class="o" id="svPham" aria-label="Phạm vi tìm" style="flex:0 1 150px">' + [['so', 'Sổ này'], ['dv', 'Cả đơn vị ' + S.dvSo], ['tat', 'Tất cả đơn vị']].map(function (x) { return '<option value="' + x[0] + '"' + (S.pvSo === x[0] ? ' selected' : '') + '>' + esc(x[1]) + '</option>'; }).join('') + '</select>' +
       '<button class="nut" data-sv="moLoc" id="svNutLoc">Bộ lọc' + (soLoc() ? ' (' + soLoc() + ')' : '') + '</button><button class="nut" data-sv="moCot">Tuỳ chỉnh cột</button></div>' +
-    '<div class="hang">' + [['', 'Tất cả'], ['dung', 'Đúng hạn'], ['qua', 'Treo lâu'], ['lech', 'Lệch dữ liệu'], ['loi', 'Lỗi'], ['xong', 'Xong'], ['huy', 'Đã huỷ'], ['cu', 'Sổ cũ']].map(function (t) {
+    '<div class="hang">' + [['', 'Tất cả'], ['dung', 'Đúng hạn'], ['qua', 'Treo lâu'], ['lech', 'Lệch dữ liệu'], ['loi', 'Lỗi'], ['giu', 'Giữ số'], ['xong', 'Hoàn tất'], ['huy', 'Đã huỷ'], ['cu', 'Sổ cũ']].map(function (t) {
         return '<button class="nut tron' + ((S.locTT || '') === t[0] ? ' chon' : '') + '" data-loctt="' + t[0] + '">' + t[1] + '</button>'; }).join('') +
       '<button class="nut tron" id="xoaLocSo" style="margin-left:auto">Xoá lọc</button></div>' +
     '<div id="dsSoVb" style="display:flex;flex-direction:column;gap:10px"></div>';
@@ -963,7 +963,6 @@ function veChiTiet(id) {
   if (S.ctId !== id) { S.ctId = id; S.tabCt = 'tien'; }
   var ls = lichSu(p);
   var chips = [chipChieu(p.chieu, true), chipPhieu(p)];
-  if (p.giu) chips.push('<span class="chip c-giu">Giữ số</span>');
   if (p.huy) chips.push('<span class="chip tt-xong">Đã huỷ</span>');
   var tabs = [['tien', 'Tiến trình'], ['yk', 'Ý kiến (' + yKien(p).length + ')'], ['ds', 'Liên kết'], ['nk', 'Nhật ký (' + suKien(p).length + ')']];
   var nut = function (t, u, chinh) { return u ? '<a class="nut' + (chinh ? ' chinh' : '') + '" href="' + esc(u) + '" target="_blank" rel="noopener" style="min-height:44px">' + t + '</a>' : ''; };
