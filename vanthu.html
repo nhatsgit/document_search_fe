@@ -124,6 +124,8 @@ td a.ten{text-decoration:none;font-weight:500}
 .luoi-so button,.luoi-so span,.luoi-so a{display:block;border-radius:8px;padding:10px 0 9px;text-align:center;font-weight:600;font-size:13px;line-height:1.3;border:1px solid var(--vien);background:#fff;cursor:pointer}
 .luoi-so small{display:block;margin-top:2px;font-size:11px;font-weight:400;line-height:1.3;color:var(--chu-3);text-decoration:none}
 .luoi-so .lo{background:#FDECEC;color:#9F1D1D;border-color:#F0B4B4;cursor:default}
+.luoi-so .sai-tg{background:#FEF3C7!important}
+.luoi-so .sai-tg small{color:#92400E;font-weight:600}
 .luoi-so .giu{background:#EEF2FF;color:#3730A3;border:1px dashed #A5B0F0}
 .luoi-dau{position:sticky;top:0;z-index:2;display:flex;flex-direction:column;gap:6px;background:var(--the);padding-bottom:8px}
 .luoi-cuon{flex:1;min-height:0;overflow-y:auto;padding:2px}
@@ -720,19 +722,22 @@ function veNoiSo() {
     veThanhSo(el);
   } else if (S.tabSo === 'luoi') {
     var theoSo = {}; c.vb.forEach(function (p) { (theoSo[p.so] = theoSo[p.so] || []).push(p); });
+    // Sai thời gian tô nền vàng và giữ nguyên viền trạng thái, nên vẫn thấy cả hai dấu hiệu trên một ô
+    var laSai = {}; c.sai.forEach(function (x) { laSai[x.id] = 1; });
+    var ghiSai = function (x) { return laSai[x.id] ? 'Sai thời gian: ngày ' + ngay(x.ngay) + ' sớm hơn văn bản số nhỏ hơn. ' : ''; };
     var ngayO = function (x) { return '<small>' + (x && x.ngay ? ngay(x.ngay).slice(0, 5) : '—') + '</small>'; };
     var o = [], VIEN = { qua: '#E07B12', loi: '#D64545', lech: '#6366F1', dung: '#1F8A55', xong: '#E1E6EE' };
     for (var n = c.dau; c.vb.length && n <= c.cuoi; n++) {
       if (!theoSo[n]) { o.push('<span class="lo" title="Nhảy số: chưa có văn bản dùng số này">' + n + ngayO(null) + '</span>'); continue; }
       theoSo[n].slice().sort(function (x, y) { return x.hau > y.hau ? 1 : -1; }).forEach(function (p) {
-        o.push(p.giu ? '<a class="giu" href="#/phieu/' + esc(p.id) + '" title="' + esc(p.trich) + '" style="color:inherit;text-decoration:none">' + esc(p.khoa) + ngayO(p) + '</a>'
-          : '<button data-mo="' + esc(p.id) + '" title="' + (p.huy ? 'Đã huỷ: ' : '') + esc(p.trich) + '" style="' + (p.huy ? 'border-color:#B8C0CC;text-decoration:line-through;color:var(--chu-4)' : c.trung.indexOf(p.khoa) >= 0 ? 'border:2px solid #D64545;background:#FDECEC' : !p.root ? 'border-color:#E1E6EE;background:#F1F3F6' : 'border-color:' + VIEN[p.tt]) + '">' + esc(p.khoa) + ngayO(p) + '</button>');
+        o.push(p.giu ? '<a class="giu' + (laSai[p.id] ? ' sai-tg' : '') + '" href="#/phieu/' + esc(p.id) + '" title="' + esc(ghiSai(p) + p.trich) + '" style="color:inherit;text-decoration:none">' + esc(p.khoa) + ngayO(p) + '</a>'
+          : '<button' + (laSai[p.id] ? ' class="sai-tg"' : '') + ' data-mo="' + esc(p.id) + '" title="' + (p.huy ? 'Đã huỷ: ' : '') + esc(ghiSai(p) + p.trich) + '" style="' + (p.huy ? 'border-color:#B8C0CC;text-decoration:line-through;color:var(--chu-4)' : c.trung.indexOf(p.khoa) >= 0 ? 'border:2px solid #D64545;background:#FDECEC' : !p.root ? 'border-color:#E1E6EE;background:#F1F3F6' : 'border-color:' + VIEN[p.tt]) + '">' + esc(p.khoa) + ngayO(p) + '</button>');
       });
     }
     var demO = function (f) { return c.vb.filter(f).length; };
     var cg = [['Hoàn tất', 'border-color:#E1E6EE', demO(function (x) { return x.root && !x.huy && x.tt === 'xong'; })], ['Sổ cũ ghi tay', 'border-color:#E1E6EE;background:#F1F3F6', demO(function (x) { return !x.root && !x.huy && !x.giu; })], ['Đúng hạn', 'border-color:#1F8A55', demO(function (x) { return !x.huy && x.tt === 'dung'; })],
       ['Treo lâu', 'border-color:#E07B12', demO(function (x) { return !x.huy && x.tt === 'qua'; })], ['Lệch dữ liệu', 'border-color:#6366F1', demO(function (x) { return !x.huy && x.tt === 'lech'; })], ['Lỗi', 'border-color:#D64545', demO(function (x) { return !x.huy && x.tt === 'loi'; })],
-      ['Trùng số', 'border:2px solid #D64545;background:#FDECEC', c.trung.length], ['Giữ số', 'background:#EEF2FF;color:#3730A3;border:1px dashed #A5B0F0', demO(function (x) { return x.giu && !x.huy; })], ['Đã huỷ', 'border-color:#B8C0CC;color:var(--chu-4);text-decoration:line-through', demO(function (x) { return x.huy; })], ['Nhảy số', 'background:#FDECEC;color:#9F1D1D;border-color:#F0B4B4', c.lo.length]];
+      ['Trùng số', 'border:2px solid #D64545;background:#FDECEC', c.trung.length], ['Sai thời gian', 'background:#FEF3C7;border-color:#E9C46A;color:#92400E', c.sai.length], ['Giữ số', 'background:#EEF2FF;color:#3730A3;border:1px dashed #A5B0F0', demO(function (x) { return x.giu && !x.huy; })], ['Đã huỷ', 'border-color:#B8C0CC;color:var(--chu-4);text-decoration:line-through', demO(function (x) { return x.huy; })], ['Nhảy số', 'background:#FDECEC;color:#9F1D1D;border-color:#F0B4B4', c.lo.length]];
     el.classList.add('co-ds');
     el.innerHTML = '<div class="luoi-dau"><div class="cg-luoi" aria-label="Chú thích lưới số">' + cg.map(function (x) { return '<span><i class="so" style="' + x[1] + '">' + x[2] + '</i>' + x[0] + '</span>'; }).join('') + '</div><span class="phu">Bấm một số để xem chi tiết phiếu. Riêng ô Nhảy số không có phiếu để mở.</span></div><div class="luoi-cuon">' + (o.length ? '<div class="luoi-so">' + o.join('') + '</div>' : '<div class="rong">Sổ chưa cấp số nào</div>') + '</div>';
   } else {
