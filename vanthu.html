@@ -724,7 +724,7 @@ function veNoiSo() {
     var theoSo = {}; c.vb.forEach(function (p) { (theoSo[p.so] = theoSo[p.so] || []).push(p); });
     // Sai thời gian tô nền vàng và giữ nguyên viền trạng thái, nên vẫn thấy cả hai dấu hiệu trên một ô
     var laSai = {}; c.sai.forEach(function (x) { laSai[x.id] = 1; });
-    var ghiSai = function (x) { return laSai[x.id] ? 'Sai thời gian: ngày ' + ngay(x.ngay) + ' sớm hơn văn bản số nhỏ hơn. ' : ''; };
+    var ghiSai = function (x) { return laSai[x.id] ? 'Sai thời gian: ngày ' + ngay(x.ngay) + ' không khớp thứ tự số trong sổ. ' : ''; };
     var ngayO = function (x) { return '<small>' + (x && x.ngay ? ngay(x.ngay).slice(0, 5) : '—') + '</small>'; };
     var o = [], VIEN = { qua: '#E07B12', loi: '#D64545', lech: '#6366F1', dung: '#1F8A55', xong: '#E1E6EE' };
     for (var n = c.dau; c.vb.length && n <= c.cuoi; n++) {
@@ -746,7 +746,7 @@ function veNoiSo() {
     };
     var vd = [].concat.apply([], c.trung.map(function (k) { return c.vb.filter(function (x) { return x.khoa === k; }).map(function (x) {
         return dong('<span class="chip tt-loi">Trùng số</span>', k, esc(x.ma || k) + '<div class="phu">' + esc(x.trich) + '</div>', x); }); }))
-      .concat(c.sai.map(function (x) { return dong('<span class="chip tt-qua">Sai thời gian</span>', x.khoa, 'Ngày ' + ngay(x.tao) + ' sớm hơn văn bản số nhỏ hơn trong sổ<div class="phu">' + esc(x.trich) + '</div>', x); }))
+      .concat(c.sai.map(function (x) { return dong('<span class="chip tt-qua">Sai thời gian</span>', x.khoa, 'Ngày ' + ngay(x.tao) + ' không khớp thứ tự số trong sổ<div class="phu">' + esc(x.trich) + '</div>', x); }))
       .concat(c.lech.map(function (x) { return dong(chipPhieu(x), x.khoa, esc(moTa(x)) + '<div class="phu">' + esc(x.trich) + '</div>', x); }))
       .concat(c.giu.map(function (g) { var x = timPhieu(g.id); return dong('<span class="chip c-giu">Giữ số</span>', g.so, esc(g.ly) + '<div class="phu">' + esc(g.nguoi) + '</div>', x); }))
       .concat(c.lo.map(function (n) { return dong('<span class="chip tt-loi">Nhảy số</span>', n, 'Không có văn bản nào dùng số này: kiểm tra phiếu bị huỷ hoặc cấp nhầm.', null); }));
