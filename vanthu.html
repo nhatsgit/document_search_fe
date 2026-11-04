@@ -394,7 +394,7 @@ function moTa(p) {
   return p.tt === 'xong' ? tenBuoc(p) : 'Đang ở ' + tenBuoc(p);
 }
 function timPhieu(id) { return DS.filter(function (p) { return p.id === id; })[0]; }
-function khop(p, q) { return !q || boDau([p.ma, p.soGoc, p.trich, p.coQuan, p.nguoiKy, tenBuoc(p), nguoiGiu(p), p.dv].join(' ')).indexOf(boDau(q)) >= 0; }
+function khop(p, q) { return !q || boDau([p.ma, p.soGoc, p.trich, p.tomTat, p.coQuan, p.nguoiKy, tenBuoc(p), nguoiGiu(p), p.dv].join(' ')).indexOf(boDau(q)) >= 0; }
 function tick(ok, coDuLieu) { return 'chip nhe ' + (!coDuLieu ? 'tt-xong' : ok ? 'tt-dung' : 'tt-loi'); }
 
 /* ---------- trạng thái giao diện ---------- */
@@ -526,7 +526,7 @@ function veNoiTab() {
         [['tat', 'Tất cả'], ['loi', 'Lỗi'], ['qua', 'Treo lâu'], ['lech', 'Lệch dữ liệu'], ['dung', 'Đúng hạn']].map(function (l) {
           return '<button class="nut tron' + (S.locPhieu === l[0] ? ' chon' : '') + '" data-locphieu="' + l[0] + '">' + l[1] + '</button>'; }).join('') +
         (S.locBuoc ? '<button class="nut tron loc" data-boloc="1">Bước: ' + esc(BUOC[S.locBuoc[0]][S.locBuoc[1]][0]) + ' ✕</button>' : '') +
-        '<input class="o" id="oTim" type="search" placeholder="Tìm số, trích yếu, cơ quan, người giữ…" value="' + esc(S.q) + '" style="margin-left:auto;flex:0 1 300px;min-width:200px" aria-label="Tìm phiếu"></div>' +
+        '<input class="o" id="oTim" type="search" placeholder="Tìm số, trích yếu, tóm tắt, cơ quan…" value="' + esc(S.q) + '" style="margin-left:auto;flex:0 1 300px;min-width:200px" aria-label="Tìm phiếu"></div>' +
       bangPhieu(loc.slice((S.trang - 1) * co, S.trang * co)) + phanTrang(S.trang, soTrang, 'trang');
   } else if (S.tab === 'dayso') {
     var so = DS_SO.filter(function (s) { return (S.dv === 'Tất cả' || s.dv === S.dv) && (S.chieu === 'tat' || s.chieu === S.chieu); })
@@ -702,7 +702,8 @@ var COT_SO = [
   { id: 'so', ten: 'Số', rong: 76, lay: function (p) { return [p.khoa, p.ma].join(' '); }, o: function (p, x) { return '<span class="so" style="font-weight:700">' + hlTim(p.khoa || '—', x('so')) + '</span>'; } },
   { id: 'ngay', ten: 'Ngày', rong: 100, lay: function (p) { return p.ngay ? ngay(p.ngay) : ''; }, gt: function (p) { return p.ngay || 0; }, o: function (p, x) { return '<span class="so">' + hlTim(p.ngay ? ngay(p.ngay) : '—', x('ngay')) + '</span>'; } },
   { id: 'loai', ten: 'Loại', rong: 112, an: true, lay: function (p) { return p.loai[1]; } },
-  { id: 'trich', ten: 'Trích yếu', rong: 0, lay: function (p) { return [p.trich, p.tomTat].join(' '); }, gt: function (p) { return p.trich; }, o: function (p, x) { return '<a class="ten" href="#/phieu/' + esc(p.id) + '">' + hlTim(p.trich, x('trich')) + '</a><div class="phu">' + esc(tenBuoc(p)) + '</div>'; } },
+  { id: 'trich', ten: 'Trích yếu', rong: 0, lay: function (p) { return p.trich; }, o: function (p, x) { return '<a class="ten" href="#/phieu/' + esc(p.id) + '">' + hlTim(p.trich, x('trich')) + '</a><div class="phu">' + esc(tenBuoc(p)) + '</div>' + doanTomTat(p, x('tomTat')); } },
+  { id: 'tomTat', ten: 'Tóm tắt', rong: 300, an: true, lay: function (p) { return p.tomTat; } },
   { id: 'soGoc', ten: 'Số gốc', rong: 120, lay: function (p) { return p.soGoc; } },
   { id: 'coQuan', ten: 'Cơ quan, đơn vị', rong: 170, lay: function (p) { return p.coQuan; } },
   { id: 'luong', ten: 'Luồng', rong: 120, lay: function (p) { return p.luong; } },
@@ -729,8 +730,9 @@ function docCfgSo(ch) {
     var x = JSON.parse(localStorage.getItem('vt_cot_' + ch) || 'null'), m = cfgSoMac(ch);
     if (!x) return m;
     var co = (x.thuTu || []).filter(function (i) { return COT_SO_MAP[i]; });
-    m.thuTu.forEach(function (i) { if (co.indexOf(i) < 0) co.push(i); });
-    return { thuTu: co, an: x.an || m.an, rong: x.rong || {} };
+    var an = x.an || m.an;
+    m.thuTu.forEach(function (i) { if (co.indexOf(i) < 0) { co.push(i); if (m.an[i]) an[i] = 1; } });
+    return { thuTu: co, an: an, rong: x.rong || {} };
   } catch (e) { return cfgSoMac(ch); }
 }
 var CFG_NHANH = { den: docCfgSo('den'), di: docCfgSo('di') };
@@ -797,6 +799,15 @@ function sapHang(ds) {
     return (co ? b.d - a.d : 0) || (b.p.so == null ? -1 : b.p.so) - (a.p.so == null ? -1 : a.p.so) || (b.p.hau > a.p.hau ? 1 : -1);
   });
 }
+/** Tìm khớp trong tóm tắt: hiện đoạn chứa từ khớp ngay dưới trích yếu, khi cột Tóm tắt đang ẩn. */
+function doanTomTat(p, tus) {
+  if (!p.tomTat || !tus.length || !cfgSo().an.tomTat) return '';
+  var t = boDau(p.tomTat), vt = -1;
+  tus.forEach(function (x) { var i = t.indexOf(x); if (i >= 0 && (vt < 0 || i < vt)) vt = i; });
+  if (vt < 0) return '';
+  var dau = Math.max(0, vt - 60), doan = p.tomTat.slice(dau, vt + 130);
+  return '<div class="phu" style="margin-top:3px"><b>Tóm tắt:</b> ' + (dau ? '…' : '') + hlTim(doan, tus) + (vt + 130 < p.tomTat.length ? '…' : '') + '</div>';
+}
 function hlTim(text, tus) {
   text = String(text == null ? '' : text);
   if (!tus || !tus.length) return esc(text);
@@ -824,7 +835,7 @@ function veThanhSo(el) {
   var c = chiSoSo(S.so);
   el.innerHTML = '<div class="sv-thanh">' +
       '<select class="o" id="svTruong" aria-label="Tìm trong trường" style="flex:0 1 170px"><option value="tat">Tất cả trường</option>' + ID_TIM.map(function (i) { return '<option value="' + i + '"' + (S.truongSo === i ? ' selected' : '') + '>' + COT_SO_MAP[i].ten + '</option>'; }).join('') + '</select>' +
-      '<div class="sv-o"><input class="o" id="oTimSoVb" type="search" autocomplete="off" placeholder="Tìm số, trích yếu, người ký… gõ không dấu; &quot;cụm từ&quot;; -loại trừ" value="' + esc(S.qSoVb || '') + '" aria-label="Tìm văn bản"><div class="sv-goi" id="svGoi" hidden></div></div>' +
+      '<div class="sv-o"><input class="o" id="oTimSoVb" type="search" autocomplete="off" placeholder="Tìm số, trích yếu, tóm tắt, người ký… gõ không dấu; &quot;cụm từ&quot;; -loại trừ" value="' + esc(S.qSoVb || '') + '" aria-label="Tìm văn bản"><div class="sv-goi" id="svGoi" hidden></div></div>' +
       '<select class="o" id="svPham" aria-label="Phạm vi tìm" style="flex:0 1 150px">' + [['so', 'Sổ này'], ['dv', 'Cả đơn vị ' + S.dvSo], ['tat', 'Tất cả đơn vị']].map(function (x) { return '<option value="' + x[0] + '"' + (S.pvSo === x[0] ? ' selected' : '') + '>' + esc(x[1]) + '</option>'; }).join('') + '</select>' +
       '<button class="nut" data-sv="moLoc" id="svNutLoc">Bộ lọc' + (soLoc() ? ' (' + soLoc() + ')' : '') + '</button><button class="nut" data-sv="moCot">Tuỳ chỉnh cột</button></div>' +
     '<div class="hang">' + [['', 'Tất cả'], ['dung', 'Đúng hạn'], ['qua', 'Treo lâu'], ['lech', 'Lệch dữ liệu'], ['loi', 'Lỗi'], ['giu', 'Giữ số'], ['xong', 'Hoàn tất'], ['huy', 'Đã huỷ'], ['cu', 'Sổ cũ']].map(function (t) {
