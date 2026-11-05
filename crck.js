@@ -15,6 +15,7 @@
     qt: '<rect x="3" y="4" width="6" height="6" rx="1"/><rect x="15" y="14" width="6" height="6" rx="1"/><path d="M9 7h5a2 2 0 0 1 2 2v5"/>',
     so: '<path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/>',
     ds: '<path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/>',
+    lich: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
     moi: '<path d="M4 7h16v4H4zM5 11v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8M10 15h4"/>'
   };
   function svg(t) { return '<svg ' + nv + '>' + (HINH[t] || '') + '</svg>'; }
@@ -37,6 +38,8 @@
       { id: 'qt', ten: 'Quy trình', hinh: 'qt', link: function () { return 'vanthu.html#/quytrinh'; } },
       { id: 'so', ten: 'Sổ văn thư', hinh: 'so', link: function () { return 'vanthu.html#/so'; } },
       { id: 'phieu', ten: 'Danh sách phiếu', hinh: 'ds', link: function () { return 'vanthu.html#/phieu'; } }] },
+    { id: 'lich', ten: 'Lịch', hinh: 'lich', muc: [
+      { id: 'lich', ten: 'Lịch làm việc', hinh: 'lich', link: function () { return 'lich.html'; } }] },
     { id: 'ai', ten: 'Chạy AI', hinh: 'ai', muc: [
       { id: 'ai', ten: 'Theo dõi, điều khiển', hinh: 'ai', link: function () { return 'index.html#/ai'; } }] }
   ];
@@ -63,7 +66,7 @@
       try { localStorage.setItem('tclt_theme', toi ? 'light' : 'dark'); } catch (e) {}
     };
   }
-  top.innerHTML = '<button type="button" class="ck-burger" id="ckBurger" aria-label="Mở, thu menu" title="Mở, thu menu">' + svg('menu') + '</button>' +
+  top.innerHTML = '<button type="button" class="ck-burger" id="ckBurger" aria-label="Mở menu" title="Mở menu">' + svg('menu') + '</button>' +
     '<a class="ck-hieu" href="index.html" title="Về trang tra cứu"><img src="img/logo-vrg.png" alt="VRG Rubber"><b>CRCK Lưu trữ</b></a>' +
     '<nav class="ck-vet" id="ckVet" aria-label="Đường dẫn"></nav>' +
     '<form class="ck-tim" id="ckTim" role="search">' + svg('tim') + '<input type="search" id="ckTimO" placeholder="Tìm văn bản lưu trữ" aria-label="Tìm văn bản lưu trữ" autocomplete="off"></form>';
@@ -72,11 +75,7 @@
   document.body.appendChild(man);
 
   function dongNgan() { document.body.classList.remove('ck-mo'); }
-  function laNgan() { return document.body.classList.contains('ck-thu') || window.matchMedia('(max-width: 900px)').matches; }
-  document.getElementById('ckBurger').onclick = function () {
-    if (laNgan()) document.body.classList.toggle('ck-mo');
-    else document.body.classList.add('ck-thu');
-  };
+  document.getElementById('ckBurger').onclick = function () { document.body.classList.toggle('ck-mo'); };
   man.onclick = dongNgan;
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') dongNgan(); });
   ben.addEventListener('click', function (e) {
@@ -105,7 +104,7 @@
         return (Array.isArray(x) ? '<a href="' + esc(x[1]) + '">' + esc(x[0]) + '</a>' : '<span>' + esc(x) + '</span>');
       }).join('<i aria-hidden="true">›</i>');
     },
-    thuGon: function (co) { document.body.classList.toggle('ck-thu', !!co); dongNgan(); }
+    thuGon: function () { dongNgan(); }
   };
   veBen();
 })();

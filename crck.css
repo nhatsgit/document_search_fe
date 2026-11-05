@@ -71,13 +71,13 @@ body.ck :focus-visible { outline: 3px solid var(--brand-200); outline-offset: 2p
 .ck-ben-duoi { margin-top: 12px; padding: 10px 10px 0; border-top: 1px solid var(--mau-line); display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--faint); font-size: 12.5px; }
 .ck-man { display: none; position: fixed; inset: 0; z-index: 60; background: rgba(16, 26, 20, .4); }
 
-/* Thu gọn menu (trang danh sách, chi tiết) và điện thoại: menu thành ngăn trượt */
-body.ck-thu .ck-khung { grid-template-columns: minmax(0, 1fr); }
-body.ck-thu .ck-ben { position: fixed; z-index: 61; top: 0; bottom: 0; left: 0; width: 280px; max-height: none; background: var(--page); box-shadow: var(--sh-2); transform: translateX(-105%); visibility: hidden; transition: transform .18s, visibility .18s; }
-body.ck-mo .ck-ben { transform: none; visibility: visible; }
+/* Máy tính: menu luôn hiện. Điện thoại: menu thành ngăn trượt, mở bằng nút ba gạch */
+.ck-burger { display: none; }
 body.ck-mo .ck-man { display: block; }
 @media (max-width: 900px) {
+  .ck-burger { display: grid; }
   .ck-khung { grid-template-columns: minmax(0, 1fr); }
+  body.ck-mo .ck-ben { transform: none; visibility: visible; }
   .ck-ben { position: fixed; z-index: 61; top: 0; bottom: 0; left: 0; width: 280px; max-height: none; background: var(--page); box-shadow: var(--sh-2); transform: translateX(-105%); visibility: hidden; transition: transform .18s, visibility .18s; }
   .ck-top { padding: 8px 12px; gap: 8px; }
   .ck-noi { padding: 14px 16px 40px; }
