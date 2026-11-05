@@ -344,7 +344,7 @@ function veLuoiCot(cot, rong) {
     '<div class="lc-than" style="' + st + ';height:' + cao + 'px"><div class="lc-gio">' + gio + '</div>' + cot.map(function (c) {
       return '<div class="lc-cot' + (c.nay ? ' nay' : '') + '" style="background-size:100% ' + PX + 'px" data-tao="' + c.k + '" data-lo="' + lo + '"' + (c.dd ? ' data-dd="' + esc(c.dd) + '"' : '') + (c.vt ? ' data-vt="' + esc(c.vt) + '"' : '') + '>' + ngoai(c) + c.co.map(function (e) {
         var top = (e.a - lo) / 60 * PX, h = Math.max(24, (e.b - e.a) / 60 * PX - 2);
-        return nutSu(e.x, h < 44 ? 'ngan' : '', dongHo(e.a) + '–' + dongHo(Math.min(e.b, 1439)), 'top:' + top + 'px;height:' + h + 'px;left:calc(' + e.lan + ' / ' + e.soLan + ' * 100% + 1px);width:calc(100% / ' + e.soLan + ' - 3px)', true);
+        return nutSu(e.x, h < 44 ? 'lc-ngan' : '', dongHo(e.a) + '–' + dongHo(Math.min(e.b, 1439)), 'top:' + top + 'px;height:' + h + 'px;left:calc(' + e.lan + ' / ' + e.soLan + ' * 100% + 1px);width:calc(100% / ' + e.soLan + ' - 3px)', true);
       }).join('') + (c.nay && mNay >= lo && mNay <= hi ? '<div class="lc-bay-gio" style="top:' + (mNay - lo) / 60 * PX + 'px"></div>' : '') + '</div>';
     }).join('') + '</div></div>';
   var cuon = $('#cuonGio'); if (cuon) cuon.scrollTop = Math.max(0, (Math.max(lo, 7 * 60) - lo) / 60 * PX);
@@ -901,7 +901,7 @@ function moXuat() {
     '</div><div class="lc-xuat-phai"><p class="lc-phu" id="xGhiChu"></p><div class="lc-xuat-xem" id="xXem"></div></div></div>',
     '<button type="button" class="ck-btn" data-xuat="ics" title="Google Lịch, Outlook, điện thoại">Thuê bao, .ics</button><span class="cach"></span><button type="button" class="ck-btn" data-dongnut="1">Đóng</button>' +
     '<button type="button" class="ck-btn" data-xuat="xls">Excel</button><button type="button" class="ck-btn" data-xuat="doc">Word</button><button type="button" class="ck-btn chinh" data-xuat="in">In, lưu PDF</button>');
-  var h = $('#lcHop .lc-hop'); if (h) h.classList.add('rong');
+  var h = $('#lcHop .lc-hop'); if (h) h.classList.add('lc-hop-rong');
   xCapNhat();
 }
 function taiFile(ten, noiDung, loai) {

@@ -233,9 +233,9 @@ dl.lc-ct dt{color:var(--muted)}dl.lc-ct dd{margin:0;overflow-wrap:anywhere;white
 }
 
 /* ===== đỡ chồng lấn: lịch ngắn một dòng, rê chuột để xem đủ, thu phóng giờ ===== */
-.lc-su.ngan{flex-direction:row;align-items:center;gap:6px;padding-top:1px;padding-bottom:1px}
-.lc-su.ngan b{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.lc-su.ngan small{flex:none;white-space:nowrap}
+.lc-su.lc-ngan{flex-direction:row;align-items:center;gap:6px;padding-top:1px;padding-bottom:1px}
+.lc-su.lc-ngan b{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lc-su.lc-ngan small{flex:none;white-space:nowrap}
 .lc-cot .lc-su:hover,.lc-cot .lc-su:focus-visible{z-index:5;min-width:min(230px,80vw);height:auto!important;min-height:26px;flex-direction:column;align-items:stretch;box-shadow:0 4px 14px rgba(0,0,0,.18),0 0 0 2px color-mix(in srgb,var(--c) 55%,transparent)}
 .lc-cot .lc-su:hover b,.lc-cot .lc-su:focus-visible b{white-space:normal}
 .lc-zoom{display:inline-flex;gap:4px}
@@ -258,7 +258,7 @@ dl.lc-ct dt{color:var(--muted)}dl.lc-ct dd{margin:0;overflow-wrap:anywhere;white
 .lc-o-vuong.nho{width:12px;height:12px;margin-right:6px;border-radius:3px;vertical-align:middle}
 .lc-vtbox{display:flex;flex-wrap:wrap;gap:0 20px;max-height:190px;margin-top:4px;overflow:auto}
 .lc-vttim{margin-top:2px}
-.lc-hop.rong{width:min(940px,100%)}
+.lc-hop.lc-hop-rong{width:min(940px,100%)}
 /* ===== xuất file ===== */
 .lc-xuat-khoang{display:flex;flex-wrap:wrap;gap:6px 22px;margin-top:4px;color:var(--mau-ink)}
 .lc-xuat-khoang label{display:inline-flex;align-items:center;gap:6px;font-size:14.5px;cursor:pointer}
@@ -290,7 +290,7 @@ dl.lc-ct dt{color:var(--muted)}dl.lc-ct dd{margin:0;overflow-wrap:anywhere;white
 .lc-vt-nhom{flex-basis:100%;display:flex;align-items:center;gap:6px 14px;margin-top:8px;color:var(--muted);font-size:13px}
 .lc-vt-nhom b{font-weight:700;color:var(--mau-ink)}
 .lc-vt-nhom span{display:inline-flex;gap:10px}
-.lc-hop.rong{width:min(1180px,100%)}
+.lc-hop.lc-hop-rong{width:min(1180px,100%)}
 .lc-xuat-bo{display:grid;grid-template-columns:330px minmax(0,1fr);gap:18px;align-items:start}
 .lc-xuat-loc{max-height:64vh;padding-right:8px;overflow:auto}
 .lc-xuat-loc fieldset{margin:0 0 12px;padding:8px 10px 10px;border:1px solid var(--mau-line);border-radius:10px}
