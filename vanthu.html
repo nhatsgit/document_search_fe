@@ -410,7 +410,7 @@ dl.tt{font-size:14px;gap:7px 12px;grid-template-columns:132px minmax(0,1fr)}
    DỮ LIỆU: đọc từ API /api/vanthu (sheet HE THONG BASE), chỉ đọc.
    ===================================================================== */
 var API_VT = 'https://document-search-api-319700450833.us-central1.run.app/api/vanthu';
-var DV = ['BHCK', 'CRCK', 'CRCK2', 'BHVN', 'Đảng ủy'];
+var DV = ['CRCK2', 'BHCK', 'CRCK', 'BHVN', 'Đảng ủy'];
 var BUOC = { den: [], di: [] };   // [tên bước, số giờ coi là treo] — lấy từ API
 var NGUOI = {
   den: ['Hệ thống · AI', 'Văn thư · lãnh đạo', 'Văn thư · lãnh đạo', 'Hệ thống'],
@@ -513,8 +513,8 @@ function khop(p, q) { return !q || boDau([p.ma, p.soGoc, p.trich, p.tomTat, p.co
 function tick(ok, coDuLieu) { return 'chip nhe ' + (!coDuLieu ? 'tt-xong' : ok ? 'tt-dung' : 'tt-loi'); }
 
 /* ---------- trạng thái giao diện ---------- */
-var S = { coTrang: 20, dv: 'Tất cả', chieu: 'tat', tab: 'tq', locPhieu: 'tat', q: '', trang: 1,
-  so: 'den|BHCK', dvSo: 'BHCK', tabSo: 'vb', locThang: '', locKy: '', locLuong: '', locTT: '', qSoVb: '', trangSo: 1, tabCt: 'yk', ctId: null, thuQt: {}, ngan: null };
+var S = { coTrang: 20, dv: 'CRCK2', chieu: 'tat', tab: 'tq', locPhieu: 'tat', q: '', trang: 1,
+  so: '', dvSo: 'CRCK2', tabSo: 'vb', locThang: '', locKy: '', locLuong: '', locTT: '', qSoVb: '', trangSo: 1, tabCt: 'yk', ctId: null, thuQt: {}, ngan: null };
 
 function dsChon() { return DS.filter(function (p) { return (S.dv === 'Tất cả' || p.dv === S.dv) && (S.chieu === 'tat' || p.chieu === S.chieu); }); }
 function dsMo() { return dsChon().filter(function (p) { return p.tt !== 'xong' && p.tt !== 'giu'; }); }
@@ -570,7 +570,7 @@ function veNgan() {
 function hangLocChung() {
   return '<div class="hang" style="gap:8px 16px"><div class="seg" role="group" aria-label="Loại văn thư">' + [['tat', 'Tất cả'], ['den', 'Văn thư đến'], ['di', 'Văn thư đi']].map(function (c) {
         return '<button class="' + (S.chieu === c[0] ? 'chon' : '') + '" data-chieu="' + c[0] + '">' + c[1] + '</button>'; }).join('') + '</div>' +
-      '<div class="seg" role="group" aria-label="Đơn vị" style="margin-left:auto">' + ['Tất cả'].concat(DV).map(function (d) {
+      '<div class="seg" role="group" aria-label="Đơn vị" style="margin-left:auto">' + DV.concat(['Tất cả']).map(function (d) {
         return '<button class="' + (S.dv === d ? 'chon' : '') + '" data-dv="' + esc(d) + '">' + esc(d) + '</button>'; }).join('') + '</div></div>';
 }
 var HINH_VT = {
