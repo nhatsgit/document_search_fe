@@ -33,10 +33,7 @@
       { id: 'bo', ten: 'Bộ hồ sơ', hinh: 'bo', link: function () { return linkTra('bo'); } },
       { id: 'tong', ten: 'Tổng quan kho', hinh: 'tq', link: function () { return linkTra('tong'); } },
       { id: 'tc2', ten: 'Tra cứu 2.0', hinh: 'ds', nhan: 'thử', link: function () { return 'tracuu2.html'; } }] },
-    { id: 'vanthu', ten: 'Văn thư', hinh: 'thu', muc: [
-      { id: 'congvan', ten: 'Công văn', hinh: 'thu', link: function () { return 'vanthu.html#/'; } },
-      { id: 'so', ten: 'Sổ văn thư', hinh: 'so', link: function () { return 'vanthu.html#/so'; } },
-      { id: 'lich', ten: 'Lịch làm việc', hinh: 'lich', link: function () { return 'lich.html'; } }] },
+    { id: 'vanthu', ten: 'Văn thư', hinh: 'thu', link: function () { return 'vanthu.html#/'; } },
     { id: 'ai', ten: 'Chạy AI', hinh: 'ai', muc: [
       { id: 'ai', ten: 'Theo dõi, điều khiển', hinh: 'ai', link: function () { return 'index.html#/ai'; } }] }
   ];
@@ -46,6 +43,10 @@
   function veBen() {
     ben.setAttribute('aria-label', 'Menu phân hệ');
     ben.innerHTML = '<div class="ck-nhan">Phân hệ</div>' + MENU.map(function (p) {
+      if (p.link) {
+        var dangO = S.ph === p.id;
+        return '<a class="ck-ph-he' + (dangO ? ' chon' : '') + '"' + (dangO ? ' aria-current="page"' : '') + ' href="' + esc(p.link()) + '" data-ckmuc="' + p.id + ':' + p.id + '">' + svg(p.hinh) + '<span>' + esc(p.ten) + '</span></a>';
+      }
       var mo = S.moNhom === p.id;
       return '<button type="button" class="ck-ph-he" data-ckph="' + p.id + '" aria-expanded="' + mo + '">' + svg(p.hinh) + '<span>' + esc(p.ten) + '</span><svg class="ck-mui" ' + nv + '>' + HINH.mui + '</svg></button>' +
         '<div class="ck-nhom"' + (mo ? '' : ' hidden') + '>' + p.muc.map(function (m) {

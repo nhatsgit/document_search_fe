@@ -56,7 +56,8 @@ body.ck :focus-visible { outline: 3px solid var(--brand-200); outline-offset: 2p
 .ck-ph-he > svg:first-child { flex: none; width: 19px; height: 19px; }
 .ck-ph-he > span { flex: 1; min-width: 0; }
 .ck-mui { flex: none; width: 15px; height: 15px; color: var(--faint); transition: transform .15s; }
-.ck-ph-he[aria-expanded="true"] { background: var(--mau-card); color: var(--brand-700); font-weight: 600; box-shadow: var(--sh-1), inset 3px 0 0 var(--brand); }
+a.ck-ph-he { text-decoration: none; }
+.ck-ph-he.chon, .ck-ph-he[aria-expanded="true"] { background: var(--mau-card); color: var(--brand-700); font-weight: 600; box-shadow: var(--sh-1), inset 3px 0 0 var(--brand); }
 .ck-ph-he[aria-expanded="true"] .ck-mui { transform: rotate(180deg); }
 .ck-nhom { display: flex; flex-direction: column; gap: 2px; margin: 4px 0 6px; padding: 6px; background: var(--mau-card); border: 1px solid var(--mau-line); border-radius: var(--r); }
 .ck-nhom[hidden] { display: none; }
