@@ -2,7 +2,10 @@
 :where(#lcGoc,#lcHop) :where(button,input,select,textarea){font:inherit;color:inherit}
 :where(#lcGoc,#lcHop) :where(h2,h3,h4,p){margin:0}
 :where(#lcGoc,#lcHop) *{box-sizing:border-box}
-.lc-lap{flex:none}
+.lc-lap,.lc-mau{flex:none}
+.lc-mau[aria-pressed="true"]{background:var(--brand-100);color:var(--brand-700);border-color:var(--brand-200);font-weight:600}
+.lc-demo{margin-bottom:10px;padding:9px 14px;border-radius:10px;background:var(--info-bg);color:var(--info-fg);font-size:14px}
+.lc-demo[hidden]{display:none}
 .lc-thanh{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin-bottom:10px}
 .lc-chuyen{display:flex;align-items:center;gap:6px;min-width:0}
 .lc-chuyen h2{margin-left:6px;font-size:18px;font-weight:700;letter-spacing:-.01em;white-space:nowrap}

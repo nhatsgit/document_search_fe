@@ -25,7 +25,7 @@ var dongHo = function (m) { return hai(Math.floor(m / 60)) + ':' + hai(m % 60); 
 var nhanNgay = function (d) { return THU[(d.getDay() + 6) % 7] + ' ' + d.getDate() + '/' + (d.getMonth() + 1); };
 var vnNgay = function (s) { var p = s.slice(0, 10).split('-'); return p[2] + '/' + p[1] + '/' + p[0]; };
 
-var S = { xem: doc('lich_xem', dienThoai() ? 'ngay' : 'tuan'), moc: homNay(), an: {}, ds: [] };
+var S = { xem: doc('lich_xem', dienThoai() ? 'ngay' : 'tuan'), moc: homNay(), an: {}, ds: [], demo: doc('lich_demo', '') === '1', demoDs: null };
 try { S.an = JSON.parse(doc('lich_an', '{}')) || {}; } catch (e) {}
 if (!XEM.some(function (x) { return x[0] === S.xem; })) S.xem = 'tuan';
 
@@ -170,7 +170,102 @@ function ve() {
 }
 
 /* ---------- dữ liệu ---------- */
+/* ---------- dữ liệu mẫu: lịch giả chỉ nằm trong trình duyệt, không ghi vào lịch thật ---------- */
+function demoTao() {
+  var h = homNay(), ds = [], dem = 0, goc = Math.round((thuHai(h) - h) / 86400000);   // goc: thứ Hai của tuần này, tính từ hôm nay
+  /** loai, tên, số ngày kể từ hôm nay, giờ bắt đầu (null = cả ngày), giờ kết thúc, tuỳ chọn {dd, tp, dv, gc, dai: số ngày kéo dài thêm} */
+  var them = function (loai, ten, d, a, b, o) {
+    o = o || {};
+    ds.push({ id: 'mau' + (++dem), tieuDe: ten, loai: loai, caNgay: !a, batDau: ymd(cong(h, d)) + ' ' + (a || '00:00'), ketThuc: ymd(cong(h, d + (o.dai || 0))) + ' ' + (b || '23:59'),
+      diaDiem: o.dd || '', thanhPhan: o.tp || '', donVi: o.dv || '', ghiChu: o.gc || '' });
+  };
+  var P1 = 'Phòng họp 1', P2 = 'Phòng họp 2', PL = 'Phòng họp lớn', X1 = 'Xe 51A-123.45', X2 = 'Xe 51B-678.90';
+  var T = function (k, thu) { return goc + 7 * k + thu; };   // thu: 0 = thứ Hai … 6 = Chủ nhật
+
+  // Tuần này: đủ các trường hợp để xem
+  them('hop', 'Giao ban tuần', T(0, 0), '08:00', '09:30', { dd: PL, tp: 'TGĐ, P.TGĐ Hùng, P.TGĐ Mai, Trưởng phòng TCHC, Trưởng phòng KHĐT', dv: 'CRCK2', gc: 'Báo cáo công việc tuần trước, kế hoạch tuần này.\nTrưởng phòng chuẩn bị số liệu trước 16:00 thứ Sáu.' });
+  them('xe', 'Xe đi Sở Kế hoạch và Đầu tư nộp hồ sơ', T(0, 0), '08:30', '11:30', { dd: X1, tp: 'Chị Lan (Văn thư), Anh Tuấn (lái xe)', dv: 'CRCK2' });
+  them('giayto', 'Hạn nộp báo cáo an toàn lao động quý IV', T(0, 0), null, null, { dv: 'CRCK2', gc: 'Nộp cho Sở Lao động trước 17:00.' });
+  them('phong', 'Phỏng vấn ứng viên kế toán', T(0, 0), '14:00', '16:00', { dd: P2, tp: 'Trưởng phòng TCHC, Trưởng phòng Kế toán', dv: 'CRCK2' });
+  them('hop', 'Họp kế hoạch đầu tư năm 2027', T(0, 1), '09:00', '10:30', { dd: P1, tp: 'Trưởng phòng KHĐT, P.TGĐ Hùng', dv: 'CRCK2' });
+  them('hop', 'Họp rà soát nhân sự (trùng phòng)', T(0, 1), '09:30', '11:00', { dd: P1, tp: 'Trưởng phòng TCHC, Chuyên viên Hà', dv: 'CRCK2', gc: 'Cố ý đặt trùng Phòng họp 1 để thấy cảnh báo trùng giờ.' });
+  them('hop', 'Làm việc với đối tác Vinatex (trùng người)', T(0, 1), '10:00', '11:30', { dd: P2, tp: 'Trưởng phòng KHĐT, Giám đốc Vinatex', dv: 'CRCK2', gc: 'Trùng người với cuộc họp kế hoạch đầu tư lúc 09:00.' });
+  them('hop', 'Họp ban Thường vụ Đảng uỷ', T(0, 1), '14:00', '16:00', { dd: P2, tp: 'Bí thư, Phó bí thư, các Uỷ viên', dv: 'Đảng ủy' });
+  them('congtac', 'Đoàn công tác Phnom Penh làm việc với đối tác', T(0, 2), null, null, { dai: 2, dd: 'Phnom Penh, Campuchia', tp: 'TGĐ, P.TGĐ Mai, Trưởng phòng KHĐT', dv: 'CRCK2', gc: 'Đi 3 ngày, về chiều thứ Sáu. Vé máy bay do văn phòng đặt.' });
+  them('khac', 'Nghỉ phép: anh Minh (phòng Kỹ thuật)', T(0, 2), null, null, { dv: 'CRCK2' });
+  them('hop', 'Gọi điện thoại nhanh với Tập đoàn', T(0, 2), '10:00', '10:15', { tp: 'P.TGĐ Hùng', dv: 'BHCK', gc: 'Chỉ 15 phút, để xem khối rất ngắn.' });
+  them('hop', 'Họp triển khai chương trình chuyển đổi số toàn công ty, thống nhất lộ trình, phân công phụ trách từng phòng ban và kế hoạch đào tạo người dùng cuối', T(0, 2), '14:00', '15:30', { dd: PL, tp: 'Tất cả trưởng phòng', dv: 'CRCK2', gc: 'Tên dài để xem cách xuống dòng.' });
+  // Thứ Năm: nhiều lịch trong ngày, sớm, khuya, qua đêm
+  them('xe', 'Xe đưa đoàn ra sân bay Tân Sơn Nhất', T(0, 3), '06:30', '08:00', { dd: X2, tp: 'Anh Tuấn (lái xe)', dv: 'CRCK2', gc: 'Khối bắt đầu sớm hơn 07:00 để lưới giờ mở rộng.' });
+  them('hop', 'Họp đầu ngày (stand-up)', T(0, 3), '08:00', '08:30', { dd: P1, tp: 'Phòng TCHC', dv: 'CRCK2' });
+  them('hop', 'Họp phòng Kế toán', T(0, 3), '08:00', '09:00', { dd: P2, tp: 'Phòng Kế toán', dv: 'CRCK2' });
+  them('phong', 'Đào tạo an toàn lao động', T(0, 3), '08:15', '11:30', { dd: PL, tp: 'Công nhân khối sản xuất', dv: 'BHCK' });
+  them('viec', 'Gửi bản thảo quy chế cho Pháp chế', T(0, 3), '10:00', '10:30', { tp: 'Chuyên viên Hà', dv: 'CRCK2' });
+  them('hop', 'Họp giao ban bảo hiểm', T(0, 3), '09:00', '10:00', { dd: P1, tp: 'Phòng BHCK, Phòng BHVN', dv: 'BHVN' });
+  them('xe', 'Xe đón khách Tập đoàn', T(0, 3), '13:00', '15:00', { dd: X1, tp: 'Anh Tuấn (lái xe)', dv: 'CRCK2' });
+  them('hop', 'Tiếp khách và ăn tối với đối tác', T(0, 3), '18:30', '21:00', { dd: 'Nhà hàng Sen Vàng, 25 Lê Duẩn', tp: 'TGĐ, P.TGĐ Hùng, Giám đốc Vinatex', dv: 'CRCK2' });
+  them('khac', 'Trực sự cố hệ thống (qua đêm)', T(0, 3), '22:00', '02:00', { dai: 1, dd: 'Phòng máy chủ', tp: 'Anh Dũng (IT)', dv: 'CRCK2', gc: 'Bắt đầu 22:00 thứ Năm, kết thúc 02:00 thứ Sáu.' });
+  // Thứ Sáu, Bảy, Chủ nhật
+  them('viec', 'Trình ký quyết định bổ nhiệm', T(0, 4), null, null, { dv: 'CRCK2' });
+  them('viec', 'Nộp bản kê tài sản cố định', T(0, 4), null, null, { dv: 'CRCK2' });
+  them('giayto', 'Hết hạn giấy phép xả thải', T(0, 4), null, null, { dv: 'BHCK', gc: 'Cần gia hạn trước ngày này.' });
+  them('giayto', 'Hạn đóng bảo hiểm tháng này', T(0, 4), null, null, { dv: 'CRCK2' });
+  them('hop', 'Họp tổng kết tuần', T(0, 4), '15:00', '17:00', { dd: PL, tp: 'TGĐ, P.TGĐ Hùng, P.TGĐ Mai, các Trưởng phòng', dv: 'CRCK2' });
+  them('phong', 'Đặt phòng sinh hoạt chi bộ', T(0, 4), '17:00', '18:00', { dd: P2, dv: 'Đảng ủy', gc: 'Không ghi thành phần.' });
+  them('khac', 'Trực cơ quan ngày thứ Bảy', T(0, 5), null, null, { tp: 'Chị Lan (Văn thư)', dv: 'CRCK2' });
+  // Chủ nhật tuần này để trống
+
+  // Tuần sau: đợt nhiều ngày
+  them('khac', 'Kiểm toán nội bộ', T(1, 0), null, null, { dai: 4, dd: 'Tại văn phòng công ty', tp: 'Đoàn kiểm toán Tập đoàn', dv: 'CRCK2', gc: 'Kéo dài cả tuần, thứ Hai đến thứ Sáu.' });
+  them('congtac', 'Đi thị sát vườn cây Tây Ninh', T(1, 2), '07:30', '17:00', { dd: 'Nông trường Tây Ninh', tp: 'P.TGĐ Mai, Trưởng phòng Kỹ thuật', dv: 'BHCK' });
+  them('xe', 'Xe đi Tây Ninh', T(1, 2), '07:00', '18:00', { dd: X2, tp: 'Anh Tuấn (lái xe)', dv: 'BHCK' });
+  them('xe', 'Xe đi dự hội nghị tại Biên Hòa (trùng xe)', T(1, 2), '08:00', '12:00', { dd: X2, tp: 'Anh Bình (lái xe)', dv: 'CRCK', gc: 'Cố ý trùng xe với chuyến đi Tây Ninh.' });
+  them('congtac', 'Hội nghị ngành cao su toàn quốc', T(2, 1), null, null, { dai: 1, dd: 'Hà Nội', tp: 'TGĐ, Trưởng phòng KHĐT', dv: 'CRCK2' });
+  them('khac', 'Nghỉ phép: chị Hương', T(1, 3), null, null, { dai: 6, dv: 'BHVN', gc: 'Nghỉ phép hai tuần, kéo qua cuối tuần.' });
+
+  // Lịch lặp: giao ban thứ Hai hằng tuần, họp Đảng uỷ hai tuần một lần, hạn giấy tờ cuối tháng
+  for (var k = -10; k <= 14; k++) if (k !== 0) them('hop', 'Giao ban tuần', T(k, 0), '08:00', '09:30', { dd: PL, tp: 'TGĐ, P.TGĐ Hùng, P.TGĐ Mai, Trưởng phòng TCHC, Trưởng phòng KHĐT', dv: 'CRCK2' });
+  for (k = -10; k <= 14; k += 2) them('hop', 'Họp ban Thường vụ Đảng uỷ', T(k, 1), '14:00', '16:00', { dd: P2, tp: 'Bí thư, Phó bí thư, các Uỷ viên', dv: 'Đảng ủy' });
+  for (var m = -6; m <= 8; m++) {
+    var cuoi = new Date(h.getFullYear(), h.getMonth() + m + 1, 0);
+    them('giayto', 'Hạn nộp báo cáo thuế tháng', Math.round((cuoi - h) / 86400000), null, null, { dv: 'CRCK2' });
+  }
+
+  // Rải ngẫu nhiên (cố định) cả năm để xem chế độ Tháng và Năm có độ dày khác nhau
+  var seed = 20261105, ngau = function (n) { seed = (seed * 1103515245 + 12345) % 2147483648; return Math.floor(seed / 2147483648 * n); };
+  var MAU = [
+    ['hop', ['Họp phòng', 'Họp triển khai', 'Họp đánh giá tiến độ', 'Họp với nhà cung cấp', 'Họp hội đồng thi đua'], [P1, P2, PL]],
+    ['phong', ['Đặt phòng đào tạo', 'Đặt phòng phỏng vấn', 'Đặt phòng tiếp khách'], [P1, P2, PL]],
+    ['xe', ['Xe đi công tác', 'Xe đưa đón khách', 'Xe đi ngân hàng', 'Xe đi Sở'], [X1, X2]],
+    ['congtac', ['Công tác tại nông trường', 'Đi làm việc với cơ quan thuế', 'Dự hội nghị'], ['Nông trường', 'Cục Thuế', 'Tập đoàn']],
+    ['viec', ['Hoàn thiện báo cáo', 'Trình ký hồ sơ', 'Phản hồi công văn'], ['']],
+    ['giayto', ['Gia hạn giấy phép', 'Hết hạn hợp đồng', 'Hạn nộp hồ sơ'], ['']],
+    ['khac', ['Nghỉ phép', 'Trực cơ quan'], ['']]
+  ], DONVI = ['CRCK2', 'CRCK2', 'CRCK2', 'BHCK', 'CRCK', 'BHVN', 'Đảng ủy'], NGUOI = ['TGĐ', 'P.TGĐ Hùng', 'P.TGĐ Mai', 'Trưởng phòng TCHC', 'Trưởng phòng KHĐT', 'Chị Lan (Văn thư)', 'Chuyên viên Hà', 'Anh Tuấn (lái xe)', 'Anh Dũng (IT)'];
+  var ngayDau = new Date(h.getFullYear(), 0, 1), ngayCuoi = new Date(h.getFullYear(), 11, 31), tongNgay = Math.round((ngayCuoi - ngayDau) / 86400000);
+  for (var i = 0; i < 170; i++) {
+    var d = cong(ngayDau, ngau(tongNgay)), thu = (d.getDay() + 6) % 7, mau = MAU[ngau(MAU.length)];
+    if (thu > 4 && ngau(4)) continue;   // cuối tuần thưa hơn
+    var ten = mau[1][ngau(mau[1].length)], dd = mau[2][ngau(mau[2].length)], dv = DONVI[ngau(DONVI.length)], tp = NGUOI[ngau(NGUOI.length)] + (ngau(2) ? ', ' + NGUOI[ngau(NGUOI.length)] : '');
+    var ngayTu = Math.round((d - h) / 86400000);
+    if (mau[0] === 'giayto' || mau[0] === 'viec' || mau[0] === 'khac' || (mau[0] === 'congtac' && ngau(2))) them(mau[0], ten, ngayTu, null, null, { dv: dv, tp: mau[0] === 'viec' ? tp : '', dd: dd, dai: mau[0] === 'congtac' ? ngau(3) : 0 });
+    else { var gio = 7 * 60 + ngau(10) * 60 + ngau(2) * 30, dai = 30 + ngau(4) * 30; them(mau[0], ten, ngayTu, dongHo(gio), dongHo(Math.min(gio + dai, 1439)), { dd: dd, tp: tp, dv: dv }); }
+  }
+  return ds;
+}
+function demoLay() { if (!S.demoDs) S.demoDs = demoTao(); return S.demoDs.slice(); }
+function demoLuu(id, v) {
+  if (id) { var x = S.demoDs.filter(function (y) { return y.id === id; })[0]; if (x) Object.assign(x, v); }
+  else S.demoDs.push(Object.assign({ id: 'mau' + Date.now() }, v));
+}
+function veDemo() {
+  var b = $('#lcMau'), t = $('#lcDemo');
+  if (b) b.setAttribute('aria-pressed', S.demo);
+  if (t) t.hidden = !S.demo;
+}
+
 function nap() {
+  if (S.demo) { S.ds = demoLay().map(function (x) { if (!MAU[x.loai]) x.loai = 'khac'; return x; }); danhDauTrung(); ve(); return Promise.resolve(); }
   return fetch(API).then(function (r) { return r.json(); }).then(function (j) {
     if (!j.ok) throw new Error(j.loi || 'API lỗi');
     S.ds = j.data.lich.map(function (x) { if (!MAU[x.loai]) x.loai = 'khac'; return x; });
@@ -206,7 +301,7 @@ function moChiTiet(id) {
 function moForm(x, loi) {
   x = x || {};
   var dBat = (x.batDau || ymd(S.moc) + ' 08:00'), dKet = (x.ketThuc || dBat.slice(0, 11) + dongHo(Math.min(phut(dBat) + 60, 1439)));
-  var coMa = !!maDaLuu();
+  var coMa = S.demo || !!maDaLuu();
   moHop(x.id ? 'Sửa lịch' : 'Lập lịch',
     (loi ? '<div class="lc-loi" role="alert">' + esc(loi) + '</div>' : '') +
     '<label class="lc-o ca">Tên lịch<input id="fTen" maxlength="200" required value="' + esc(x.tieuDe || '') + '"></label>' +
@@ -220,7 +315,7 @@ function moForm(x, loi) {
     '<label class="lc-o ca">Ghi chú<textarea id="fGhiChu" rows="3" maxlength="2000">' + esc(x.ghiChu || '') + '</textarea></label>' +
     '<div class="lc-trung" id="fTrung" hidden></div>' +
     (coMa ? '' : '<label class="lc-o ca">Mã lập lịch<input type="password" id="fMa" autocomplete="off"></label>'),
-    (coMa ? '<button type="button" class="ck-btn" data-quenma="1">Quên mã</button>' : '') + '<span class="cach"></span><button type="button" class="ck-btn" data-dongnut="1">Huỷ</button><button type="button" class="ck-btn chinh" id="fLuu" data-luu="' + esc(x.id || '') + '">Lưu</button>');
+    (coMa && !S.demo ? '<button type="button" class="ck-btn" data-quenma="1">Quên mã</button>' : '') + '<span class="cach"></span><button type="button" class="ck-btn" data-dongnut="1">Huỷ</button><button type="button" class="ck-btn chinh" id="fLuu" data-luu="' + esc(x.id || '') + '">Lưu</button>');
   anGio(); kiemTrung(x.id);
   var o = $('#fTen'); if (o) o.focus();
 }
@@ -243,7 +338,8 @@ function luu(id, nut) {
   if (!v.tieuDe) return bao('Chưa nhập tên lịch');
   if (!/^\d{4}-\d{2}-\d{2} /.test(v.batDau)) return bao('Chưa chọn ngày');
   if (v.ketThuc < v.batDau) return bao('Thời gian kết thúc phải sau thời gian bắt đầu');
-  if (!ma) return bao('Chưa nhập mã lập lịch');
+  if (!ma && !S.demo) return bao('Chưa nhập mã lập lịch');
+  if (S.demo) { demoLuu(id, v); dongHop(); S.moc = phanNgay(v.batDau.slice(0, 10)); nap(); return; }
   nut.disabled = true; nut.textContent = 'Đang lưu…';
   gui(id ? { lenh: 'sua', id: id, lich: v } : { lenh: 'them', lich: v }, ma).then(function () {
     ghi('lich_ma', ma);
@@ -256,6 +352,10 @@ function luu(id, nut) {
   });
 }
 function xoa(id, nut) {
+  if (S.demo) {
+    if (nut.dataset.dem !== '1') { nut.dataset.dem = '1'; nut.textContent = 'Bấm lần nữa để xoá'; return; }
+    S.demoDs = S.demoDs.filter(function (y) { return y.id !== id; }); dongHop(); nap(); return;
+  }
   var ma = maDaLuu();
   if (!ma) { var x = S.ds.filter(function (y) { return y.id === id; })[0]; moForm(x, 'Nhập mã rồi lưu một lần để được xoá lịch.'); return; }
   if (nut.dataset.dem !== '1') { nut.dataset.dem = '1'; nut.textContent = 'Bấm lần nữa để xoá'; return; }
@@ -308,10 +408,14 @@ function gan(el) {
       '<button type="button" class="ck-btn vuong" id="lcToi" aria-label="Sau">›</button>' +
       '<h2 id="lcTenKhoang" aria-live="polite"></h2></div>' +
       '<div class="lc-xem" id="lcXem" role="group" aria-label="Cách xem"></div>' +
+      '<button type="button" class="ck-btn lc-mau" id="lcMau" aria-pressed="false" title="Xem thử bằng lịch giả, không ghi vào lịch thật">Dữ liệu mẫu</button>' +
       '<button type="button" class="ck-btn chinh lc-lap" id="lcLap">+ Lập lịch</button></div>' +
+    '<div class="lc-demo" id="lcDemo" hidden>Đang xem <b>dữ liệu mẫu</b>: lịch giả để xem thử. Lập, sửa, xoá chỉ có tác dụng trên trình duyệt này, không ghi vào lịch thật. Bấm <b>Dữ liệu mẫu</b> lần nữa để về lịch thật.</div>' +
     '<div class="lc-loai" id="lcLoai" role="group" aria-label="Loại lịch"></div>' +
     '<div class="lc-the" id="lcNoi"></div></div>';
   $('#lcLap').onclick = function () { moForm(); };
+  $('#lcMau').onclick = function () { S.demo = !S.demo; S.demoDs = null; ghi('lich_demo', S.demo ? '1' : ''); veDemo(); S.ds = []; $('#lcNoi').innerHTML = '<div class="lc-baoloi">Đang đọc lịch…</div>'; nap(); };
+  veDemo();
   $('#lcHomNay').onclick = function () { S.moc = homNay(); ve(); };
   $('#lcLui').onclick = function () { buoc(-1); };
   $('#lcToi').onclick = function () { buoc(1); };
