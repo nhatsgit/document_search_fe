@@ -35,8 +35,7 @@
       { id: 'tc2', ten: 'Tra cứu 2.0', hinh: 'ds', nhan: 'thử', link: function () { return 'tracuu2.html'; } }] },
     { id: 'vanthu', ten: 'Văn thư', hinh: 'thu', muc: [
       { id: 'congvan', ten: 'Công văn', hinh: 'thu', link: function () { return 'vanthu.html#/'; } },
-      { id: 'so', ten: 'Sổ văn thư', hinh: 'so', link: function () { return 'vanthu.html#/so'; } }] },
-    { id: 'lich', ten: 'Lịch', hinh: 'lich', muc: [
+      { id: 'so', ten: 'Sổ văn thư', hinh: 'so', link: function () { return 'vanthu.html#/so'; } },
       { id: 'lich', ten: 'Lịch làm việc', hinh: 'lich', link: function () { return 'lich.html'; } }] },
     { id: 'ai', ten: 'Chạy AI', hinh: 'ai', muc: [
       { id: 'ai', ten: 'Theo dõi, điều khiển', hinh: 'ai', link: function () { return 'index.html#/ai'; } }] }
