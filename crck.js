@@ -34,10 +34,8 @@
       { id: 'tong', ten: 'Tổng quan kho', hinh: 'tq', link: function () { return linkTra('tong'); } },
       { id: 'tc2', ten: 'Tra cứu 2.0', hinh: 'ds', nhan: 'thử', link: function () { return 'tracuu2.html'; } }] },
     { id: 'vanthu', ten: 'Văn thư', hinh: 'thu', muc: [
-      { id: 'tong', ten: 'Tổng quan', hinh: 'tq', link: function () { return 'vanthu.html#/'; } },
-      { id: 'qt', ten: 'Quy trình', hinh: 'qt', link: function () { return 'vanthu.html#/quytrinh'; } },
-      { id: 'so', ten: 'Sổ văn thư', hinh: 'so', link: function () { return 'vanthu.html#/so'; } },
-      { id: 'phieu', ten: 'Danh sách phiếu', hinh: 'ds', link: function () { return 'vanthu.html#/phieu'; } }] },
+      { id: 'congvan', ten: 'Công văn', hinh: 'thu', link: function () { return 'vanthu.html#/'; } },
+      { id: 'so', ten: 'Sổ văn thư', hinh: 'so', link: function () { return 'vanthu.html#/so'; } }] },
     { id: 'lich', ten: 'Lịch', hinh: 'lich', muc: [
       { id: 'lich', ten: 'Lịch làm việc', hinh: 'lich', link: function () { return 'lich.html'; } }] },
     { id: 'ai', ten: 'Chạy AI', hinh: 'ai', muc: [

@@ -29,7 +29,7 @@ body.ck { background: var(--page); color: var(--mau-ink); font: 400 15px/1.55 va
 body.ck :focus-visible { outline: 3px solid var(--brand-200); outline-offset: 2px; }
 
 /* Thanh trên: nền trắng, vạch vàng 2px */
-.ck-top { position: relative; z-index: 45; display: flex; align-items: center; gap: 12px; min-height: 58px; padding: 8px 20px; background: var(--mau-card); border-bottom: 1px solid var(--mau-line); box-shadow: 0 2px 0 var(--gold); }
+.ck-top { position: relative; z-index: 1; display: flex; align-items: center; gap: 12px; min-height: 58px; padding: 8px 20px; background: var(--mau-card); border-bottom: 1px solid var(--mau-line); box-shadow: 0 2px 0 var(--gold); }
 .ck-burger, .ck-nut-tron { flex: none; width: 38px; height: 38px; display: grid; place-items: center; border: 0; border-radius: 10px; background: none; color: var(--muted); cursor: pointer; padding: 0; }
 .ck-burger:hover, .ck-nut-tron:hover { background: var(--hover-bg); color: var(--mau-ink); }
 .ck-burger svg, .ck-nut-tron svg { width: 20px; height: 20px; }
