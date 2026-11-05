@@ -184,3 +184,58 @@ dl.lc-ct dt{color:var(--muted)}dl.lc-ct dd{margin:0;overflow-wrap:anywhere;white
   .lc-cuon{max-height:none!important;overflow:visible!important}
   .lc-the{box-shadow:none}
 }
+
+/* ===== lãnh đạo: chọn người, cột lãnh đạo, bảng tuần ===== */
+.lc-hang3{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:12px}
+.lc-nhan{margin-right:2px;font-size:13px;font-weight:600;color:var(--muted)}
+.lc-ng,.lc-ngc{position:relative;display:inline-flex;align-items:center;gap:8px;min-height:42px;padding:4px 16px 4px 5px;border:1px solid var(--mau-line);border-radius:24px;background:var(--mau-card);color:inherit;font-size:13.5px;text-align:left;cursor:pointer}
+.lc-ng span,.lc-ngc span{display:flex;flex-direction:column;line-height:1.2}
+.lc-ng small,.lc-ngc small{font-size:11.5px;color:var(--muted)}
+.lc-ng:hover,.lc-ngc:hover{background:var(--soft)}
+.lc-av{flex:none;width:32px;height:32px;display:grid;place-items:center;border-radius:50%;background:var(--c,var(--brand));color:#fff;font-size:12px;font-style:normal;font-weight:700}
+.lc-av.tat{background:var(--soft);color:var(--muted)}
+.lc-av.nho{width:22px;height:22px;margin-right:6px;font-size:10px;vertical-align:middle}
+.lc-ng.chon,.lc-ngc:has(input:checked){border-color:var(--brand-200);background:var(--brand-100);color:var(--brand-700)}
+.lc-ngc input{position:absolute;opacity:0;pointer-events:none}
+.lc-ngc:has(input:checked)::after{content:"✓";margin-left:2px;font-weight:700}
+.lc-ngc:has(input:focus-visible){box-shadow:0 0 0 3px var(--brand-100)}
+.lc-ldbox{display:flex;flex-wrap:wrap;gap:8px;margin-top:5px}
+.lc-ldtim{margin-top:2px}
+.lc-kind.chon{border-color:var(--brand-200);background:var(--brand-100);color:var(--brand-700);font-weight:600}
+.lc-dau h4 .lc-am{margin-top:2px}
+.lc-ngc2{display:inline-flex;align-items:center;font-weight:600}
+.lc-ldb{width:100%;border-collapse:collapse;font-size:14px}
+.lc-ldb th{padding:6px 8px;border-bottom:1px solid var(--mau-line);font-size:12.5px;font-weight:600;text-align:left;color:var(--muted)}
+.lc-ldb td{padding:7px 8px;border-bottom:1px solid var(--vach);vertical-align:middle}
+.lc-ldb-nut{display:flex;gap:6px;justify-content:flex-end}
+.lc-ldb-nut .ck-btn{min-height:32px;padding:0 10px;font-size:13px}
+/* bảng lịch công tác tuần */
+.lc-bang-cuon{max-height:max(420px,calc(100dvh - 300px));overflow:auto}
+.lc-bang{width:100%;border-collapse:separate;border-spacing:0;font-size:13.5px}
+.lc-bang th,.lc-bang td{padding:8px 10px;border-bottom:1px solid var(--vach);border-left:1px solid var(--vach);vertical-align:top;text-align:left}
+.lc-bang th:first-child{border-left:0}
+.lc-bang thead th{position:sticky;top:0;z-index:2;background:var(--soft);font-weight:600}
+.lc-bang thead th small{display:block;font-size:11.5px;font-weight:400;color:var(--muted)}
+.lc-bang th.lc-b-n{width:104px;background:var(--soft);font-weight:600}
+.lc-bang th.lc-b-n small{display:block}
+.lc-bang th.lc-b-b{width:62px;background:var(--soft);font-weight:500;color:var(--muted)}
+.lc-bang tr.nay th.lc-b-n{background:var(--brand-100);color:var(--brand-700)}
+.lc-bang tr.cuoi-ngay>*{border-bottom:2px solid var(--mau-line)}
+.lc-b-su{display:block;width:100%;margin:0 0 6px;padding:5px 8px;border:0;border-left:3px solid var(--c);border-radius:6px;background:color-mix(in srgb,var(--c) 10%,var(--mau-card));color:inherit;text-align:left;cursor:pointer}
+.lc-b-su time{display:block;font-size:12.5px;font-weight:700;color:var(--c)}
+.lc-b-su b{font-weight:600;overflow-wrap:anywhere}
+.lc-b-su small{display:block;font-size:12px;color:var(--muted)}
+.lc-b-su.trung{box-shadow:inset 0 0 0 1px var(--bad-fg)}
+@media print{
+  .lc-hang3{display:none!important}
+  .lc-bang-cuon{max-height:none!important;overflow:visible!important}
+  .lc-bang th,.lc-bang td{border-color:#999}
+}
+
+/* ===== đỡ chồng lấn: lịch ngắn một dòng, rê chuột để xem đủ, thu phóng giờ ===== */
+.lc-su.ngan{flex-direction:row;align-items:center;gap:6px;padding-top:1px;padding-bottom:1px}
+.lc-su.ngan b{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lc-su.ngan small{flex:none;white-space:nowrap}
+.lc-cot .lc-su:hover,.lc-cot .lc-su:focus-visible{z-index:5;min-width:min(230px,80vw);height:auto!important;min-height:26px;flex-direction:column;align-items:stretch;box-shadow:0 4px 14px rgba(0,0,0,.18),0 0 0 2px color-mix(in srgb,var(--c) 55%,transparent)}
+.lc-cot .lc-su:hover b,.lc-cot .lc-su:focus-visible b{white-space:normal}
+.lc-zoom{display:inline-flex;gap:4px}
