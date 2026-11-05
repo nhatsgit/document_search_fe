@@ -285,3 +285,26 @@ dl.lc-ct dt{color:var(--muted)}dl.lc-ct dd{margin:0;overflow-wrap:anywhere;white
 .lc-o .lc-vt-muc input,.lc-vt-muc input{width:18px;height:18px;min-height:0;padding:0;border:0}
 .lc-o .lc-xuat-khoang label{display:inline-flex;flex-direction:row;align-items:center;gap:6px;white-space:nowrap;color:var(--mau-ink)}
 .lc-o .lc-xuat-khoang input{width:18px;height:18px;min-height:0;padding:0;accent-color:var(--brand)}
+
+/* ===== bộ lọc trong hộp thoại xuất file, nhóm Lãnh đạo, Nhân viên ===== */
+.lc-vt-nhom{flex-basis:100%;display:flex;align-items:center;gap:6px 14px;margin-top:8px;color:var(--muted);font-size:13px}
+.lc-vt-nhom b{font-weight:700;color:var(--mau-ink)}
+.lc-vt-nhom span{display:inline-flex;gap:10px}
+.lc-hop.rong{width:min(1180px,100%)}
+.lc-xuat-bo{display:grid;grid-template-columns:330px minmax(0,1fr);gap:18px;align-items:start}
+.lc-xuat-loc{max-height:64vh;padding-right:8px;overflow:auto}
+.lc-xuat-loc fieldset{margin:0 0 12px;padding:8px 10px 10px;border:1px solid var(--mau-line);border-radius:10px}
+.lc-xuat-loc legend{display:flex;align-items:center;gap:10px;padding:0 6px;font-size:13.5px;font-weight:700;color:var(--mau-ink)}
+.lc-xuat-loc input[type="text"],.lc-xuat-loc input:not([type]),.lc-xuat-loc input[type="date"]{width:100%;min-height:36px;padding:6px 10px;border:1px solid var(--mau-line);border-radius:8px;background:var(--mau-card);color:var(--mau-ink);font-size:14px}
+.lc-xuat-ngay{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.lc-xuat-ngay label{display:flex;flex-direction:column;gap:3px;font-size:12.5px;color:var(--muted)}
+.lc-xc{display:flex;align-items:center;gap:8px;min-height:30px;font-size:14px;cursor:pointer;color:var(--mau-ink)}
+.lc-xc input{width:17px;height:17px;min-height:0;margin:0;padding:0;accent-color:var(--brand)}
+.lc-xcap{display:flex;margin-bottom:6px;overflow:hidden;border:1px solid var(--mau-line);border-radius:9px}
+.lc-xcap button{flex:1;min-height:34px;border:0;border-left:1px solid var(--vach);background:none;color:var(--ink-phu);font-size:13.5px;font-weight:600;cursor:pointer}
+.lc-xcap button:first-child{border-left:0}.lc-xcap button:hover{background:var(--brand-100);color:var(--brand-700)}
+.lc-vtbox.x{max-height:none;overflow:visible}
+.lc-xuat-xem{max-height:64vh}
+.lc-bc .bc-loc{margin:0 0 2px;text-align:center;font-style:italic;font-size:11.5pt}
+.lc-bc h2{margin:18px 0 6px;font-size:14pt}
+@media (max-width:900px){.lc-xuat-bo{grid-template-columns:1fr}.lc-xuat-loc{max-height:none}}

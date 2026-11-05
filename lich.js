@@ -197,7 +197,9 @@ var MAU_CHUNG = '#2f7a3d', MAU_VT = ['#8fa9e0', '#e3a98f', '#c39bd3', '#e38b86',
 function vtTheoId(id) { return S.vaiTro.filter(function (l) { return l.id === id; })[0]; }
 function vtCua(x) { return String(x.vaiTro || '').split(',').map(function (t) { return t.trim(); }).filter(function (id) { return id && vtTheoId(id); }); }
 function vtTen(x) { return vtCua(x).map(function (id) { return vtTheoId(id).ten; }).join(', '); }
-function dsVt() { return S.vaiTro.slice().sort(function (a, b) { return (Number(a.thuTu) || 99) - (Number(b.thuTu) || 99) || String(a.ten).localeCompare(String(b.ten)); }); }
+var TEN_CAP = { 1: 'Lãnh đạo', 2: 'Nhân viên' };
+function capVt(v) { return Number(v.cap) === 1 ? 1 : 2; }
+function dsVt() { return S.vaiTro.slice().sort(function (a, b) { return capVt(a) - capVt(b) || (Number(a.thuTu) || 99) - (Number(b.thuTu) || 99) || String(a.ten).localeCompare(String(b.ten)); }); }
 function mauVt(v) {
   if (v.mau && /^#[0-9a-fA-F]{6}$/.test(v.mau)) return v.mau;
   var n = 0; String(v.id).split('').forEach(function (c) { n += c.charCodeAt(0); });
@@ -423,11 +425,18 @@ function veVt() {
   el.innerHTML = '<div class="lc-vt-dau"><button type="button" class="lc-vt-gap" id="lcVtGap" aria-expanded="' + S.vtMo + '"><b>Lịch đang xem</b><span class="lc-dem">' + dem + '</span><i class="lc-mui' + (S.vtMo ? ' mo' : '') + '">▾</i></button>' +
     '<span class="lc-vt-nut"><button type="button" class="lc-nut-chu" data-vttat="1">Chọn tất cả</button><button type="button" class="lc-nut-chu" data-vttat="0">Bỏ chọn</button><button type="button" class="lc-nut-chu" id="lcQlVt">Quản lý vai trò</button></span></div>' +
     (S.vtMo ? '<div class="lc-vt-ds">' + muc('toi', 'Lịch của tôi', MAU_CHUNG, S.toi, true, '<button type="button" class="lc-nut-chu nho" id="lcSuaToi" title="Chọn các vai trò của tôi">chọn vai trò</button>') +
-      ds.map(function (v) { return muc(v.id, v.ten, mauVt(v), !S.vtAn[v.id]); }).join('') + muc('chung', 'Lịch chung toàn công ty', MAU_CHUNG, !S.vtAn.chung, true) + '</div>' : '');
+      [1, 2].map(function (c) {
+        var g = ds.filter(function (v) { return capVt(v) === c; });
+        return g.length ? '<div class="lc-vt-nhom"><b>' + TEN_CAP[c] + '</b><span><button type="button" class="lc-nut-chu nho" data-vtnhom="' + c + ':on">chọn nhóm</button><button type="button" class="lc-nut-chu nho" data-vtnhom="' + c + ':off">bỏ nhóm</button></span></div>' + g.map(function (v) { return muc(v.id, v.ten, mauVt(v), !S.vtAn[v.id]); }).join('') : '';
+      }).join('') + muc('chung', 'Lịch chung toàn công ty', MAU_CHUNG, !S.vtAn.chung, true) + '</div>' : '');
 }
 function doiVt(id, on) {
   if (id === 'toi') { if (on && !S.toiVt.length) { moVtToi(); return; } S.toi = on; }
   else if (on) delete S.vtAn[id]; else S.vtAn[id] = 1;
+  luuVtTt(); ve();
+}
+function chonNhomCap(cap, on) {
+  S.vaiTro.forEach(function (v) { if (capVt(v) === cap) { if (on) delete S.vtAn[v.id]; else S.vtAn[v.id] = 1; } });
   luuVtTt(); ve();
 }
 function chonTatCaVt(on) {
@@ -435,7 +444,7 @@ function chonTatCaVt(on) {
   luuVtTt(); ve();
 }
 function moVtToi() {
-  moHop('Lịch của tôi', '<p class="lc-ca lc-phu">Chọn các vai trò của bạn. Khi tick “Lịch của tôi”, lịch của các vai trò này luôn hiện.</p><div class="lc-ca lc-vtbox" id="toiBox">' + (dsVt().length ? dsVt().map(function (l) { return chipVt(l, S.toiVt.indexOf(l.id) >= 0); }).join('') : '<span class="lc-phu">Chưa có vai trò. Bấm “Quản lý vai trò” để thêm.</span>') + '</div>',
+  moHop('Lịch của tôi', '<p class="lc-ca lc-phu">Chọn các vai trò của bạn. Khi tick “Lịch của tôi”, lịch của các vai trò này luôn hiện.</p><div class="lc-ca lc-vtbox" id="toiBox">' + (dsVt().length ? htmlNhomVt(function (id) { return S.toiVt.indexOf(id) >= 0; }) : '<span class="lc-phu">Chưa có vai trò. Bấm “Quản lý vai trò” để thêm.</span>') + '</div>',
     '<span class="cach"></span><button type="button" class="ck-btn" data-dongnut="1">Huỷ</button><button type="button" class="ck-btn chinh" id="luuToi">Lưu</button>');
 }
 function ve() {
@@ -462,7 +471,8 @@ function ve() {
 
 /* ---------- dữ liệu mẫu: lịch giả chỉ nằm trong trình duyệt, không ghi vào lịch thật ---------- */
 var TEN_VT_MAU = ['Trưởng phòng KHĐT', 'Kế toán thanh toán', 'Nhân viên trạm thu gom Đội 1', 'Tổ trưởng Đội 1', 'Trợ lý Đội 1', 'Đội phó Đội 1', 'Đội trưởng Đội 1', 'Cán bộ kỹ thuật KTNN', 'Trưởng phòng KTNN', 'Thủ kho thành phẩm', 'Lái xe giao hàng', 'Nhân viên IT', 'Trưởng bảo trì', 'Nhân viên hành chính', 'Trưởng phòng QLCL', 'Nhân viên kiểm nghiệm QLCL', 'Nhân viên cân mủ', 'Văn thư', 'Nhân viên bảo vệ', 'Kế toán công nợ', 'Thủ kho', 'Cán bộ dự án', 'Trưởng ban quản lý dự án', 'Thủ quỹ', 'Trưởng ca nhà máy', 'Quản đốc nhà máy', 'Kế toán phải trả', 'Kế toán phải thu', 'Kế toán tổng hợp', 'Nhân viên nhân sự TCHC', 'Trưởng phòng TCHC', 'Nhân viên bán hàng', 'Trưởng phòng bán hàng', 'Nhân viên mua hàng KHĐT', 'Kế toán trưởng', 'Tổng giám đốc', 'Phó tổng giám đốc', 'Giám đốc nhà máy', 'Lịch Ban lãnh đạo'];
-var VT_MAU = TEN_VT_MAU.map(function (t, i) { return { id: 'v' + (i + 1), ten: t, mau: t === 'Lịch Ban lãnh đạo' ? '#5b6b7e' : MAU_VT[i % MAU_VT.length], thuTu: i + 1 }; });
+var CAP_LD = ['Tổng giám đốc', 'Phó tổng giám đốc', 'Giám đốc nhà máy', 'Quản đốc nhà máy', 'Kế toán trưởng', 'Trưởng phòng KHĐT', 'Trưởng phòng KTNN', 'Trưởng phòng QLCL', 'Trưởng phòng TCHC', 'Trưởng phòng bán hàng', 'Trưởng ban quản lý dự án', 'Lịch Ban lãnh đạo'];
+var VT_MAU = TEN_VT_MAU.map(function (t, i) { return { id: 'v' + (i + 1), ten: t, mau: t === 'Lịch Ban lãnh đạo' ? '#5b6b7e' : MAU_VT[i % MAU_VT.length], thuTu: i + 1, cap: CAP_LD.indexOf(t) >= 0 ? 1 : 2 }; });
 var VT_ID = {}; VT_MAU.forEach(function (v) { VT_ID[v.ten] = v.id; });
 /* Tên người, chức danh ghi trong thành phần của dữ liệu mẫu ứng với vai trò nào */
 var MAP_VT = { 'tgđ': ['Tổng giám đốc', 'Lịch Ban lãnh đạo'], 'p.tgđ hùng': ['Phó tổng giám đốc', 'Lịch Ban lãnh đạo'], 'p.tgđ mai': ['Phó tổng giám đốc', 'Lịch Ban lãnh đạo'], 'kế toán trưởng': ['Kế toán trưởng'],
@@ -648,7 +658,7 @@ function moForm(x, loi) {
     '<label class="lc-o f-lap">Lặp đến ngày (bỏ trống: mãi mãi)<input type="date" id="fLapDen" value="' + esc(x.lapDen || '') + '"></label>' +
     '<label class="lc-o f-gio">Nhắc việc<select id="fNhac">' + opt(NHAC, x.nhac || '') + '</select></label>' +
     '<label class="lc-o ca">Địa điểm, phòng họp, xe<input id="fDiaDiem" maxlength="200" list="dsDiaDiem" value="' + esc(x.diaDiem || '') + '"><datalist id="dsDiaDiem">' + TAI_NGUYEN.map(function (t) { return '<option value="' + esc(t) + '">'; }).join('') + '</datalist></label>' +
-    '<div class="lc-o ca">Lịch, vai trò' + (vtAll.length > 8 ? '<input class="lc-vttim" id="fVtTim" placeholder="Tìm vai trò…" autocomplete="off">' : '') + '<div class="lc-vtbox" id="fVtBox">' + (vtAll.length ? vtAll.map(function (l) { return chipVt(l, vtSel.indexOf(l.id) >= 0); }).join('') : '<span class="lc-phu">Chưa có vai trò. Bấm “Quản lý vai trò” để thêm.</span>') + '</div><small class="lc-phu">Không chọn vai trò nào: lịch hiện ở Lịch chung toàn công ty.</small></div>' +
+    '<div class="lc-o ca">Lịch, vai trò' + (vtAll.length > 8 ? '<input class="lc-vttim" id="fVtTim" placeholder="Tìm vai trò…" autocomplete="off">' : '') + '<div class="lc-vtbox" id="fVtBox">' + (vtAll.length ? htmlNhomVt(function (id) { return vtSel.indexOf(id) >= 0; }) : '<span class="lc-phu">Chưa có vai trò. Bấm “Quản lý vai trò” để thêm.</span>') + '</div><small class="lc-phu">Không chọn vai trò nào: lịch hiện ở Lịch chung toàn công ty.</small></div>' +
     '<label class="lc-o ca">Thành phần (cách nhau bằng dấu phẩy)<input id="fThanhPhan" maxlength="500" value="' + esc(x.thanhPhan || '') + '"></label>' +
     '<label class="lc-o">Đơn vị<input id="fDonVi" maxlength="100" list="dsDonVi" value="' + esc(dv) + '"><datalist id="dsDonVi">' + DV.map(function (t) { return '<option value="' + esc(t) + '">'; }).join('') + '</datalist></label>' +
     '<label class="lc-o">Liên kết (phiếu Base, tài liệu)<input id="fLienKet" maxlength="500" type="url" placeholder="https://" value="' + esc(x.lienKet || '') + '"></label>' +
@@ -660,8 +670,16 @@ function moForm(x, loi) {
   var o = $('#fTen'); if (o) o.focus();
 }
 /** Một dòng chọn vai trò: ô tick, ô màu, tên. */
-function chipVt(l, chon) {
-  return '<label class="lc-vt-muc" data-ten="' + esc(boDau(l.ten)) + '"><input type="checkbox" value="' + esc(l.id) + '"' + (chon ? ' checked' : '') + '><i class="lc-o-vuong" style="--c:' + mauVt(l) + '"></i><span>' + esc(l.ten) + '</span></label>';
+function chipVt(l, chon, ten) {
+  return '<label class="lc-vt-muc" data-ten="' + esc(boDau(l.ten)) + '"><input type="checkbox"' + (ten ? ' name="' + ten + '"' : '') + ' value="' + esc(l.id) + '"' + (chon ? ' checked' : '') + '><i class="lc-o-vuong" style="--c:' + mauVt(l) + '"></i><span>' + esc(l.ten) + '</span></label>';
+}
+/** Vai trò chia hai nhóm: cấp 1 Lãnh đạo, cấp 2 Nhân viên (nhóm không có vai trò thì không hiện). nutNhom: tên thuộc tính cho nút chọn, bỏ cả nhóm. */
+function htmlNhomVt(tick, ten, nutNhom) {
+  return [1, 2].map(function (c) {
+    var ds = dsVt().filter(function (v) { return capVt(v) === c; });
+    return ds.length ? '<div class="lc-vt-nhom"><b>' + TEN_CAP[c] + '</b>' + (nutNhom ? '<span><button type="button" class="lc-nut-chu nho" data-' + nutNhom + '="' + c + ':on">chọn nhóm</button><button type="button" class="lc-nut-chu nho" data-' + nutNhom + '="' + c + ':off">bỏ nhóm</button></span>' : '') + '</div>' +
+      ds.map(function (v) { return chipVt(v, tick(v.id), ten); }).join('') : '';
+  }).join('');
 }
 function anGio() { var ca = $('#fCaNgay').checked; document.querySelectorAll('.f-gio').forEach(function (e) { e.style.display = ca ? 'none' : ''; }); }
 function anLap() { var l = $('#fLap').value; document.querySelectorAll('.f-lap').forEach(function (e) { e.style.display = l ? '' : 'none'; }); }
@@ -733,10 +751,11 @@ function moQlVt(sua, loi, tam) {
   var ds = dsVt(), l = tam || (sua ? vtTheoId(sua) : null) || {}, coMa = S.demo || !!maDaLuu(), mau = /^#[0-9a-fA-F]{6}$/.test(l.mau || '') ? l.mau : MAU_VT[ds.length % MAU_VT.length];
   moHop('Quản lý vai trò',
     (loi ? '<div class="lc-loi" role="alert">' + esc(loi) + '</div>' : '') +
-    '<div class="lc-ca">' + (ds.length ? '<table class="lc-ldb"><thead><tr><th>Vai trò (lịch)</th><th>Thứ tự</th><th></th></tr></thead><tbody>' + ds.map(function (x) {
-      return '<tr><td><span class="lc-ngc2"><i class="lc-o-vuong nho" style="--c:' + mauVt(x) + '"></i>' + esc(x.ten) + '</span></td><td>' + esc(x.thuTu) + '</td><td class="lc-ldb-nut"><button type="button" class="ck-btn" data-vtsua="' + esc(x.id) + '">Sửa</button><button type="button" class="ck-btn nguy" data-vtxoa="' + esc(x.id) + '">Xoá</button></td></tr>'; }).join('') + '</tbody></table>' : '<p class="lc-phu">Chưa có vai trò nào.</p>') + '</div>' +
+    '<div class="lc-ca">' + (ds.length ? '<table class="lc-ldb"><thead><tr><th>Vai trò (lịch)</th><th>Cấp</th><th>Thứ tự</th><th></th></tr></thead><tbody>' + ds.map(function (x) {
+      return '<tr><td><span class="lc-ngc2"><i class="lc-o-vuong nho" style="--c:' + mauVt(x) + '"></i>' + esc(x.ten) + '</span></td><td>' + TEN_CAP[capVt(x)] + '</td><td>' + esc(x.thuTu) + '</td><td class="lc-ldb-nut"><button type="button" class="ck-btn" data-vtsua="' + esc(x.id) + '">Sửa</button><button type="button" class="ck-btn nguy" data-vtxoa="' + esc(x.id) + '">Xoá</button></td></tr>'; }).join('') + '</tbody></table>' : '<p class="lc-phu">Chưa có vai trò nào.</p>') + '</div>' +
     '<div class="lc-ca"><b>' + (l.id ? 'Sửa: ' + esc(l.ten) : 'Thêm vai trò') + '</b></div>' +
     '<label class="lc-o ca">Tên vai trò<input id="vtTen" maxlength="80" placeholder="VD: Trưởng phòng TCHC" value="' + esc(l.ten || '') + '"></label>' +
+    '<label class="lc-o">Cấp<select id="vtCap"><option value="1"' + (capVt(l) === 1 ? ' selected' : '') + '>Cấp 1: Lãnh đạo</option><option value="2"' + (capVt(l) === 2 ? ' selected' : '') + '>Cấp 2: Nhân viên</option></select></label>' +
     '<label class="lc-o">Màu<input type="color" id="vtMau" value="' + mau + '"></label>' +
     '<label class="lc-o">Thứ tự hiện (số nhỏ hiện trước)<input id="vtTT" type="number" min="1" max="999" value="' + esc(l.thuTu || '') + '"></label>' +
     (coMa ? '' : '<label class="lc-o ca">Mã lập lịch<input type="password" id="vtMa" autocomplete="off"></label>'),
@@ -744,7 +763,7 @@ function moQlVt(sua, loi, tam) {
   var o = $('#vtTen'); if (o) o.focus();
 }
 function luuVt(nut) {
-  var l = { id: nut.dataset.vtid || '', ten: $('#vtTen').value.trim(), mau: $('#vtMau').value, thuTu: Number($('#vtTT').value) || 99 }, o = $('#vtMa'), ma = o ? o.value.trim() : maDaLuu();
+  var l = { id: nut.dataset.vtid || '', ten: $('#vtTen').value.trim(), mau: $('#vtMau').value, cap: Number($('#vtCap').value) === 1 ? 1 : 2, thuTu: Number($('#vtTT').value) || 99 }, o = $('#vtMa'), ma = o ? o.value.trim() : maDaLuu();
   if (!l.ten) return moQlVt(l.id, 'Chưa nhập tên vai trò', l);
   if (S.demo) {
     if (l.id) Object.assign(S.demoVt.filter(function (y) { return y.id === l.id; })[0] || {}, l); else { l.id = 'v' + Date.now(); S.demoVt.push(l); }
@@ -770,9 +789,9 @@ function xoaVt(id, nut) {
 
 /* ---------- xuất file: PDF, Word, Excel theo mẫu "Lịch công tác tuần" ---------- */
 var TEN_CTY = 'C.R.C.K.2 APHIVATH CAOUTHOUC CO., LTD';
-/** Từng ngày trong khoảng, kèm các lịch đang xem của ngày đó (bỏ lịch bị từ chối), xếp cả ngày trước rồi theo giờ. */
-function suKienTheoNgay(tu, den) {
-  var m = theoNgay(dsHien().filter(function (x) { return x.trangThai !== 'tuchoi'; }), tu, den), ra = [];
+/** Từng ngày trong khoảng, kèm các lịch của ngày đó (đã lọc), xếp cả ngày trước rồi theo giờ. */
+function suKienTheoNgay(tu, den, ds) {
+  var m = theoNgay(ds, tu, den), ra = [];
   for (var d = tu; ymd(d) <= ymd(den); d = cong(d, 1)) {
     var k = ymd(d);
     ra.push({ k: k, d: d, ds: (m[k] || []).slice().sort(function (p, q) { return (q.x.caNgay ? 1 : 0) - (p.x.caNgay ? 1 : 0) || p.a - q.a; }) });
@@ -780,22 +799,47 @@ function suKienTheoNgay(tu, den) {
   return ra;
 }
 /** Một dòng nội dung: giờ - vai trò - tên lịch. Thành phần: ... ĐD: ... */
-function dongBaoCao(e) {
-  var x = e.x, vt = vtTen(x);
+function dongBaoCao(e, loc, coVt) {
+  var x = e.x, vt = coVt && loc.hienVt ? vtTen(x) : '';
   return '<b>' + (x.caNgay ? 'Cả ngày' : dongHo(e.a)) + '</b> - ' + (vt ? esc(vt) + ' - ' : '') + esc(x.tieuDe) + (x.trangThai === 'cho' ? ' (chờ duyệt)' : '') + '.' +
-    (x.thanhPhan ? ' Thành phần: ' + esc(x.thanhPhan) + '.' : '') + (x.diaDiem ? ' ĐD: ' + esc(x.diaDiem) + '.' : '');
+    (loc.hienTp && x.thanhPhan ? ' Thành phần: ' + esc(x.thanhPhan) + '.' : '') + (loc.hienDd && x.diaDiem ? ' ĐD: ' + esc(x.diaDiem) + '.' : '');
 }
-function taoBaoCao(tu, den) {
-  var ngay = suKienTheoNgay(tu, den), dai = ngay.length > 14, tuan = ngay.length === 7 && (tu.getDay() + 6) % 7 === 0;
+/** Các dòng mô tả bộ lọc đang dùng, in dưới tiêu đề để người đọc biết đây là bản đã lọc. */
+function moTaLoc(loc) {
+  var r = [], vs = dsVt().filter(function (v) { return loc.vt.indexOf(v.id) >= 0; }), chung = loc.vt.indexOf('chung') >= 0;
+  var soCap = function (c) { return S.vaiTro.filter(function (v) { return capVt(v) === c; }).length; };
+  if (loc.loai.length < LOAI.length) r.push('Loại công việc: ' + LOAI.filter(function (l) { return loc.loai.indexOf(l[0]) >= 0; }).map(function (l) { return l[1]; }).join(', '));
+  if (loc.kieu !== 'vt' && !(vs.length === S.vaiTro.length && chung)) {
+    var tatCa = vs.length === S.vaiTro.length, c1 = vs.length > 0 && vs.length === soCap(1) && vs.every(function (v) { return capVt(v) === 1; }), c2 = vs.length > 0 && vs.length === soCap(2) && vs.every(function (v) { return capVt(v) === 2; });
+    var bo = S.vaiTro.filter(function (v) { return loc.vt.indexOf(v.id) < 0; });
+    var ten = tatCa ? 'tất cả vai trò' : c1 ? 'cấp Lãnh đạo' : c2 ? 'cấp Nhân viên' : bo.length && bo.length <= 4 ? 'tất cả vai trò, trừ ' + bo.map(function (v) { return v.ten; }).join(', ') : vs.length > 8 ? vs.slice(0, 8).map(function (v) { return v.ten; }).join(', ') + ' … (+' + (vs.length - 8) + ')' : vs.map(function (v) { return v.ten; }).join(', ');
+    r.push('Vai trò: ' + (ten ? ten + (chung ? '; gồm Lịch chung' : (tatCa ? ' (không gồm Lịch chung)' : '')) : chung ? 'Lịch chung' : '(không chọn)'));
+  }
+  if (loc.q) r.push('Từ khoá: ' + loc.q);
+  return r;
+}
+function taoBaoCao(tu, den, loc, ds) {
+  var soNgay = Math.round((den - tu) / 86400000) + 1, tuan = soNgay === 7 && (tu.getDay() + 6) % 7 === 0, hienTrong = loc.hienTrong && soNgay <= 31;
   var thang = tu.getMonth() === den.getMonth() && tu.getDate() === 1 && den.getDate() === new Date(den.getFullYear(), den.getMonth() + 1, 0).getDate();
   var tieu = tuan ? 'LỊCH CÔNG TÁC TUẦN' : thang ? 'LỊCH CÔNG TÁC THÁNG ' + (tu.getMonth() + 1) + '/' + tu.getFullYear() : 'LỊCH CÔNG TÁC';
-  var hang = ngay.filter(function (n) { return !dai || n.ds.length; }).map(function (n) {
-    return '<tr><td class="bc-n" align="center"><b>' + TEN_THU[(n.d.getDay() + 6) % 7] + '</b><br><b>' + vnNgay(n.k) + '</b></td><td class="bc-nd">' + n.ds.map(function (e) { return '<p>' + dongBaoCao(e) + '</p>'; }).join('') + '</td></tr>';
-  }).join('');
+  var bang = function (dsx, coVt) {
+    var hang = suKienTheoNgay(tu, den, dsx).filter(function (n) { var t = n.d.getDay(); return (hienTrong || n.ds.length) && (loc.hienCuoiTuan || (t !== 0 && t !== 6)); }).map(function (n) {
+      return '<tr><td class="bc-n" align="center"><b>' + TEN_THU[(n.d.getDay() + 6) % 7] + '</b><br><b>' + vnNgay(n.k) + '</b></td><td class="bc-nd">' + n.ds.map(function (e) { return '<p>' + dongBaoCao(e, loc, coVt) + '</p>'; }).join('') + '</td></tr>';
+    }).join('');
+    return '<table border="1" cellspacing="0" cellpadding="6"><thead><tr><th width="150">NGÀY<br>THÁNG</th><th>THỜI GIAN - NỘI DUNG – THÀNH PHẦN – ĐỊA ĐIỂM</th></tr></thead><tbody>' + (hang || '<tr><td colspan="2" align="center">Không có lịch trong khoảng này</td></tr>') + '</tbody></table>';
+  };
+  var phan;
+  if (loc.kieu === 'vt') {   // mỗi vai trò một bảng, ngắt trang giữa các vai trò
+    var nhom = dsVt().filter(function (v) { return loc.vt.indexOf(v.id) >= 0; }).map(function (v) { return { ten: v.ten, ds: ds.filter(function (x) { return vtCua(x).indexOf(v.id) >= 0; }) }; });
+    if (loc.vt.indexOf('chung') >= 0) nhom.push({ ten: 'Lịch chung toàn công ty', ds: ds.filter(function (x) { return !vtCua(x).length; }) });
+    nhom = nhom.filter(function (g) { return g.ds.length; });
+    phan = nhom.length ? nhom.map(function (g) { return '<div class="bc-sec"><h2>' + esc(g.ten) + '</h2>' + bang(g.ds, false) + '</div>'; }).join('') : bang([], false);
+  } else phan = bang(ds, true);
   return '<div class="lc-bc"><p class="bc-cty"><b>' + TEN_CTY + '</b></p><h1>' + tieu + '</h1><p class="bc-khoang"><b>Từ ' + vnNgay(ymd(tu)) + ' đến ' + vnNgay(ymd(den)) + '</b></p>' +
-    '<table border="1" cellspacing="0" cellpadding="6"><thead><tr><th width="150">NGÀY<br>THÁNG</th><th>THỜI GIAN - NỘI DUNG – THÀNH PHẦN – ĐỊA ĐIỂM</th></tr></thead><tbody>' + (hang || '<tr><td colspan="2" align="center">Không có lịch trong khoảng này</td></tr>') + '</tbody></table></div>';
+    moTaLoc(loc).map(function (t) { return '<p class="bc-loc">' + esc(t) + '</p>'; }).join('') + phan + '</div>';
 }
-var CSS_BC = '.lc-bc{font-family:"Times New Roman",Times,serif;font-size:13pt;color:#000;background:#fff}.lc-bc p{margin:4px 0}.lc-bc .bc-cty{text-align:center;font-size:12pt}.lc-bc h1{margin:14px 0 4px;text-align:center;font-size:20pt;font-weight:700}.lc-bc .bc-khoang{text-align:center;margin-bottom:14px}' +
+var CSS_BC = '.lc-bc .bc-loc{margin:0 0 2px;text-align:center;font-style:italic;font-size:11.5pt}.lc-bc h2{margin:18px 0 6px;font-size:14pt}.lc-bc .bc-sec+.bc-sec{page-break-before:always}' +
+  '.lc-bc{font-family:"Times New Roman",Times,serif;font-size:13pt;color:#000;background:#fff}.lc-bc p{margin:4px 0}.lc-bc .bc-cty{text-align:center;font-size:12pt}.lc-bc h1{margin:14px 0 4px;text-align:center;font-size:20pt;font-weight:700}.lc-bc .bc-khoang{text-align:center;margin-bottom:14px}' +
   '.lc-bc table{width:100%;border-collapse:collapse}.lc-bc th{padding:8px;border:1px solid #000;background:#f3f6f4;color:#44525e;font-size:11.5pt}.lc-bc td{padding:8px 10px;border:1px solid #000;vertical-align:top;height:44px}.lc-bc td.bc-n{width:150px;text-align:center}.lc-bc td.bc-nd{text-align:justify}';
 function xKhoang() {
   var v = (document.querySelector('input[name="xkh"]:checked') || {}).value, t = thuHai(S.moc);
@@ -806,18 +850,55 @@ function xKhoang() {
   }
   return [t, cong(t, 6)];
 }
+function xLoc() {
+  var chon = function (n) { return Array.from(document.querySelectorAll('input[name="' + n + '"]:checked')).map(function (i) { return i.value; }); }, c = function (id) { var e = $('#' + id); return !!(e && e.checked); };
+  return { loai: chon('xloai'), vt: chon('xvt'), q: ($('#xQ') ? $('#xQ').value : '').trim(), kieu: chon('xkieu')[0] || 'ngay', hienVt: c('xVt'), hienTp: c('xTp'), hienDd: c('xDd'), hienTrong: c('xTrong'), hienCuoiTuan: c('xCuoi'), cho: c('xCho') };
+}
+/** Lịch (đã mở rộng lặp) khớp bộ lọc của hộp thoại xuất: loại công việc, vai trò, từ khoá, trạng thái. */
+function suKienXuat(loc) {
+  var q = boDau(loc.q || '').split(/\s+/).filter(Boolean);
+  return S.ds.filter(function (x) {
+    if (x.trangThai === 'tuchoi' || (x.trangThai === 'cho' && !loc.cho)) return false;
+    if (loc.loai.indexOf(x.loai) < 0) return false;
+    var ids = vtCua(x);
+    if (ids.length) { if (!ids.some(function (id) { return loc.vt.indexOf(id) >= 0; })) return false; }
+    else if (loc.vt.indexOf('chung') < 0) return false;
+    if (q.length) { var t = boDau([x.tieuDe, x.diaDiem, x.thanhPhan, x.ghiChu, x.donVi].join(' ')); if (!q.every(function (w) { return t.indexOf(w) >= 0; })) return false; }
+    return true;
+  });
+}
 function xCapNhat() {
-  var k = xKhoang(), v = (document.querySelector('input[name="xkh"]:checked') || {}).value;
+  var k = xKhoang(), v = (document.querySelector('input[name="xkh"]:checked') || {}).value, loc = xLoc(), ds = suKienXuat(loc);
   document.querySelectorAll('.f-xtu').forEach(function (e) { e.style.display = v === 'tu' ? '' : 'none'; });
-  $('#xXem').innerHTML = taoBaoCao(k[0], k[1]);
-  var n = suKienTheoNgay(k[0], k[1]).reduce(function (t, d) { return t + d.ds.length; }, 0);
-  $('#xGhiChu').textContent = n + ' dòng lịch, theo các lịch đang tick ở “Lịch đang xem”' + (v === 'tu' ? ' (tối đa 92 ngày)' : '') + '. Lịch bị từ chối không đưa vào.';
+  $('#xXem').innerHTML = taoBaoCao(k[0], k[1], loc, ds);
+  var n = suKienTheoNgay(k[0], k[1], ds).reduce(function (t, d) { return t + d.ds.length; }, 0);
+  $('#xGhiChu').textContent = n + ' dòng lịch trong khoảng ' + vnNgay(ymd(k[0])) + ' – ' + vnNgay(ymd(k[1])) + (v === 'tu' ? ' (tối đa 92 ngày)' : '') + '.';
+}
+/** Chọn cả cấp trong bộ lọc vai trò: tất cả, chỉ Lãnh đạo, chỉ Nhân viên (Lịch chung giữ nguyên). */
+function xCap(c) {
+  S.vaiTro.forEach(function (v) { var i = document.querySelector('input[name="xvt"][value="' + v.id + '"]'); if (i) i.checked = c === 'all' || capVt(v) === Number(c); });
+  xCapNhat();
+}
+function xNhom(cap, on) {
+  S.vaiTro.forEach(function (v) { if (capVt(v) === cap) { var i = document.querySelector('input[name="xvt"][value="' + v.id + '"]'); if (i) i.checked = on; } });
+  xCapNhat();
 }
 function moXuat() {
+  var md = { loai: LOAI.map(function (l) { return l[0]; }).filter(function (id) { return !S.an[id]; }), vt: dsVt().filter(vtHien).map(function (v) { return v.id; }).concat(S.vtAn.chung ? [] : ['chung']) };
+  var ck = function (on) { return on ? ' checked' : ''; }, cb = function (id, ten, on) { return '<label class="lc-xc"><input type="checkbox" id="' + id + '"' + ck(on) + '>' + ten + '</label>'; };
   moHop('Xuất lịch ra file',
-    '<div class="lc-o ca">Khoảng thời gian<div class="lc-xuat-khoang"><label><input type="radio" name="xkh" value="tuan" checked> Tuần đang xem</label><label><input type="radio" name="xkh" value="thang"> Tháng đang xem</label><label><input type="radio" name="xkh" value="tu"> Tuỳ chọn</label></div></div>' +
-    '<label class="lc-o f-xtu">Từ ngày<input type="date" id="xTu" value="' + ymd(S.moc) + '"></label><label class="lc-o f-xtu">Đến ngày<input type="date" id="xDen" value="' + ymd(cong(S.moc, 6)) + '"></label>' +
-    '<p class="lc-ca lc-phu" id="xGhiChu"></p><div class="lc-ca"><div class="lc-xuat-xem" id="xXem"></div></div>',
+    '<div class="lc-ca lc-xuat-bo"><div class="lc-xuat-loc">' +
+      '<fieldset><legend>Ngày</legend><div class="lc-xuat-khoang"><label><input type="radio" name="xkh" value="tuan" checked> Tuần đang xem</label><label><input type="radio" name="xkh" value="thang"> Tháng đang xem</label><label><input type="radio" name="xkh" value="tu"> Tuỳ chọn</label></div>' +
+        '<div class="lc-xuat-ngay f-xtu"><label>Từ<input type="date" id="xTu" value="' + ymd(S.moc) + '"></label><label>Đến<input type="date" id="xDen" value="' + ymd(cong(S.moc, 6)) + '"></label></div></fieldset>' +
+      '<fieldset><legend>Công việc (loại lịch)<span><button type="button" class="lc-nut-chu nho" data-xloai="on">tất cả</button><button type="button" class="lc-nut-chu nho" data-xloai="off">bỏ</button></span></legend>' +
+        LOAI.map(function (l) { return '<label class="lc-xc"><input type="checkbox" name="xloai" value="' + l[0] + '"' + ck(md.loai.indexOf(l[0]) >= 0) + '>' + l[1] + '</label>'; }).join('') + '</fieldset>' +
+      '<fieldset><legend>Vai trò</legend><div class="lc-xcap" role="group" aria-label="Cấp vai trò"><button type="button" data-xcap="all">Tất cả</button><button type="button" data-xcap="1">Lãnh đạo</button><button type="button" data-xcap="2">Nhân viên</button></div>' +
+        '<div class="lc-vtbox x">' + htmlNhomVt(function (id) { return md.vt.indexOf(id) >= 0; }, 'xvt', 'xnhom') +
+        '<div class="lc-vt-nhom"><b>Chung</b></div><label class="lc-vt-muc"><input type="checkbox" name="xvt" value="chung"' + ck(md.vt.indexOf('chung') >= 0) + '><i class="lc-o-vuong" style="--c:' + MAU_CHUNG + '"></i><span>Lịch chung toàn công ty</span></label></div></fieldset>' +
+      '<fieldset><legend>Từ khoá</legend><input id="xQ" placeholder="Tên lịch, địa điểm, thành phần…" autocomplete="off" value="' + esc(S.q) + '"></fieldset>' +
+      '<fieldset><legend>Hiển thị</legend>' + cb('xVt', 'Tên vai trò trong dòng', true) + cb('xTp', 'Thành phần', true) + cb('xDd', 'Địa điểm', true) + cb('xTrong', 'Cả ngày không có lịch', true) + cb('xCuoi', 'Thứ Bảy, Chủ nhật', true) + cb('xCho', 'Lịch chờ duyệt', true) + '</fieldset>' +
+      '<fieldset><legend>Cách trình bày</legend><div class="lc-xuat-khoang"><label><input type="radio" name="xkieu" value="ngay" checked> Theo ngày</label><label><input type="radio" name="xkieu" value="vt"> Mỗi vai trò một bảng</label></div></fieldset>' +
+    '</div><div class="lc-xuat-phai"><p class="lc-phu" id="xGhiChu"></p><div class="lc-xuat-xem" id="xXem"></div></div></div>',
     '<button type="button" class="ck-btn" data-xuat="ics" title="Google Lịch, Outlook, điện thoại">Thuê bao, .ics</button><span class="cach"></span><button type="button" class="ck-btn" data-dongnut="1">Đóng</button>' +
     '<button type="button" class="ck-btn" data-xuat="xls">Excel</button><button type="button" class="ck-btn" data-xuat="doc">Word</button><button type="button" class="ck-btn chinh" data-xuat="in">In, lưu PDF</button>');
   var h = $('#lcHop .lc-hop'); if (h) h.classList.add('rong');
@@ -829,16 +910,16 @@ function taiFile(ten, noiDung, loai) {
   setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
 }
 function xuatFile(kieu) {
-  var k = xKhoang(), ten = 'lich-cong-tac-' + ymd(k[0]) + (ymd(k[1]) !== ymd(k[0]) ? '-den-' + ymd(k[1]) : '');
+  var k = xKhoang(), loc = xLoc(), ds = suKienXuat(loc), ten = 'lich-cong-tac-' + ymd(k[0]) + (ymd(k[1]) !== ymd(k[0]) ? '-den-' + ymd(k[1]) : '');
   if (kieu === 'in') {
     // In đúng phần mẫu giấy: ẩn mọi thứ khác của trang rồi gọi hộp thoại in (chọn "Lưu thành PDF" để có file PDF)
-    var d = document.createElement('div'); d.id = 'lcBcIn'; d.innerHTML = '<style>' + CSS_BC + '</style>' + taoBaoCao(k[0], k[1]); document.body.appendChild(d); document.body.classList.add('dang-in-bc');
+    var d = document.createElement('div'); d.id = 'lcBcIn'; d.innerHTML = '<style>' + CSS_BC + '</style>' + taoBaoCao(k[0], k[1], loc, ds); document.body.appendChild(d); document.body.classList.add('dang-in-bc');
     var xong = function () { document.body.classList.remove('dang-in-bc'); d.remove(); window.removeEventListener('afterprint', xong); };
     window.addEventListener('afterprint', xong); setTimeout(function () { window.print(); }, 60);
   } else if (kieu === 'doc') {
-    taiFile(ten + '.doc', '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>Lịch công tác</title><!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View></w:WordDocument></xml><![endif]--><style>@page{size:A4;margin:2cm}' + CSS_BC + '</style></head><body>' + taoBaoCao(k[0], k[1]) + '</body></html>', 'application/msword');
+    taiFile(ten + '.doc', '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>Lịch công tác</title><!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View></w:WordDocument></xml><![endif]--><style>@page{size:A4;margin:2cm}' + CSS_BC + '</style></head><body>' + taoBaoCao(k[0], k[1], loc, ds) + '</body></html>', 'application/msword');
   } else if (kieu === 'xls') {
-    var dong = suKienTheoNgay(k[0], k[1]).map(function (n) {
+    var dong = suKienTheoNgay(k[0], k[1], ds).map(function (n) {
       return n.ds.map(function (e) {
         var x = e.x, c = function (v) { return '<td>' + esc(v) + '</td>'; };
         return '<tr>' + c(vnNgay(n.k)) + c(TEN_THU[(n.d.getDay() + 6) % 7]) + c(x.caNgay ? 'Cả ngày' : dongHo(e.a)) + c(x.caNgay ? '' : dongHo(Math.min(e.b, 1439))) + c(x.tieuDe) + c(TEN_LOAI[x.loai]) + c(vtTen(x) || 'Lịch chung') + c(x.thanhPhan) + c(x.diaDiem) + c(x.donVi) + c(x.trangThai ? TEN_TT[x.trangThai] : '') + c(x.ghiChu) + '</tr>';
@@ -914,7 +995,7 @@ function tinhTrong(ten, dai, tu, den, ids) {
 function moTimGio() {
   var tu = homNay(), den = cong(tu, 6), dai = [30, 60, 90, 120, 180];
   moHop('Tìm giờ trống chung',
-    '<div class="lc-o ca">Vai trò cần rảnh<div class="lc-vtbox" id="tgVtBox">' + (dsVt().length ? dsVt().map(function (l) { return chipVt(l, S.tgVt.indexOf(l.id) >= 0); }).join('') : '<span class="lc-phu">Chưa có vai trò.</span>') + '</div></div>' +
+    '<div class="lc-o ca">Vai trò cần rảnh<div class="lc-vtbox" id="tgVtBox">' + (dsVt().length ? htmlNhomVt(function (id) { return S.tgVt.indexOf(id) >= 0; }) : '<span class="lc-phu">Chưa có vai trò.</span>') + '</div></div>' +
     '<label class="lc-o ca">Người, phòng, xe khác cần rảnh (cách nhau bằng dấu phẩy)<input id="tgTen" placeholder="VD: P.TGĐ Hùng, Trưởng phòng KHĐT, Phòng họp 1" value="' + esc(S.tgTen || S.ten) + '"></label>' +
     '<label class="lc-o">Thời lượng<select id="tgDai">' + dai.map(function (n) { return '<option value="' + n + '"' + (n === 60 ? ' selected' : '') + '>' + (n >= 60 ? n / 60 + ' giờ' : n + ' phút') + '</option>'; }).join('') + '</select></label>' +
     '<span></span><label class="lc-o">Từ ngày<input type="date" id="tgTu" value="' + ymd(tu) + '"></label><label class="lc-o">Đến ngày<input type="date" id="tgDen" value="' + ymd(den) + '"></label>' +
@@ -1001,11 +1082,15 @@ document.addEventListener('click', function (e) {
   if ((g = t.closest('[data-vtxoa]'))) { xoaVt(g.dataset.vtxoa, g); return; }
   if (t.closest('[data-vtmoi]')) { moQlVt(); return; }
   if (t.closest('#lcVtGap')) { S.vtMo = !S.vtMo; ghi('lich_vt_mo', S.vtMo ? '1' : '0'); veVt(); return; }
+  if ((g = t.closest('[data-vtnhom]'))) { var pn = g.dataset.vtnhom.split(':'); chonNhomCap(Number(pn[0]), pn[1] === 'on'); return; }
   if ((g = t.closest('[data-vttat]'))) { chonTatCaVt(g.dataset.vttat === '1'); return; }
   if (t.closest('#lcSuaToi')) { e.preventDefault(); moVtToi(); return; }
   if (t.id === 'luuToi') { S.toiVt = Array.from(document.querySelectorAll('#toiBox input:checked')).map(function (i) { return i.value; }); S.toi = S.toiVt.length > 0; luuVtTt(); dongHop(); ve(); return; }
   if (t.id === 'tgTim') { chayTimGio(); return; }
   if (t.closest('#lcXuat')) { moXuat(); return; }
+  if ((g = t.closest('[data-xcap]'))) { xCap(g.dataset.xcap); return; }
+  if ((g = t.closest('[data-xnhom]'))) { var px = g.dataset.xnhom.split(':'); xNhom(Number(px[0]), px[1] === 'on'); return; }
+  if ((g = t.closest('[data-xloai]'))) { document.querySelectorAll('input[name="xloai"]').forEach(function (i) { i.checked = g.dataset.xloai === 'on'; }); xCapNhat(); return; }
   if ((g = t.closest('[data-xuat]'))) { if (g.dataset.xuat === 'ics') moIcs(); else xuatFile(g.dataset.xuat); return; }
   if (t.closest('#lcTrong')) { moTimGio(); return; }
   if (t.dataset && t.dataset.dong && t === e.currentTarget.querySelector('.lc-nen')) { dongHop(); return; }
@@ -1059,7 +1144,7 @@ document.addEventListener('keydown', function (e) {
 document.addEventListener('change', function (e) {
   var vd = e.target.dataset && e.target.dataset.vtdoi;
   if (vd) { doiVt(vd, e.target.checked); return; }
-  if (e.target.name === 'xkh' || e.target.id === 'xTu' || e.target.id === 'xDen') { xCapNhat(); return; }
+  if (/^(xkh|xloai|xvt|xkieu)$/.test(e.target.name || '') || /^(xTu|xDen|xVt|xTp|xDd|xTrong|xCuoi|xCho)$/.test(e.target.id || '')) { xCapNhat(); return; }
   if (!$('#fLuu')) return;
   if (e.target.id === 'fCaNgay') anGio();
   if (e.target.id === 'fLap') anLap();
@@ -1069,6 +1154,7 @@ document.addEventListener('change', function (e) {
 });
 document.addEventListener('input', function (e) {
   if (e.target.id === 'lcTim') { S.q = e.target.value.trim(); ve(); return; }
+  if (e.target.id === 'xQ') { xCapNhat(); return; }
   if (e.target.id === 'fVtTim') { var tk = boDau(e.target.value); document.querySelectorAll('#fVtBox .lc-vt-muc').forEach(function (l) { l.style.display = !tk || l.dataset.ten.indexOf(tk) >= 0 ? '' : 'none'; }); return; }
   if ($('#fLuu') && /^(fDiaDiem|fThanhPhan)$/.test(e.target.id)) kiemTrung($('#fLuu').dataset.luu);
 });
