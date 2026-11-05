@@ -186,9 +186,13 @@ table.sv-bang .tim-o th{top:38px;height:40px;box-shadow:0 1px 0 var(--vien)}
   body.trang-so .chi-so div{padding-top:6px;padding-bottom:6px}
   body.trang-so .phan-trang{flex:none}
 }
+@media (max-width:900px){
+  .so-bo .ds-so{max-height:320px;overflow-y:auto}
+}
 @media (min-width:901px){
   .so-bo{flex-wrap:nowrap}
-  .so-bo>aside{flex:0 0 300px;max-width:300px}
+  .so-bo>aside{flex:0 0 300px;max-width:300px;position:sticky;top:12px;max-height:calc(100dvh - 24px);display:flex;flex-direction:column}
+  .so-bo .ds-so{flex:1;min-height:0;overflow-y:auto}
   .so-bo>section{flex:1 1 0}
 }
 /* ---------- tìm kiếm trong sổ ---------- */
@@ -740,6 +744,7 @@ function namCoDuLieu() {
 function veSo() {
   // Sổ đang xem không còn khớp bộ lọc thì mở sổ đầu tiên khớp
   if (!soTheoLoc().some(function (x) { return x.id === S.so; })) { chonSoDau(); S.trangSo = 1; datLaiLocSo(); }
+  var dsCu = $('#dsSo'), cuonCu = dsCu ? dsCu.scrollTop : null;
   var so = timSo(S.so) || { ten: 'Chưa có sổ', dv: S.dvSo, ky: '' }, c = chiSoSo(S.so);
   $('#noiTab').innerHTML = '<div class="so-bo">' +
     '<aside class="the"><div style="padding:14px 14px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px"><h2 style="font-size:15px">Sổ văn thư</h2>' +
@@ -752,6 +757,13 @@ function veSo() {
         return '<button role="tab" aria-selected="' + (S.tabSo === t[0]) + '" class="' + (S.tabSo === t[0] ? 'chon' : '') + '" data-tabso="' + t[0] + '">' + t[1] +
           (t[2] != null ? '<span class="dem' + (t[3] && t[2] ? ' do' : '') + '">' + t[2] + '</span>' : '') + '</button>'; }).join('') + '</div>' +
       '<div class="noi" id="noiSo"></div></section></div>';
+  var dsMoi = $('#dsSo'), dangChon = dsMoi.querySelector('button.chon');
+  if (cuonCu != null) dsMoi.scrollTop = cuonCu;
+  // Mới mở tab, hoặc sổ đang chọn nằm ngoài vùng đang thấy thì cuộn tới sổ đó
+  if (dangChon) {
+    var a = dsMoi.getBoundingClientRect(), b = dangChon.getBoundingClientRect();
+    if (b.top < a.top || b.bottom > a.bottom) dsMoi.scrollTop += b.top - a.top - 8;
+  }
   veNoiSo();
 }
 function veDsSo() {
