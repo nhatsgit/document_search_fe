@@ -257,9 +257,11 @@ table.sv-bang td{overflow-wrap:anywhere}
 .qt-chu{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px;color:var(--chu-3)}
 .qt-chu span{display:inline-flex;align-items:center;gap:6px}
 .qt-cham{flex:none;width:9px;height:9px;border-radius:50%}
-.qt-thoi{display:flex;align-items:stretch;gap:6px;overflow-x:auto;padding:10px 10px 4px 2px;margin-top:-6px}
-.qt-mt{flex:none;align-self:center;color:var(--chu-4);font-size:16px}
-.qt-buoc{position:relative;flex:1 0 165px;min-width:165px;display:flex;flex-direction:column;gap:5px;padding:10px 12px;border:1px solid var(--vien);border-radius:10px;background:var(--nen-o);text-align:left;font-size:12.5px;color:var(--chu-4)}
+.qt-thoi{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px 30px;padding:10px 30px 4px 2px;margin-top:-6px}
+.qt-cap{position:relative;display:flex;min-width:0}
+.qt-cap>.qt-buoc{flex:1;min-width:0}
+.qt-mt{position:absolute;right:-24px;top:50%;width:18px;margin-top:-10px;text-align:center;color:var(--chu-4);font-size:16px;line-height:20px}
+.qt-buoc{position:relative;display:flex;flex-direction:column;gap:5px;padding:10px 12px;border:1px solid var(--vien);border-radius:10px;background:var(--nen-o);text-align:left;font-size:12.5px;color:var(--chu-4)}
 .qt-buoc.duyet{border-style:dashed;border-color:var(--o)}
 .qt-buoc.ket{cursor:pointer;background:var(--ok-bg);border:1px solid var(--navy-vien);color:var(--chu-2)}
 .qt-buoc.ket:hover{border-color:var(--navy);box-shadow:0 2px 8px rgba(20,90,58,.14)}
@@ -281,9 +283,8 @@ table.sv-bang td{overflow-wrap:anywhere}
 .ngan-muc b{font-size:14px;font-weight:600}
 .ngan-muc small{font-size:12.5px;color:var(--chu-3)}
 @media (max-width:720px){
-  .qt-thoi{flex-direction:column;overflow:visible;padding:8px 8px 0 0}
-  .qt-buoc{flex:none;width:100%}
-  .qt-mt{transform:rotate(90deg);line-height:1}
+  .qt-thoi{grid-template-columns:1fr;gap:26px;padding:8px 8px 0 0}
+  .qt-mt{right:auto;left:50%;top:auto;bottom:-24px;margin:0 0 0 -9px;transform:rotate(90deg)}
 }
 
 /* ---------- theo giao diện Thẻ nhóm CRCK ---------- */
@@ -534,7 +535,7 @@ function tomTatKet(ds) {
     var n = ds.filter(function (p) { return p.tt === t[0]; }).length; return n ? n + ' ' + t[1] : ''; }).filter(Boolean).join(' · ');
 }
 /** Bước cuối của quy trình: Sổ văn thư, bấm để sang tab Chức năng (Sổ văn thư). */
-var BUOC_SO = '<span class="qt-mt" aria-hidden="true">→</span><button class="qt-buoc so-buoc" data-qtso="1" aria-label="Sổ văn thư: bấm để mở"><span class="qt-tb"><i class="qt-cham" style="background:var(--brand)"></i><span>Sổ văn thư</span></span><span>Văn thư · chuyên viên</span><span>Cấp số, ghi sổ, soát số</span><span class="qt-kq">Bấm để mở sổ văn thư →</span></button>';
+var BUOC_SO = '<div class="qt-cap"><button class="qt-buoc so-buoc" data-qtso="1" aria-label="Sổ văn thư: bấm để mở"><span class="qt-tb"><i class="qt-cham" style="background:var(--brand)"></i><span>Sổ văn thư</span></span><span>Văn thư · chuyên viên</span><span>Cấp số, ghi sổ, soát số</span><span class="qt-kq">Bấm để mở sổ văn thư →</span></button></div>';
 function veQuyTrinh() {
   return (S.chieu === 'tat' ? ['den', 'di'] : [S.chieu]).map(function (c) {
     var q = QT[c], thu = !!S.thuQt[c], dsKet = BUOC[c].map(function (b, i) { return phieuKet(c, i); });
@@ -549,9 +550,9 @@ function veQuyTrinh() {
           var than = '<span class="qt-tb"><i class="qt-cham" style="background:' + v[1] + '"></i><span>' + (laDuyet ? '◇ ' : '') + esc(b[0]) + '</span></span>' +
             '<span>' + esc(NGUOI[c][i]) + '</span><span>' + esc(q.buoc[i][1]) + '</span>' +
             '<span class="qt-kq">' + (n ? n + ' phiếu kẹt: ' + tomTatKet(x) : trongHan ? trongHan + ' phiếu trong hạn' : 'Không có phiếu') + '</span>';
-          return (i ? '<span class="qt-mt" aria-hidden="true">→</span>' : '') + (n
+          return '<div class="qt-cap">' + (n
             ? '<button class="qt-buoc ket' + (laDuyet ? ' duyet' : '') + '" data-qtmo="' + c + ':' + i + '" aria-label="' + esc(b[0]) + ': ' + n + ' phiếu đang kẹt, bấm để xem">' + than + '<span class="qt-bao so">' + n + '</span></button>'
-            : '<div class="qt-buoc' + (laDuyet ? ' duyet' : '') + '">' + than + '</div>');
+            : '<div class="qt-buoc' + (laDuyet ? ' duyet' : '') + '">' + than + '</div>') + '<span class="qt-mt" aria-hidden="true">→</span></div>';
         }).join('') + BUOC_SO + '</div></div>') + '</section>';
   }).join('');
 }
