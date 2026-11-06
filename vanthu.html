@@ -563,6 +563,7 @@ function nutLienKet(p) {
 }
 var IC_CHEP = '<svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h9"/></svg>';
 var IC_DA = '<svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>';
+var IC_TAI = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="m7 11 5 5 5-5"/><path d="M5 20h14"/></svg>';
 var IC_DRIVE = '<svg aria-hidden="true" viewBox="0 0 87.3 78"><path fill="#0066DA" d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3L27.5 53H0c0 1.55.4 3.1 1.2 4.5z"/><path fill="#00AC47" d="M43.65 25 29.9 1.2c-1.35.8-2.5 1.9-3.3 3.3L1.2 48.5A9.06 9.06 0 0 0 0 53h27.5z"/><path fill="#EA4335" d="M73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5H59.8l5.85 11.5z"/><path fill="#00832D" d="M43.65 25 57.4 1.2C56.05.4 54.5 0 52.9 0H34.4c-1.6 0-3.15.45-4.5 1.2z"/><path fill="#2684FC" d="M59.8 53H27.5L13.75 76.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z"/><path fill="#FFBA00" d="M73.4 26.5 60.7 4.5c-.8-1.4-1.95-2.5-3.3-3.3L43.65 25 59.8 53h27.45c0-1.55-.4-3.1-1.2-4.5z"/></svg>';
 /* Nút sao chép cạnh một thông tin, giống trang tra cứu */
 function nutChep(gt, ten) {
@@ -1280,12 +1281,16 @@ function veCacBuoc(p, ls) {
       return '<span class="ck-b ' + loai + '"><i>' + (loai === 'xong' ? '✓' : b.i + 1) + '</i><span><b>' + esc(b.ten) + '</b><small' + (b.trang === 'qua' ? ' style="color:var(--warn-fg);font-weight:600"' : '') + '>' + esc(phu) + '</small></span></span>';
     }).join('') + '</div>' + (p.tt === 'giu' ? '<p class="phu" style="margin:10px 0 0">Đang giữ số, chờ hồ sơ.</p>' : '');
 }
-/** Biểu tượng mở phiếu Base, Base Office, file Drive và sao chép số phiếu; nằm ở hàng nhãn của tờ phiếu. */
+/** Nút tải file văn bản về máy: lấy mã file từ link Drive, tải theo quyền Google của người bấm. */
+function nutTai(p) {
+  var m = /\/d\/([\w-]+)/.exec(p.linkDrive || '') || /[?&]id=([\w-]+)/.exec(p.linkDrive || '');
+  return m ? '<a href="https://drive.google.com/uc?export=download&id=' + encodeURIComponent(m[1]) + '" target="_blank" rel="noopener" title="Tải file về máy" aria-label="Tải file về máy">' + IC_TAI + '</a>'
+    : '<span class="tat" title="Chưa có file để tải" aria-label="Chưa có file để tải">' + IC_TAI + '</span>';
+}
+/** Các biểu tượng mở phiếu Base, Base Office, file Drive và tải file về; nằm ở hàng nhãn của tờ phiếu. */
 function nutPhieu(p) {
   var nut = function (t, u, hinh) { return u ? '<a href="' + esc(u) + '" target="_blank" rel="noopener" title="Mở ' + t + '" aria-label="Mở ' + t + '">' + hinh + '</a>' : '<span class="tat" title="Chưa có ' + t + '" aria-label="Chưa có ' + t + '">' + hinh + '</span>'; };
-  var gon = function (n) { return n.replace('width="14" height="14" ', ''); };
-  return '<div class="ct-nut">' + nut('phiếu Base Service', p.linkBase, '<img src="img/base-service.png" alt="">') + nut('Base Office', p.linkOffice, '<img src="img/base-office.png" alt="">') + nut('file trên Drive', p.linkDrive, IC_DRIVE) +
-    (p.ma ? '<button type="button" data-chep="' + esc(p.ma) + '" title="Sao chép số ' + esc(p.ma) + '" aria-label="Sao chép số ' + esc(p.ma) + '">' + gon(IC_CHEP) + '</button>' : '<span class="tat" title="Chưa cấp số" aria-label="Chưa cấp số">' + gon(IC_CHEP) + '</span>') + '</div>';
+  return '<div class="ct-nut">' + nut('phiếu Base Service', p.linkBase, '<img src="img/base-service.png" alt="">') + nut('Base Office', p.linkOffice, '<img src="img/base-office.png" alt="">') + nut('file trên Drive', p.linkDrive, IC_DRIVE) + nutTai(p) + '</div>';
 }
 function benMeta(p) {
   var hang = [['Bước gần nhất', tenBuoc(p)], ['Phụ trách', nguoiGiu(p)], ['Từ bước gần nhất', p.tt === 'xong' || !p.lucCuoi ? '—' : gioChu(p.gio)], ['Hết hạn', p.hetHan ? ngay(p.hetHan) : '—'],
