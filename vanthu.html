@@ -11,6 +11,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Khmer:wght@400;600&display=swap" rel="stylesheet">
 <script>(function () { var t = 'light'; try { t = localStorage.getItem('tclt_theme') || 'light'; } catch (e) {} document.documentElement.setAttribute('data-theme', t); })();</script>
+<link rel="preconnect" href="https://document-search-api-319700450833.us-central1.run.app" crossorigin>
+<link rel="preload" href="https://document-search-api-319700450833.us-central1.run.app/api/vanthu" as="fetch" crossorigin>
 <link rel="stylesheet" href="crck.css?v=6">
 <link rel="stylesheet" href="lich.css?v=11">
 <style>
@@ -465,14 +467,43 @@ function apDuLieu(d) {
 /** Các sổ khớp thanh lọc đơn vị, Đến/Đi. */
 function soTheoLoc() { return DS_SO.filter(function (s) { return (S.dv === 'Tất cả' || s.dv === S.dv) && (S.chieu === 'tat' || s.chieu === S.chieu); }); }
 function chonSoDau() { var x = soTheoLoc()[0]; S.so = x ? x.id : ''; if (x) S.dvSo = x.dv; }
+/* Dữ liệu lần xem trước lưu trong IndexedDB: mở trang là hiện ngay, trong lúc dữ liệu mới tải ngầm rồi thay vào */
+var KHO = { ten: 'vt_dulieu', bang: 'kv', khoa: 'vanthu' };
+function khoMo() {
+  return new Promise(function (ok, loi) {
+    var r = indexedDB.open(KHO.ten, 1);
+    r.onupgradeneeded = function () { r.result.createObjectStore(KHO.bang); };
+    r.onsuccess = function () { ok(r.result); };
+    r.onerror = function () { loi(r.error); };
+  });
+}
+function khoDoc() {
+  if (!window.indexedDB) return Promise.resolve(null);
+  return khoMo().then(function (db) {
+    return new Promise(function (ok) { var q = db.transaction(KHO.bang).objectStore(KHO.bang).get(KHO.khoa); q.onsuccess = function () { ok(q.result || null); }; q.onerror = function () { ok(null); }; });
+  }).catch(function () { return null; });
+}
+function khoGhi(data) {
+  if (!window.indexedDB) return;
+  khoMo().then(function (db) { db.transaction(KHO.bang, 'readwrite').objectStore(KHO.bang).put({ luc: Date.now(), data: data }, KHO.khoa); }).catch(function () {});
+}
+function danhDauHien() { if (!window.__vtHien) window.__vtHien = Math.round(performance.now()); }   // thời điểm hiện nội dung lần đầu, để đo tốc độ
 function napDuLieu() {
+  var daCoMoi = false, daHienCu = false;
   $('#man').innerHTML = '<div class="the rong">Đang đọc sổ văn thư…</div>';
+  var hienCu = khoDoc().then(function (c) {
+    if (!c || !c.data || daCoMoi) return;
+    try { apDuLieu(c.data); CAP_NHAT += ' · đang cập nhật…'; daHienCu = true; dinhTuyen(); danhDauHien(); } catch (e) { daHienCu = false; }
+  });
   fetch(API_VT).then(function (r) { return r.json(); }).then(function (j) {
     if (!j.ok) throw new Error(j.loi || 'API lỗi');
-    apDuLieu(j.data); dinhTuyen();
+    daCoMoi = true; apDuLieu(j.data); khoGhi(j.data); dinhTuyen(); danhDauHien();
   }).catch(function (e) {
-    CAP_NHAT = 'Không đọc được sổ văn thư'; if ($('#capNhat')) $('#capNhat').textContent = CAP_NHAT;
-    $('#man').innerHTML = '<div class="the rong">Không đọc được sổ văn thư: ' + esc(e.message) + ' <button class="nut" id="thuLai">Thử lại</button></div>';
+    return hienCu.then(function () {   // chờ xong việc đọc dữ liệu cũ rồi mới quyết định báo lỗi hay giữ dữ liệu cũ
+      if (daHienCu) { CAP_NHAT = CAP_NHAT.replace(' · đang cập nhật…', '') + ' · chưa cập nhật được, đang hiện dữ liệu lần trước'; if ($('#capNhat')) $('#capNhat').textContent = CAP_NHAT; return; }
+      CAP_NHAT = 'Không đọc được sổ văn thư'; if ($('#capNhat')) $('#capNhat').textContent = CAP_NHAT;
+      $('#man').innerHTML = '<div class="the rong">Không đọc được sổ văn thư: ' + esc(e.message) + ' <button class="nut" id="thuLai">Thử lại</button></div>';
+    });
   });
 }
 
