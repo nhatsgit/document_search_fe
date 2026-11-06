@@ -201,6 +201,8 @@ table.sv-bang .tim-o th{top:38px;height:40px;box-shadow:0 1px 0 var(--vien)}
 /* Hàng tìm kiếm, bộ lọc và nút trạng thái luôn ở đầu màn hình khi cuộn trang */
 .sv-dinh{position:sticky;top:0;z-index:8;display:flex;flex-direction:column;gap:10px;padding:8px 0 8px;background:var(--the);box-shadow:0 1px 0 var(--vien)}
 .sv-thanh{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.so-tai{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;padding:0 14px 10px;font-size:12.5px}
+.vt-toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:90;max-width:min(560px,92vw);padding:11px 18px;border-radius:12px;background:var(--chu);color:var(--the);box-shadow:0 8px 24px rgba(0,0,0,.25);font-size:14.5px}
 .sv-o{position:relative;flex:1 1 300px;min-width:0}
 .sv-o input{width:100%;padding-right:34px}
 .sv-xoa{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:30px;height:30px;border:0;background:none;font-size:17px;color:var(--chu-4);cursor:pointer}
@@ -490,6 +492,32 @@ function khoGhi(data) {
   khoMo().then(function (db) { db.transaction(KHO.bang, 'readwrite').objectStore(KHO.bang).put({ luc: Date.now(), data: data }, KHO.khoa); }).catch(function () {});
 }
 function danhDauHien() { if (!window.__vtHien) window.__vtHien = Math.round(performance.now()); }   // thời điểm hiện nội dung lần đầu, để đo tốc độ
+/** Dòng ghi sổ được đọc lúc nào. */
+function tuoiSo() {
+  var m = Math.max(0, Math.round((Date.now() - BAY_GIO) / 60000));
+  return 'Sổ cập nhật ' + luc(BAY_GIO) + (m < 1 ? ' (vừa xong)' : m < 60 ? ' (' + m + ' phút trước)' : ' (' + Math.floor(m / 60) + ' giờ trước)');
+}
+function thongBaoVt(t) {
+  var e = document.createElement('div'); e.className = 'vt-toast'; e.setAttribute('role', 'status'); e.textContent = t; document.body.appendChild(e);
+  setTimeout(function () { e.remove(); }, 5000);
+}
+/** Nút "Tải lại sổ": bỏ qua bộ nhớ tạm của trình duyệt và của máy chủ để lấy sổ mới nhất ngay. */
+var DANG_TAI_SO = false;
+function taiLaiSo() {
+  if (DANG_TAI_SO) return;
+  DANG_TAI_SO = true;
+  var nut = $('#taiLaiSo'), truoc = DS.length, truocLuc = BAY_GIO;
+  if (nut) { nut.disabled = true; nut.textContent = 'Đang tải…'; }
+  fetch(API_VT, { cache: 'reload', headers: { 'X-Lam-Moi': '1' } }).then(function (r) { return r.json(); }).then(function (j) {
+    if (!j.ok) throw new Error(j.loi || 'API lỗi');
+    apDuLieu(j.data); khoGhi(j.data); dinhTuyen();
+    var d = DS.length - truoc;
+    thongBaoVt(d ? 'Đã cập nhật sổ: ' + (d > 0 ? '+' : '') + d + ' dòng' : j.data.luc > truocLuc ? 'Đã tải lại sổ, không có dòng mới' : 'Sổ đã là bản mới nhất');
+  }).catch(function (e) {
+    thongBaoVt('Không tải lại được sổ: ' + e.message);
+    var n = $('#taiLaiSo'); if (n) { n.disabled = false; n.textContent = '⟳ Tải lại sổ'; }
+  }).then(function () { DANG_TAI_SO = false; });
+}
 function napDuLieu() {
   var daCoMoi = false, daHienCu = false;
   $('#man').innerHTML = '<div class="the rong">Đang đọc sổ văn thư…</div>';
@@ -779,6 +807,7 @@ function veSo() {
   $('#noiTab').innerHTML = '<div class="so-bo">' +
     '<aside class="the"><div style="padding:14px 14px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px"><h2 style="font-size:15px">Sổ văn thư</h2>' +
       '<select class="o" id="chonNam" aria-label="Năm" style="flex:0 0 96px;min-width:0">' + namCoDuLieu().map(function (n) { return '<option' + (n === S.nam ? ' selected' : '') + '>' + n + '</option>'; }).join('') + '</select></div>' +
+      '<div class="so-tai"><button class="nut" id="taiLaiSo" title="Bỏ qua bộ nhớ tạm, đọc lại sổ mới nhất từ Google Sheet">⟳ Tải lại sổ</button><span class="phu" id="tuoiSo">' + tuoiSo() + '</span></div>' +
       '<div class="ds-so" id="dsSo">' + veDsSo() + '</div></aside>' +
     '<section class="the"><div style="padding:14px 16px;display:flex;flex-direction:column;gap:12px">' +
       '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;justify-content:space-between"><div style="display:flex;flex-direction:column;gap:2px"><h2 style="font-size:17px">' + esc(so.ten) + ' · ' + esc(so.dv) + ' ' + S.nam + '</h2><span class="phu">' + (so.ky ? 'Gồm: ' + esc(so.ky) + ' · ' : '') + (so.donViSo ? esc(so.donViSo) + ' · ' : '') + 'sổ cái trên Google Sheet</span></div>' + chipChieu(so.chieu, true) + '</div>' +
@@ -1306,6 +1335,7 @@ window.addEventListener('hashchange', dinhTuyen);
 document.addEventListener('click', function (e) {
   var t = e.target.closest('a[href^="#/phieu/"],[data-qtthu],[data-qtmo],[data-dongngan],[data-dv],[data-chieu],[data-kpi],[data-tab],[data-cn],[data-qtso],[data-locphieu],[data-mo],[data-trang],[data-so],[data-tabso],[data-loctt],[data-trangso],[data-cotrang],[data-tabct],[data-nhac],[data-chep],[data-chaylai],[data-fchieu],#xoaLocSo,#nutFile,#guiForm,#huyForm,#taoTiep');
   if (e.target.id === 'thuLai') { napDuLieu(); return; }
+  if (e.target.closest && e.target.closest('#taiLaiSo')) { taiLaiSo(); return; }
   if (e.target.closest('.hd-lk')) return;
   if (!t || t.disabled) return;
   if (t.tagName === 'A' && !t.dataset.so) return;   // link phiếu: để trình duyệt tự đổi #
