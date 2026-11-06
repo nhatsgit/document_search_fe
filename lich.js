@@ -215,8 +215,9 @@ function thanhPhanDayDu(x, kemVaiTro) {
   return r;
 }
 function vtTen(x) { return vtCua(x).map(function (id) { return vtTheoId(id).ten; }).join(', '); }
-var TEN_CAP = { 1: 'Lãnh đạo', 2: 'Nhân viên' };
-function capVt(v) { return Number(v.cap) === 1 ? 1 : 2; }
+var TEN_CAP = { 1: 'Lãnh đạo công ty', 2: 'Lãnh đạo phòng', 3: 'Nhân viên' };
+var CAPS = [1, 2, 3];
+function capVt(v) { var c = Number(v.cap); return c === 1 || c === 2 ? c : 3; }
 function dsVt() { return S.vaiTro.slice().sort(function (a, b) { return capVt(a) - capVt(b) || (Number(a.thuTu) || 99) - (Number(b.thuTu) || 99) || String(a.ten).localeCompare(String(b.ten)); }); }
 function mauVt(v) {
   if (v.mau && /^#[0-9a-fA-F]{6}$/.test(v.mau)) return v.mau;
@@ -442,31 +443,32 @@ function veVt() {
   var ten = function (a) { var t = a.slice(0, 4).map(function (v) { return v.ten; }).join(', '); return t + (a.length > 4 ? ' … (+' + (a.length - 4) + ')' : ''); };
   var luu = chung ? ', gồm Lịch chung' : ', không gồm Lịch chung';
   var tomTat = tt === 'tat' ? 'Đang xem tất cả ' + ds.length + ' vai trò' + luu
-    : tt === '1' ? 'Chỉ nhóm Lãnh đạo (' + hien.length + ' vai trò)' + luu
-    : tt === '2' ? 'Chỉ nhóm Nhân viên (' + hien.length + ' vai trò)' + luu
+    : tt === '1' || tt === '2' || tt === '3' ? 'Chỉ nhóm ' + TEN_CAP[tt] + ' (' + hien.length + ' vai trò)' + luu
     : tt === 'toi' ? 'Chỉ lịch của tôi: ' + ten(ds.filter(function (v) { return S.toiVt.indexOf(v.id) >= 0; })) + luu
     : ds.length - hien.length > 0 && ds.length - hien.length <= 6 && hien.length > ds.length - hien.length ? 'Đang xem tất cả vai trò, trừ ' + ten(ds.filter(function (v) { return !vtHien(v); })) + luu
     : 'Đang xem ' + hien.length + '/' + ds.length + ' vai trò' + (hien.length ? ': ' + ten(hien) : '') + luu;
   el.innerHTML = '<div class="lc-vt-dau"><b class="lc-vt-ten">Lịch đang xem</b><span class="lc-dem">' + dem + '</span>' +
-    '<div class="lc-pres" role="group" aria-label="Xem nhanh">' + pre('tat', 'Tất cả', ds.length) + pre('1', 'Lãnh đạo', so(1)) + pre('2', 'Nhân viên', so(2)) + pre('toi', 'Của tôi') + '</div>' +
+    '<div class="lc-pres" role="group" aria-label="Xem nhanh">' + pre('tat', 'Tất cả', ds.length) + pre('1', 'Lãnh đạo công ty', so(1)) + pre('2', 'Lãnh đạo phòng', so(2)) + pre('3', 'Nhân viên', so(3)) + pre('toi', 'Của tôi') + '</div>' +
     '<span class="lc-vt-nut"><button type="button" class="lc-nut-chu" id="lcVtGap" aria-expanded="' + S.vtMo + '">Tuỳ chọn <i class="lc-mui' + (S.vtMo ? ' mo' : '') + '">▾</i></button><button type="button" class="lc-nut-chu" id="lcQlVt">Quản lý vai trò</button></span></div>' +
     '<p class="lc-vt-tt">' + esc(tomTat) + '</p>' +
     (S.vtMo ? '<div class="lc-vt-mo"><input class="lc-vt-tim" id="lcVtTim" type="search" placeholder="Tìm vai trò hoặc tên người…" autocomplete="off" value="' + esc(S.vtTim) + '"><div id="lcVtDs">' + htmlDsVt() + '</div></div>' : '');
 }
-/** Trạng thái xem hiện tại so với các nút xem nhanh: tat, 1 (Lãnh đạo), 2 (Nhân viên), toi (Của tôi), khac. Lịch chung không tính. */
+/** Trạng thái xem hiện tại so với các nút xem nhanh: tat, 1 (Lãnh đạo công ty), 2 (Lãnh đạo phòng), 3 (Nhân viên), toi (Của tôi), khac. Lịch chung không tính. */
 function trangThaiVt() {
-  var ds = dsVt(), hien = ds.filter(vtHien), n1 = ds.filter(function (v) { return capVt(v) === 1; }).length, n2 = ds.filter(function (v) { return capVt(v) === 2; }).length;
+  var ds = dsVt(), hien = ds.filter(vtHien);
   if (S.toi && S.toiVt.length && ds.every(function (v) { return S.vtAn[v.id]; })) return 'toi';
   if (hien.length === ds.length) return 'tat';
-  if (hien.length && hien.length === n1 && hien.every(function (v) { return capVt(v) === 1; })) return '1';
-  if (hien.length && hien.length === n2 && hien.every(function (v) { return capVt(v) === 2; })) return '2';
+  for (var k = 0; k < CAPS.length; k++) {
+    var c = CAPS[k], n = ds.filter(function (v) { return capVt(v) === c; }).length;
+    if (hien.length && hien.length === n && hien.every(function (v) { return capVt(v) === c; })) return String(c);
+  }
   return 'khac';
 }
 /** Xem nhanh: tất cả, chỉ lãnh đạo, chỉ nhân viên, hoặc chỉ các vai trò của tôi. Lịch chung luôn bật. */
 function datXemVt(kieu) {
   if (kieu === 'toi' && !S.toiVt.length) { S.choToi = true; moVtToi(); return; }
   S.vtAn = {}; S.toi = false;
-  if (kieu === '1' || kieu === '2') S.vaiTro.forEach(function (v) { if (capVt(v) !== Number(kieu)) S.vtAn[v.id] = 1; });
+  if (kieu === '1' || kieu === '2' || kieu === '3') S.vaiTro.forEach(function (v) { if (capVt(v) !== Number(kieu)) S.vtAn[v.id] = 1; });
   if (kieu === 'toi') { S.vaiTro.forEach(function (v) { S.vtAn[v.id] = 1; }); S.toi = true; }
   luuVtTt(); ve();
 }
@@ -477,7 +479,7 @@ function htmlDsVt() {
     return '<label class="lc-vc' + (on ? ' on' : '') + '" title="' + esc(goiY || ten) + '"><input type="checkbox" data-vtdoi="' + esc(id) + '"' + (on ? ' checked' : '') + '><i class="lc-o-vuong nho" style="--c:' + mau + '"></i><span>' + esc(ten) + '</span></label>';
   };
   var khop = function (v) { return !tim || boDau(v.ten + ' ' + tenNguoi(v).join(' ')).indexOf(tim) >= 0; };
-  var nhom = [1, 2].map(function (c) {
+  var nhom = CAPS.map(function (c) {
     var g = ds.filter(function (v) { return capVt(v) === c; }), hienNhom = g.filter(khop);
     if (!g.length || (tim && !hienNhom.length)) return '';
     var bat = g.filter(vtHien).length, mo = tim ? true : !!S.vtNhomMo[c];
@@ -530,7 +532,8 @@ function ve() {
 
 /* ---------- dữ liệu mẫu: lịch giả chỉ nằm trong trình duyệt, không ghi vào lịch thật ---------- */
 var TEN_VT_MAU = ['Trưởng phòng KHĐT', 'Kế toán thanh toán', 'Nhân viên trạm thu gom Đội 1', 'Tổ trưởng Đội 1', 'Trợ lý Đội 1', 'Đội phó Đội 1', 'Đội trưởng Đội 1', 'Cán bộ kỹ thuật KTNN', 'Trưởng phòng KTNN', 'Thủ kho thành phẩm', 'Lái xe giao hàng', 'Nhân viên IT', 'Trưởng bảo trì', 'Nhân viên hành chính', 'Trưởng phòng QLCL', 'Nhân viên kiểm nghiệm QLCL', 'Nhân viên cân mủ', 'Văn thư', 'Nhân viên bảo vệ', 'Kế toán công nợ', 'Thủ kho', 'Cán bộ dự án', 'Trưởng ban quản lý dự án', 'Thủ quỹ', 'Trưởng ca nhà máy', 'Quản đốc nhà máy', 'Kế toán phải trả', 'Kế toán phải thu', 'Kế toán tổng hợp', 'Nhân viên nhân sự TCHC', 'Trưởng phòng TCHC', 'Nhân viên bán hàng', 'Trưởng phòng bán hàng', 'Nhân viên mua hàng KHĐT', 'Kế toán trưởng', 'Tổng giám đốc', 'Phó tổng giám đốc', 'Giám đốc nhà máy', 'Lịch Ban lãnh đạo'];
-var CAP_LD = ['Tổng giám đốc', 'Phó tổng giám đốc', 'Giám đốc nhà máy', 'Quản đốc nhà máy', 'Kế toán trưởng', 'Trưởng phòng KHĐT', 'Trưởng phòng KTNN', 'Trưởng phòng QLCL', 'Trưởng phòng TCHC', 'Trưởng phòng bán hàng', 'Trưởng ban quản lý dự án', 'Lịch Ban lãnh đạo'];
+var CAP_CT = ['Tổng giám đốc', 'Phó tổng giám đốc', 'Giám đốc nhà máy', 'Kế toán trưởng', 'Lịch Ban lãnh đạo'];   // lãnh đạo công ty
+var CAP_PHONG = ['Quản đốc nhà máy', 'Trưởng phòng KHĐT', 'Trưởng phòng KTNN', 'Trưởng phòng QLCL', 'Trưởng phòng TCHC', 'Trưởng phòng bán hàng', 'Trưởng ban quản lý dự án', 'Trưởng bảo trì', 'Đội trưởng Đội 1'];   // lãnh đạo phòng
 var NGUOI_VT = { 'Trưởng phòng KHĐT': 'Nguyễn Thị Thu Hà', 'Kế toán thanh toán': 'Lê Thị Mai Anh, Phạm Thị Lan', 'Nhân viên trạm thu gom Đội 1': 'Trần Văn Bình, Võ Văn Tâm, Đặng Văn Sơn', 'Tổ trưởng Đội 1': 'Nguyễn Văn Phúc', 'Trợ lý Đội 1': 'Lê Thị Hoa',
   'Đội phó Đội 1': 'Phạm Minh Trí', 'Đội trưởng Đội 1': 'Bùi Minh Khoa', 'Cán bộ kỹ thuật KTNN': 'Hoàng Văn Nam, Đỗ Thị Thảo', 'Trưởng phòng KTNN': 'Trần Quốc Dũng', 'Thủ kho thành phẩm': 'Vũ Văn Long', 'Lái xe giao hàng': 'Nguyễn Văn Tuấn, Lê Văn Bình',
   'Nhân viên IT': 'Lê Anh Dũng, Phan Quốc Việt', 'Trưởng bảo trì': 'Ngô Văn Thành', 'Nhân viên hành chính': 'Nguyễn Thị Hà, Trương Thị Ngọc', 'Trưởng phòng QLCL': 'Lê Văn Phúc', 'Nhân viên kiểm nghiệm QLCL': 'Đinh Thị Hương, Mai Văn Quý',
@@ -538,7 +541,7 @@ var NGUOI_VT = { 'Trưởng phòng KHĐT': 'Nguyễn Thị Thu Hà', 'Kế toán
   'Trưởng ban quản lý dự án': 'Nguyễn Văn Hùng', 'Thủ quỹ': 'Châu Thị Kim', 'Trưởng ca nhà máy': 'Dương Văn Lợi, Lưu Văn Thắng', 'Quản đốc nhà máy': 'Trần Văn Hậu', 'Kế toán phải trả': 'Hồ Thị Diệu', 'Kế toán phải thu': 'Mạc Thị Xuân',
   'Kế toán tổng hợp': 'Kiều Thị Oanh', 'Nhân viên nhân sự TCHC': 'Lương Thị Hạnh, Tô Văn Kiên', 'Trưởng phòng TCHC': 'Vương Minh Tuấn', 'Nhân viên bán hàng': 'Từ Văn Phong, Quách Thị Liên', 'Trưởng phòng bán hàng': 'Đoàn Văn Cường',
   'Nhân viên mua hàng KHĐT': 'Âu Thị Phương', 'Kế toán trưởng': 'Bạch Thị Thanh', 'Tổng giám đốc': 'Nguyễn Văn An', 'Phó tổng giám đốc': 'Nguyễn Hữu Hùng, Lê Thị Mai', 'Giám đốc nhà máy': 'Trương Văn Kiệt' };
-var VT_MAU = TEN_VT_MAU.map(function (t, i) { return { id: 'v' + (i + 1), ten: t, mau: t === 'Lịch Ban lãnh đạo' ? '#5b6b7e' : MAU_VT[i % MAU_VT.length], thuTu: i + 1, cap: CAP_LD.indexOf(t) >= 0 ? 1 : 2, nguoi: NGUOI_VT[t] || '' }; });
+var VT_MAU = TEN_VT_MAU.map(function (t, i) { return { id: 'v' + (i + 1), ten: t, mau: t === 'Lịch Ban lãnh đạo' ? '#5b6b7e' : MAU_VT[i % MAU_VT.length], thuTu: i + 1, cap: CAP_CT.indexOf(t) >= 0 ? 1 : CAP_PHONG.indexOf(t) >= 0 ? 2 : 3, nguoi: NGUOI_VT[t] || '' }; });
 var VT_ID = {}; VT_MAU.forEach(function (v) { VT_ID[v.ten] = v.id; });
 /* Tên người, chức danh ghi trong thành phần của dữ liệu mẫu ứng với vai trò nào */
 var MAP_VT = { 'tgđ': ['Tổng giám đốc', 'Lịch Ban lãnh đạo'], 'p.tgđ hùng': ['Phó tổng giám đốc', 'Lịch Ban lãnh đạo'], 'p.tgđ mai': ['Phó tổng giám đốc', 'Lịch Ban lãnh đạo'], 'kế toán trưởng': ['Kế toán trưởng'],
@@ -741,9 +744,9 @@ function moForm(x, loi) {
 function chipVt(l, chon, ten) {
   return '<label class="lc-vt-muc" data-ten="' + esc(boDau(l.ten + ' ' + tenNguoi(l).join(' '))) + '"><input type="checkbox"' + (ten ? ' name="' + ten + '"' : '') + ' value="' + esc(l.id) + '"' + (chon ? ' checked' : '') + '><i class="lc-o-vuong" style="--c:' + mauVt(l) + '"></i><span>' + esc(l.ten) + (nguoiGon(l) ? '<small>' + esc(nguoiGon(l)) + '</small>' : '') + '</span></label>';
 }
-/** Vai trò chia hai nhóm: cấp 1 Lãnh đạo, cấp 2 Nhân viên (nhóm không có vai trò thì không hiện). nutNhom: tên thuộc tính cho nút chọn, bỏ cả nhóm. */
+/** Vai trò chia ba nhóm: cấp 1 Lãnh đạo công ty, cấp 2 Lãnh đạo phòng, cấp 3 Nhân viên (nhóm không có vai trò thì không hiện). nutNhom: tên thuộc tính cho nút chọn, bỏ cả nhóm. */
 function htmlNhomVt(tick, ten, nutNhom) {
-  return [1, 2].map(function (c) {
+  return CAPS.map(function (c) {
     var ds = dsVt().filter(function (v) { return capVt(v) === c; });
     return ds.length ? '<div class="lc-vt-nhom"><b>' + TEN_CAP[c] + '</b>' + (nutNhom ? '<span><button type="button" class="lc-nut-chu nho" data-' + nutNhom + '="' + c + ':on">chọn nhóm</button><button type="button" class="lc-nut-chu nho" data-' + nutNhom + '="' + c + ':off">bỏ nhóm</button></span>' : '') + '</div>' +
       ds.map(function (v) { return chipVt(v, tick(v.id), ten); }).join('') : '';
@@ -824,7 +827,7 @@ function moQlVt(sua, loi, tam) {
     '<div class="lc-ca"><b>' + (l.id ? 'Sửa: ' + esc(l.ten) : 'Thêm vai trò') + '</b></div>' +
     '<label class="lc-o ca">Tên vai trò<input id="vtTen" maxlength="80" placeholder="VD: Trưởng phòng TCHC" value="' + esc(l.ten || '') + '"></label>' +
     '<label class="lc-o ca">Người giữ vai trò (nhiều người thì cách nhau bằng dấu phẩy)<input id="vtNguoi" maxlength="300" placeholder="VD: Nguyễn Văn An" value="' + esc(l.nguoi || '') + '"></label>' +
-    '<label class="lc-o">Cấp<select id="vtCap"><option value="1"' + (capVt(l) === 1 ? ' selected' : '') + '>Cấp 1: Lãnh đạo</option><option value="2"' + (capVt(l) === 2 ? ' selected' : '') + '>Cấp 2: Nhân viên</option></select></label>' +
+    '<label class="lc-o">Cấp<select id="vtCap">' + CAPS.map(function (c) { return '<option value="' + c + '"' + (capVt(l) === c ? ' selected' : '') + '>Cấp ' + c + ': ' + TEN_CAP[c] + '</option>'; }).join('') + '</select></label>' +
     '<label class="lc-o">Màu<input type="color" id="vtMau" value="' + mau + '"></label>' +
     '<label class="lc-o">Thứ tự hiện (số nhỏ hiện trước)<input id="vtTT" type="number" min="1" max="999" value="' + esc(l.thuTu || '') + '"></label>' +
     (coMa ? '' : '<label class="lc-o ca">Mã lập lịch<input type="password" id="vtMa" autocomplete="off"></label>'),
@@ -832,7 +835,7 @@ function moQlVt(sua, loi, tam) {
   var o = $('#vtTen'); if (o) o.focus();
 }
 function luuVt(nut) {
-  var l = { id: nut.dataset.vtid || '', ten: $('#vtTen').value.trim(), mau: $('#vtMau').value, nguoi: $('#vtNguoi').value.trim(), cap: Number($('#vtCap').value) === 1 ? 1 : 2, thuTu: Number($('#vtTT').value) || 99 }, o = $('#vtMa'), ma = o ? o.value.trim() : maDaLuu();
+  var l = { id: nut.dataset.vtid || '', ten: $('#vtTen').value.trim(), mau: $('#vtMau').value, nguoi: $('#vtNguoi').value.trim(), cap: Number($('#vtCap').value) || 3, thuTu: Number($('#vtTT').value) || 99 }, o = $('#vtMa'), ma = o ? o.value.trim() : maDaLuu();
   if (!l.ten) return moQlVt(l.id, 'Chưa nhập tên vai trò', l);
   if (S.demo) {
     if (l.id) Object.assign(S.demoVt.filter(function (y) { return y.id === l.id; })[0] || {}, l); else { l.id = 'v' + Date.now(); S.demoVt.push(l); }
@@ -877,11 +880,13 @@ function dongBaoCao(e, loc, coVt) {
 function moTaLoc(loc) {
   var r = [], vs = dsVt().filter(function (v) { return loc.vt.indexOf(v.id) >= 0; }), chung = loc.vt.indexOf('chung') >= 0;
   var soCap = function (c) { return S.vaiTro.filter(function (v) { return capVt(v) === c; }).length; };
+  var capTron = function () { for (var k = 0; k < CAPS.length; k++) { var c = CAPS[k]; if (vs.length > 0 && vs.length === soCap(c) && vs.every(function (v) { return capVt(v) === c; })) return c; } return 0; };
   if (loc.loai.length < LOAI.length) r.push('Loại công việc: ' + LOAI.filter(function (l) { return loc.loai.indexOf(l[0]) >= 0; }).map(function (l) { return l[1]; }).join(', '));
   if (loc.kieu !== 'vt' && !(vs.length === S.vaiTro.length && chung)) {
-    var tatCa = vs.length === S.vaiTro.length, c1 = vs.length > 0 && vs.length === soCap(1) && vs.every(function (v) { return capVt(v) === 1; }), c2 = vs.length > 0 && vs.length === soCap(2) && vs.every(function (v) { return capVt(v) === 2; });
+    var tatCa = vs.length === S.vaiTro.length, cc = capTron();
     var bo = S.vaiTro.filter(function (v) { return loc.vt.indexOf(v.id) < 0; });
-    var ten = tatCa ? 'tất cả vai trò' : c1 ? 'cấp Lãnh đạo' : c2 ? 'cấp Nhân viên' : bo.length && bo.length <= 4 ? 'tất cả vai trò, trừ ' + bo.map(function (v) { return v.ten; }).join(', ') : vs.length > 8 ? vs.slice(0, 8).map(function (v) { return v.ten; }).join(', ') + ' … (+' + (vs.length - 8) + ')' : vs.map(function (v) { return v.ten; }).join(', ');
+    var boCap = 0; CAPS.forEach(function (c) { if (bo.length && bo.length === soCap(c) && bo.every(function (v) { return capVt(v) === c; })) boCap = c; });
+    var ten = tatCa ? 'tất cả vai trò' : cc ? 'cấp ' + TEN_CAP[cc] : boCap ? 'tất cả vai trò, trừ cấp ' + TEN_CAP[boCap] : bo.length && bo.length <= 4 ? 'tất cả vai trò, trừ ' + bo.map(function (v) { return v.ten; }).join(', ') : vs.length > 8 ? vs.slice(0, 8).map(function (v) { return v.ten; }).join(', ') + ' … (+' + (vs.length - 8) + ')' : vs.map(function (v) { return v.ten; }).join(', ');
     r.push('Vai trò: ' + (ten ? ten + (chung ? '; gồm Lịch chung' : (tatCa ? ' (không gồm Lịch chung)' : '')) : chung ? 'Lịch chung' : '(không chọn)'));
   }
   if (loc.q) r.push('Từ khoá: ' + loc.q);
@@ -943,7 +948,7 @@ function xCapNhat() {
   var n = suKienTheoNgay(k[0], k[1], ds).reduce(function (t, d) { return t + d.ds.length; }, 0);
   $('#xGhiChu').textContent = n + ' dòng lịch trong khoảng ' + vnNgay(ymd(k[0])) + ' – ' + vnNgay(ymd(k[1])) + (v === 'tu' ? ' (tối đa 92 ngày)' : '') + '.';
 }
-/** Chọn cả cấp trong bộ lọc vai trò: tất cả, chỉ Lãnh đạo, chỉ Nhân viên (Lịch chung giữ nguyên). */
+/** Chọn cả cấp trong bộ lọc vai trò: tất cả hoặc chỉ một cấp (Lịch chung giữ nguyên). */
 function xCap(c) {
   S.vaiTro.forEach(function (v) { var i = document.querySelector('input[name="xvt"][value="' + v.id + '"]'); if (i) i.checked = c === 'all' || capVt(v) === Number(c); });
   xCapNhat();
@@ -961,7 +966,7 @@ function moXuat() {
         '<div class="lc-xuat-ngay f-xtu"><label>Từ<input type="date" id="xTu" value="' + ymd(S.moc) + '"></label><label>Đến<input type="date" id="xDen" value="' + ymd(cong(S.moc, 6)) + '"></label></div></fieldset>' +
       '<fieldset><legend>Công việc (loại lịch)<span><button type="button" class="lc-nut-chu nho" data-xloai="on">tất cả</button><button type="button" class="lc-nut-chu nho" data-xloai="off">bỏ</button></span></legend>' +
         LOAI.map(function (l) { return '<label class="lc-xc"><input type="checkbox" name="xloai" value="' + l[0] + '"' + ck(md.loai.indexOf(l[0]) >= 0) + '>' + l[1] + '</label>'; }).join('') + '</fieldset>' +
-      '<fieldset><legend>Vai trò</legend><div class="lc-xcap" role="group" aria-label="Cấp vai trò"><button type="button" data-xcap="all">Tất cả</button><button type="button" data-xcap="1">Lãnh đạo</button><button type="button" data-xcap="2">Nhân viên</button></div>' +
+      '<fieldset><legend>Vai trò</legend><div class="lc-xcap" role="group" aria-label="Cấp vai trò"><button type="button" data-xcap="all">Tất cả</button><button type="button" data-xcap="1">Lãnh đạo công ty</button><button type="button" data-xcap="2">Lãnh đạo phòng</button><button type="button" data-xcap="3">Nhân viên</button></div>' +
         '<div class="lc-vtbox x">' + htmlNhomVt(function (id) { return md.vt.indexOf(id) >= 0; }, 'xvt', 'xnhom') +
         '<div class="lc-vt-nhom"><b>Chung</b></div><label class="lc-vt-muc"><input type="checkbox" name="xvt" value="chung"' + ck(md.vt.indexOf('chung') >= 0) + '><i class="lc-o-vuong" style="--c:' + MAU_CHUNG + '"></i><span>Lịch chung toàn công ty</span></label></div></fieldset>' +
       '<fieldset><legend>Từ khoá</legend><input id="xQ" placeholder="Tên lịch, địa điểm, thành phần…" autocomplete="off" value="' + esc(S.q) + '"></fieldset>' +

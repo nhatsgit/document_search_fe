@@ -340,3 +340,7 @@ dl.lc-ct dt{color:var(--muted)}dl.lc-ct dd{margin:0;overflow-wrap:anywhere;white
 .lc-vc.on{border-color:var(--brand-200);background:var(--brand-50);color:var(--mau-ink);font-weight:500}
 .lc-vc.on .lc-o-vuong{opacity:1}
 .lc-vc:has(input:focus-visible){box-shadow:0 0 0 3px var(--brand-100)}
+
+/* nút xem nhanh có tên dài hơn khi chia ba cấp */
+.lc-pres{flex-wrap:wrap}
+.lc-xcap button{padding:0 6px;font-size:13px}
