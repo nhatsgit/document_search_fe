@@ -384,7 +384,7 @@ dl.meta dd{margin:1px 0 0;font-size:14px;font-weight:500;overflow-wrap:anywhere}
 .ct-hai>*{min-width:0;flex:1 1 440px}
 .tabs-the{padding:0 10px}
 .to-the{border-left:5px solid var(--brand);overflow:hidden}
-.to-nhan{padding:12px 18px 0;font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--chu-3)}
+.to-nhan{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px 0 18px;font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--chu-3)}
 .to-giay{margin:10px 14px 14px;padding:16px 18px 18px;border:1px solid var(--vien);border-radius:var(--r);background:var(--the);display:flex;flex-direction:column;gap:12px}
 .to-dau{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px}
 .to-dau img{height:40px;width:auto}
@@ -1259,15 +1259,10 @@ function veChiTiet(id) {
   if (S.ctId !== id) { S.ctId = id; S.tabCt = 'yk'; }
   var ls = lichSu(p);
   var tabs = [['yk', 'Ý kiến (' + yKien(p).length + ')'], ['ds', 'Liên kết'], ['nk', 'Nhật ký (' + suKien(p).length + ')']];
-  var nut = function (t, u, hinh) { return u ? '<a href="' + esc(u) + '" target="_blank" rel="noopener" title="Mở ' + t + '" aria-label="Mở ' + t + '">' + hinh + '</a>' : '<span class="tat" title="Chưa có ' + t + '" aria-label="Chưa có ' + t + '">' + hinh + '</span>'; };
-  var gon = function (n) { return n.replace('width="14" height="14" ', ''); };
   CRCK.vet([['Văn thư', '#/'], p.ma || 'Chi tiết phiếu']);
   $('#phTrang').innerHTML = '';
   $('#man').innerHTML =
-    '<div class="dau-phieu"><a class="ct-lui" href="javascript:history.back()" title="Quay lại" aria-label="Quay lại">‹</a><h1>' + esc(p.trich || tenPhieu(p)) + '</h1>' + chipPhieu(p) + chipChieu(p.chieu, true) + '<span class="cach"></span>' +
-      '<div class="ct-nut">' + nut('phiếu Base Service', p.linkBase, '<img src="img/base-service.png" alt="">') + nut('Base Office', p.linkOffice, '<img src="img/base-office.png" alt="">') + nut('file trên Drive', p.linkDrive, IC_DRIVE) +
-        (p.ma ? '<button type="button" data-chep="' + esc(p.ma) + '" title="Sao chép số ' + esc(p.ma) + '" aria-label="Sao chép số ' + esc(p.ma) + '">' + gon(IC_CHEP) + '</button>' : '<span class="tat" title="Chưa cấp số" aria-label="Chưa cấp số">' + gon(IC_CHEP) + '</span>') +
-      '</div></div>' +
+    '<div class="dau-phieu"><a class="ct-lui" href="javascript:history.back()" title="Quay lại" aria-label="Quay lại">‹</a><h1>' + esc(p.trich || tenPhieu(p)) + '</h1>' + chipPhieu(p) + chipChieu(p.chieu, true) + '</div>' +
     '<section class="the the-dem"><h2 class="tieu-the">Các bước của phiếu này</h2>' + veCacBuoc(p, ls) + '</section>' +
     '<div class="ct-bo"><aside class="ct-meta">' + benMeta(p) + '</aside>' +
       '<div class="ct-giua"><div class="ct-hai">' + toPhieu(p) + xemFile(p) + '</div>' +
@@ -1284,6 +1279,13 @@ function veCacBuoc(p, ls) {
       var phu = [b.nguoi, b.tu ? luc(b.tu) : '', b.gio != null ? gioChu(b.gio) : ''].filter(Boolean).join(' · ');
       return '<span class="ck-b ' + loai + '"><i>' + (loai === 'xong' ? '✓' : b.i + 1) + '</i><span><b>' + esc(b.ten) + '</b><small' + (b.trang === 'qua' ? ' style="color:var(--warn-fg);font-weight:600"' : '') + '>' + esc(phu) + '</small></span></span>';
     }).join('') + '</div>' + (p.tt === 'giu' ? '<p class="phu" style="margin:10px 0 0">Đang giữ số, chờ hồ sơ.</p>' : '');
+}
+/** Biểu tượng mở phiếu Base, Base Office, file Drive và sao chép số phiếu; nằm ở hàng nhãn của tờ phiếu. */
+function nutPhieu(p) {
+  var nut = function (t, u, hinh) { return u ? '<a href="' + esc(u) + '" target="_blank" rel="noopener" title="Mở ' + t + '" aria-label="Mở ' + t + '">' + hinh + '</a>' : '<span class="tat" title="Chưa có ' + t + '" aria-label="Chưa có ' + t + '">' + hinh + '</span>'; };
+  var gon = function (n) { return n.replace('width="14" height="14" ', ''); };
+  return '<div class="ct-nut">' + nut('phiếu Base Service', p.linkBase, '<img src="img/base-service.png" alt="">') + nut('Base Office', p.linkOffice, '<img src="img/base-office.png" alt="">') + nut('file trên Drive', p.linkDrive, IC_DRIVE) +
+    (p.ma ? '<button type="button" data-chep="' + esc(p.ma) + '" title="Sao chép số ' + esc(p.ma) + '" aria-label="Sao chép số ' + esc(p.ma) + '">' + gon(IC_CHEP) + '</button>' : '<span class="tat" title="Chưa cấp số" aria-label="Chưa cấp số">' + gon(IC_CHEP) + '</span>') + '</div>';
 }
 function benMeta(p) {
   var hang = [['Bước gần nhất', tenBuoc(p)], ['Phụ trách', nguoiGiu(p)], ['Từ bước gần nhất', p.tt === 'xong' || !p.lucCuoi ? '—' : gioChu(p.gio)], ['Hết hạn', p.hetHan ? ngay(p.hetHan) : '—'],
@@ -1321,7 +1323,7 @@ function toPhieu(p) {
     ['Người soạn', p.nguoiSoan], ['Người ký', p.nguoiKy], ['Trích yếu', p.trich], ['Đơn vị nhận', p.donViNhan], ['Đơn vị thực hiện', p.dvThucHien], ['Đơn vị phối hợp', p.dvPhoiHop], ['Đơn vị liên quan', p.dvLienQuan], ['Chủ trì', p.chuTri], ['Người theo dõi', p.nguoiTheoDoi], ['Phân loại', p.phanLoai], ['Thời hạn bảo quản', p.thoiHan], ['Số trang', p.soTrang]]
     .filter(function (x) { return x && x[1] !== '' && x[1] != null; });
   var coLogo = p.dv === 'CRCK' || p.dv === 'CRCK2';
-  return '<section class="the to-the"><div class="to-nhan"><span>' + (p.chieu === 'den' ? 'Văn thư đến' : 'Văn thư đi') + '</span></div><div class="to-giay">' +
+  return '<section class="the to-the"><div class="to-nhan"><span>' + (p.chieu === 'den' ? 'Văn thư đến' : 'Văn thư đi') + '</span>' + nutPhieu(p) + '</div><div class="to-giay">' +
       '<div class="to-dau">' + (coLogo ? '<img src="img/logo-vrg.png" alt="VRG Rubber">' : '') + '<b>' + esc(TEN_CTY[p.dv] || p.dv) + '</b>' +
       '<div class="to-so"><span>Số: <b>' + esc(maHien(p)) + '</b></span><span>' + (p.chieu === 'den' ? 'Ngày nhận' : 'Ngày ban hành') + ': <b>' + (p.ngay ? ngay(p.ngay) : '—') + '</b></span></div></div>' +
       '<h2 class="to-ten">' + (p.chieu === 'den' ? 'Phiếu văn thư đến' : 'Phiếu văn thư đi') + '</h2>' +
