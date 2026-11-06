@@ -732,7 +732,6 @@ function veTheTongQuan() {
   var soChu = DS_SO.filter(function (x) { return (S.dv === 'Tất cả' || x.dv === S.dv) && (S.chieu === 'tat' || x.chieu === S.chieu); }).map(function (x) { return [x, chiSoSo(x.id)]; })
     .filter(function (x) { return x[1].lo.length || x[1].trung.length || x[1].sai.length; }).sort(function (a, b) { return (b[1].lo.length + b[1].trung.length + b[1].sai.length) - (a[1].lo.length + a[1].trung.length + a[1].sai.length); });
   var giu = GIU_SO.filter(function (g) { return (S.dv === 'Tất cả' || g.dv === S.dv) && g.nam === S.nam; }).slice().reverse();
-  var nk = nhatKyChung();
   $('#noiTab').innerHTML =
     the('Đang kẹt', 'Lỗi, treo lâu, lệch dữ liệu; nặng nhất trước', ket.length ? ket.slice(0, 5).map(function (p) {
       return '<a class="tq-dong" href="#/phieu/' + esc(p.id) + '"><b>' + esc(p.trich) + '</b><small>' + esc(p.dv) + ' · ' + esc(tenBuoc(p)) + '</small>' + chipTT(p.tt) + '</a>'; }).join('') : '<p class="tq-on">Không có phiếu nào đang kẹt</p>', dot(ket, 5, 'qt:')) +
@@ -743,9 +742,7 @@ function veTheTongQuan() {
     the('Sổ cần soát', 'Sổ có nhảy số, trùng số hoặc sai thời gian năm ' + S.nam, soChu.length ? soChu.slice(0, 5).map(function (x) {
       return '<a class="tq-dong" href="#/so" data-so="' + esc(x[0].id) + '"><b>' + esc(x[0].ten) + ' · ' + esc(x[0].dv) + '</b><small>' + [x[1].lo.length ? x[1].lo.length + ' nhảy số' : '', x[1].trung.length ? x[1].trung.length + ' trùng' : '', x[1].sai.length ? x[1].sai.length + ' sai thời gian' : ''].filter(Boolean).join(' · ') + '</small></a>'; }).join('') : '<p class="tq-on">Không có sổ nào cần soát</p>', dot(soChu, 5, 'cn:')) +
     the('Giữ số chưa dùng', 'Số đã giữ trong năm ' + S.nam + ', mới nhất trước', giu.length ? giu.slice(0, 5).map(function (g) {
-      return '<a class="tq-dong" href="#/phieu/' + esc(g.id) + '"><b>' + esc(g.ly || 'Không ghi lý do') + '</b><small>Số ' + esc(g.so) + ' · ' + esc(g.dv) + '</small></a>'; }).join('') : '<p class="tq-on">Không giữ số nào</p>', dot(giu, 5, 'cn:')) +
-    the('Nhật ký gần nhất', 'Các bước xử lý mới ghi nhận', nk.length ? nk.slice(0, 5).map(function (e) {
-      return '<div class="tq-dong tinh"><b>' + esc(e.p ? e.p.trich : 'Phiếu ' + (e.id || '')) + '</b><small>' + luc(e.luc) + ' · ' + esc(e.nd) + '</small></div>'; }).join('') : '<p class="tq-on">Chưa có nhật ký</p>', '');
+      return '<a class="tq-dong" href="#/phieu/' + esc(g.id) + '"><b>' + esc(g.ly || 'Không ghi lý do') + '</b><small>Số ' + esc(g.so) + ' · ' + esc(g.dv) + '</small></a>'; }).join('') : '<p class="tq-on">Không giữ số nào</p>', dot(giu, 5, 'cn:'));
 }
 
 function veNoiTab() {
@@ -776,11 +773,6 @@ function phanTrang(tr, soTrang, khoa, tong) {
 }
 
 function suKien(p) { return (p.suKien || []).map(function (e) { return { luc: e.luc, tt: e.tt, nd: e.gd + ': ' + e.nd, p: p }; }); }
-function nhatKyChung() {
-  var theoId = {}; DS.forEach(function (p) { if (p.root) theoId[p.root] = p; });
-  return NHAT_KY.map(function (e) { return { luc: e.luc, tt: e.tt, nd: e.gd + ': ' + e.nd, p: theoId[e.id], id: e.id }; })
-    .filter(function (e) { return !e.p || ((S.dv === 'Tất cả' || e.p.dv === S.dv) && (S.chieu === 'tat' || e.p.chieu === S.chieu)); });
-}
 function dongNk(e) {
   var cls = /Lỗi|Phạt/i.test(e.tt) ? 'tt-loi' : /Thành công/i.test(e.tt) ? 'tt-dung' : 'tt-qua';
   var ten = e.p ? '<a href="#/phieu/' + esc(e.p.id) + '" style="font-weight:600;text-decoration:none">' + esc(tenPhieu(e.p)) + '</a>' : '<span style="font-weight:600">Phiếu ' + esc(e.id || '') + '</span>';
