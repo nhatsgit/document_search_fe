@@ -105,4 +105,12 @@
     thuGon: function () { dongNgan(); }
   };
   veBen();
+  // Ứng dụng cài được: đăng ký bộ nhớ đệm để mở lại khi mất mạng, kèm dải báo khi đang offline
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(function () {});
+  var dai = null;
+  function baoMang() {
+    if (!navigator.onLine && !dai) { dai = document.createElement('div'); dai.className = 'ck-offline'; dai.setAttribute('role', 'status'); dai.textContent = 'Đang offline: hiện dữ liệu đã lưu lần trước'; document.body.appendChild(dai); }
+    else if (navigator.onLine && dai) { dai.remove(); dai = null; }
+  }
+  window.addEventListener('online', baoMang); window.addEventListener('offline', baoMang); baoMang();
 })();

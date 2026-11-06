@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#ffffff">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Văn thư">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="description" content="Tra cứu 2.0: tìm, lọc theo cột, bộ hồ sơ dạng xổ, xem nhanh tài liệu lưu trữ (bản thử với 1000 dòng KHĐT · CRCK2).">
 <title>Tra cứu 2.0</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232f7a3d'/%3E%3Ccircle cx='29' cy='29' r='12' fill='none' stroke='white' stroke-width='4'/%3E%3Cpath d='m38 38 10 10' stroke='white' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
@@ -11,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Khmer:wght@400;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <script>(function () { var t = 'light'; try { t = localStorage.getItem('tclt_theme') || 'light'; } catch (e) {} document.documentElement.setAttribute('data-theme', t); })();</script>
-<link rel="stylesheet" href="crck.css?v=8">
+<link rel="stylesheet" href="crck.css?v=9">
 <style>
 /* Tên biến riêng của trang, trỏ sang bộ màu CRCK trong crck.css */
 :root{
@@ -496,7 +502,7 @@ a{color:var(--brand-700)}a:hover{color:var(--brand)}
 <div id="popup"></div>
 <div class="hop-cot" id="hopCot" role="dialog" aria-label="Tuỳ chỉnh cột" hidden></div>
 
-<script src="crck.js?v=8"></script>
+<script src="crck.js?v=9"></script>
 <script>CRCK.chon('tracuu', 'tc2'); CRCK.thuGon(true); CRCK.vet(['Tra cứu lưu trữ', 'Tra cứu 2.0']);</script>
 <script>
 /* =====================================================================

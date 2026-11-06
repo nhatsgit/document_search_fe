@@ -4,13 +4,19 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#ffffff">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Văn thư">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="description" content="Tra cứu tài liệu lưu trữ số hoá CRCK2 / BHCK: tìm kiếm, lọc, xem bộ hồ sơ liên quan.">
 <title>Tra cứu lưu trữ - CRCK</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%232f7a3d'/%3E%3Cpath d='M18 22h28v6H18zM20 28h24v16H20z' fill='none' stroke='white' stroke-width='3' stroke-linejoin='round'/%3E%3Cpath d='M28 34h8' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Khmer:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="crck.css?v=8">
+<link rel="stylesheet" href="crck.css?v=9">
 <script>
 /* Mặc định giao diện SÁNG (không theo chế độ tối của máy); chỉ tối khi người dùng tự bấm nút ◐. Áp trước khi vẽ trang để không nháy màu. */
 (function () {
@@ -929,7 +935,7 @@ th{background:var(--soft);color:var(--muted);font-size:13.5px;text-transform:non
   <span><b>Máy chủ đang khởi động</b> — lần mở đầu sau một lúc không ai dùng cần vài giây, vui lòng đợi…</span>
 </div>
 
-<script src="crck.js?v=8"></script>
+<script src="crck.js?v=9"></script>
 <script>
 'use strict';
 /* =====================================================================

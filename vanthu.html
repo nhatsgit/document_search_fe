@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#ffffff">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Văn thư">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="description" content="Theo dõi quy trình văn thư đến / đi trên Base: phiếu, sổ văn thư, đối soát Sheet ↔ Base ↔ Base Office (bản demo, dữ liệu giả).">
 <title>Văn thư</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232f7a3d'/%3E%3Cpath d='M16 22h32v22H16z' fill='none' stroke='white' stroke-width='3.5' stroke-linejoin='round'/%3E%3Cpath d='m17 23 15 11 15-11' fill='none' stroke='white' stroke-width='3.5' stroke-linejoin='round'/%3E%3C/svg%3E">
@@ -13,7 +19,7 @@
 <script>(function () { var t = 'light'; try { t = localStorage.getItem('tclt_theme') || 'light'; } catch (e) {} document.documentElement.setAttribute('data-theme', t); })();</script>
 <link rel="preconnect" href="https://document-search-api-319700450833.us-central1.run.app" crossorigin>
 <link rel="preload" href="https://document-search-api-319700450833.us-central1.run.app/api/vanthu" as="fetch" crossorigin>
-<link rel="stylesheet" href="crck.css?v=8">
+<link rel="stylesheet" href="crck.css?v=9">
 <link rel="stylesheet" href="lich.css?v=16">
 <style>
 /* Tên biến riêng của trang, trỏ sang bộ màu CRCK trong crck.css */
@@ -454,7 +460,7 @@ dl.tt{font-size:14px;gap:7px 12px;grid-template-columns:132px minmax(0,1fr)}
 </div>
 </div>
 
-<script src="crck.js?v=8"></script>
+<script src="crck.js?v=9"></script>
 <script src="lich.js?v=13"></script>
 <script>
 'use strict';
