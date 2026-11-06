@@ -404,7 +404,22 @@ dl.tt{font-size:14px;gap:7px 12px;grid-template-columns:132px minmax(0,1fr)}
   .nut{min-height:44px}.seg button{min-height:44px}
   .ck-tabs button{min-height:44px}
 }
+.chon-mb{display:none}
 @media (max-width:720px){
+  /* Điện thoại: bộ lọc là ô chọn thả xuống; sổ chọn bằng một ô; thanh tìm sổ gọn lại */
+  .chon-mb{display:flex;gap:8px}
+  .chon-mb select{flex:1 1 0;min-width:0}
+  .mot-cn{display:none}
+  .loc-pc,.ds-so,.so-bo>aside .so-tai .phu{display:none}
+  .sv-thanh{gap:8px}
+  .sv-o{order:-1;flex:1 1 100%}
+  #svTruong,[data-sv="moCot"]{display:none}
+  #svPham{flex:1 1 0!important;min-width:0}
+  .sv-dinh .hang{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+  .sv-dinh .hang::-webkit-scrollbar{display:none}
+  .sv-dinh .hang>.nut{flex:none}
+  .qt-than{padding:10px 12px 12px}
+  .qt-buoc{padding:8px 10px;gap:3px}
   /* Sổ văn thư trên điện thoại: mỗi dòng là một thẻ (trích yếu trên cùng, số, ngày, đơn vị bên dưới), không phải cuộn ngang */
   .sv-dinh{position:static;box-shadow:none}
   #dsSoVb .bang,.bang-cuon{max-height:none;overflow:visible;border:0;border-radius:0}
@@ -680,7 +695,11 @@ function veNgan() {
 }
 
 function hangLocChung() {
-  return '<div class="hang" style="gap:8px 16px"><div class="seg" role="group" aria-label="Loại văn thư">' + [['tat', 'Tất cả'], ['den', 'Văn thư đến'], ['di', 'Văn thư đi']].map(function (c) {
+  var chonMb = '<div class="chon-mb"><select class="o" id="mbChieu" aria-label="Loại văn thư">' + [['tat', 'Tất cả văn thư'], ['den', 'Văn thư đến'], ['di', 'Văn thư đi']].map(function (c) {
+      return '<option value="' + c[0] + '"' + (S.chieu === c[0] ? ' selected' : '') + '>' + c[1] + '</option>'; }).join('') + '</select>' +
+    '<select class="o" id="mbDv" aria-label="Đơn vị">' + DV.concat(['Tất cả']).map(function (d) {
+      return '<option value="' + esc(d) + '"' + (S.dv === d ? ' selected' : '') + '>' + (d === 'Tất cả' ? 'Mọi đơn vị' : esc(d)) + '</option>'; }).join('') + '</select></div>';
+  return chonMb + '<div class="hang loc-pc" style="gap:8px 16px"><div class="seg" role="group" aria-label="Loại văn thư">' + [['tat', 'Tất cả'], ['den', 'Văn thư đến'], ['di', 'Văn thư đi']].map(function (c) {
         return '<button class="' + (S.chieu === c[0] ? 'chon' : '') + '" data-chieu="' + c[0] + '">' + c[1] + '</button>'; }).join('') + '</div>' +
       '<div class="seg" role="group" aria-label="Đơn vị" style="margin-left:auto">' + DV.concat(['Tất cả']).map(function (d) {
         return '<button class="' + (S.dv === d ? 'chon' : '') + '" data-dv="' + esc(d) + '">' + esc(d) + '</button>'; }).join('') + '</div></div>';
@@ -733,7 +752,7 @@ function veTongQuan() {
 /** Hàng chọn chức năng của tab Chức năng. Tạm thời chỉ có Sổ văn thư; thêm chức năng mới thì thêm vào danh sách này. */
 var CHUC_NANG = [['so', 'Sổ văn thư']];
 function hangChucNang() {
-  return '<div class="hang" style="gap:8px 12px"><span class="phu">Chức năng</span><div class="seg" role="group" aria-label="Chức năng">' + CHUC_NANG.map(function (c) {
+  return '<div class="hang' + (CHUC_NANG.length < 2 ? ' mot-cn' : '') + '" style="gap:8px 12px"><span class="phu">Chức năng</span><div class="seg" role="group" aria-label="Chức năng">' + CHUC_NANG.map(function (c) {
     return '<button class="' + (S.cn === c[0] ? 'chon' : '') + '" data-cn="' + c[0] + '">' + c[1] + '</button>'; }).join('') + '</div></div>';
 }
 /** Đổi tab; Chức năng (Sổ văn thư) và Lịch giữ địa chỉ riêng để tải lại trang vẫn ở đúng tab. */
@@ -844,6 +863,7 @@ function veSo() {
   $('#noiTab').innerHTML = '<div class="so-bo">' +
     '<aside class="the"><div style="padding:14px 14px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px"><h2 style="font-size:15px">Sổ văn thư</h2>' +
       '<select class="o" id="chonNam" aria-label="Năm" style="flex:0 0 96px;min-width:0">' + namCoDuLieu().map(function (n) { return '<option' + (n === S.nam ? ' selected' : '') + '>' + n + '</option>'; }).join('') + '</select></div>' +
+      '<div class="chon-mb" style="padding:0 14px 8px"><select class="o" id="mbSo" aria-label="Chọn sổ">' + chonSoMb() + '</select></div>' +
       '<div class="so-tai"><button class="nut" id="taiLaiSo" title="Bỏ qua bộ nhớ tạm, đọc lại sổ mới nhất từ Google Sheet">⟳ Tải lại sổ</button><span class="phu" id="tuoiSo">' + tuoiSo() + '</span></div>' +
       '<div class="ds-so" id="dsSo">' + veDsSo() + '</div></aside>' +
     '<section class="the"><div style="padding:14px 16px;display:flex;flex-direction:column;gap:12px">' +
@@ -861,6 +881,16 @@ function veSo() {
     if (b.top < a.top || b.bottom > a.bottom) dsMoi.scrollTop += b.top - a.top - 8;
   }
   veNoiSo();
+}
+/** Điện thoại: danh sách sổ thu thành một ô chọn, nhóm theo Đến / Đi. */
+function chonSoMb() {
+  var ds = soTheoLoc(), og = function (c, t) {
+    var x = ds.filter(function (s) { return s.chieu === c; });
+    return x.length ? '<optgroup label="' + t + '">' + x.map(function (s) {
+      var cs = chiSoSo(s.id);
+      return '<option value="' + esc(s.id) + '"' + (S.so === s.id ? ' selected' : '') + '>' + esc(s.ten) + (S.dv === 'Tất cả' ? ' · ' + esc(s.dv) : '') + (s.donViSo ? ' · ' + esc(s.donViSo) : '') + ' (' + cs.vb.length + ')</option>'; }).join('') + '</optgroup>' : '';
+  };
+  return ds.length ? og('den', 'Văn thư đến') + og('di', 'Văn thư đi') : '<option>Không có sổ khớp</option>';
 }
 function veDsSo() {
   var ds = soTheoLoc();
@@ -1431,6 +1461,9 @@ document.addEventListener('input', function (e) {
 document.addEventListener('change', function (e) {
   var t = e.target;
   if (t.id === 'chonNam') { S.nam = Number(t.value); S.trangSo = 1; datLaiLocSo(); veSo(); }
+  else if (t.id === 'mbChieu') { S.chieu = t.value; S.trang = 1; veManLoc(); }
+  else if (t.id === 'mbDv') { S.dv = t.value; S.trang = 1; veManLoc(); }
+  else if (t.id === 'mbSo') { S.so = t.value; S.dvSo = t.value.split('|')[1]; S.trangSo = 1; datLaiLocSo(); veSo(); }
 });
 
 napDuLieu();
