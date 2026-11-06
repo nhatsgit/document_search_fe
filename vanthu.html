@@ -174,19 +174,14 @@ table.sv-bang thead th,.bang-cuon thead th{position:sticky;top:0;z-index:3;backg
 table.sv-bang thead tr:first-child th{height:38px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 table.sv-bang .tim-o th{top:38px;height:40px;box-shadow:0 1px 0 var(--vien)}
 #dsSoVb .bang,.bang-cuon{overflow:auto;max-height:calc(100dvh - 150px)}
-@media (min-width:901px) and (min-height:940px){
-  body.trang-so{overflow:hidden}
-  body.trang-so #man{padding-bottom:0}
-  body.trang-so .so-bo{flex-wrap:nowrap;height:calc(100dvh - var(--vt-tren,90px) - 14px)}
-  body.trang-so .so-bo>aside,body.trang-so .so-bo>section{height:100%;min-height:0;display:flex;flex-direction:column}
-  body.trang-so .so-bo>section{flex:1 1 0}
-  body.trang-so .ds-so{flex:1;min-height:0;overflow-y:auto}
-  body.trang-so #noiSo{flex:1;min-height:0;overflow-y:auto}
-  body.trang-so #noiSo.co-ds{overflow:hidden;display:flex;flex-direction:column}
+/* Khung văn bản của sổ (ô tìm, bộ lọc, tên cột, ô tìm theo cột, phân trang) dính vào màn hình khi cuộn trang; chỉ các dòng dữ liệu cuộn bên trong khung. */
+@media (min-width:901px){
+  body.trang-so #noiSo.co-ds{position:sticky;top:12px;z-index:5;height:calc(100dvh - 60px);display:flex;flex-direction:column;background:var(--the)}
+  body.trang-so #noiSo.co-ds .sv-dinh{position:static;box-shadow:none}
   body.trang-so #dsSoVb{flex:1;min-height:0}
   body.trang-so #dsSoVb .bang{flex:1;min-height:0;max-height:none}
-  body.trang-so .chi-so div{padding-top:6px;padding-bottom:6px}
   body.trang-so .phan-trang{flex:none}
+  body.trang-so .so-bo>aside{max-height:calc(100dvh - 60px)}
 }
 @media (max-width:900px){
   .so-bo .ds-so{max-height:320px;overflow-y:auto}
@@ -1222,6 +1217,12 @@ document.addEventListener('input', function (e) {
   var o = document.querySelector('[data-svo="' + id + '"]');
   if (o) { o.focus(); try { o.setSelectionRange(vt, vt); } catch (x) {} }
 });
+document.addEventListener('wheel', function (e) {
+  var k = document.getElementById('noiSo');
+  if (e.deltaY <= 0 || !k || !k.classList.contains('co-ds') || !k.contains(e.target) || getComputedStyle(k).position !== 'sticky') return;
+  var cach = k.getBoundingClientRect().top - 12;
+  if (cach > 2) { e.preventDefault(); window.scrollBy(0, Math.min(cach, e.deltaY * (e.deltaMode === 1 ? 16 : 1))); }
+}, { passive: false });
 document.addEventListener('keydown', function (e) {
   if (e.key === 'Escape' && $('#hopSoVt') && $('#hopSoVt').innerHTML) { hopSo(''); e.stopImmediatePropagation(); return; }
   if (e.target.id !== 'oTimSoVb') return;
