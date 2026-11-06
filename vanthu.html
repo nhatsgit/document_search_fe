@@ -338,6 +338,9 @@ td a.ten{font-weight:600;color:var(--chu)}td a.ten:hover{color:var(--brand-700)}
 .ds-so button{border-radius:var(--r);color:var(--chu)}
 .ds-so button.chon{border-color:var(--brand-200);background:var(--brand-50);box-shadow:inset 3px 0 0 var(--brand)}
 .qt-buoc.ket{background:var(--brand-50);border-color:var(--brand-200)}
+.qt-buoc.giu-buoc{cursor:pointer;background:var(--brand-50);border:1px solid var(--brand-200);color:var(--chu)}
+.qt-buoc.giu-buoc:hover{border-color:var(--brand);box-shadow:0 2px 8px rgba(20,90,58,.14)}
+.qt-buoc.giu-buoc .qt-kq{font-weight:600;color:var(--brand-700)}
 .qt-buoc.so-buoc{cursor:pointer;background:var(--brand-50);border:1px solid var(--brand-200);color:var(--chu)}
 .qt-buoc.so-buoc:hover{border-color:var(--brand);box-shadow:0 2px 8px rgba(20,90,58,.14)}
 .qt-buoc.so-buoc .qt-kq{font-weight:600;color:var(--brand-700)}
@@ -431,7 +434,7 @@ var VAI_TRO = { ht: ['Hệ thống · AI', 'var(--faint)'], vt: ['Văn thư · c
 var QT = {
   den: { ten: 'Quy trình văn thư đến', mo: 'AI đọc văn bản → xử lý → chuyển file chính thức → lưu Base Office → sổ văn thư',
     buoc: [['ht', 'Đọc file đến, cấp mã văn thư'], ['vt', 'Đồng bộ thông tin trên phiếu'], ['vt', 'Đổi tên, chuyển file chính thức'], ['ht', 'Lưu văn bản vào Base Office']], duyet: [] },
-  di: { ten: 'Quy trình văn thư đi', mo: 'AI đọc dự thảo → nội dung, thể thức → xin ý kiến → cấp số → soát xét → ban hành → sổ văn thư',
+  di: { ten: 'Quy trình văn thư đi', mo: 'giữ số → AI đọc dự thảo → nội dung, thể thức → xin ý kiến → cấp số → soát xét → ban hành → sổ văn thư',
     buoc: [['ht', 'Đọc dự thảo, tạo phiếu'], ['vt', 'Soát nội dung và thể thức'], ['gd', 'Xin ý kiến'], ['vt', 'Cấp số theo sổ'], ['tp', 'Soát xét; trùng số sẽ bị khoá'], ['vt', 'Ban hành, đẩy Base Office']], duyet: [2, 4] },
 };
 var BAY_GIO = Date.now();
@@ -596,6 +599,23 @@ function tomTatKet(ds) {
     var n = ds.filter(function (p) { return p.tt === t[0]; }).length; return n ? n + ' ' + t[1] : ''; }).filter(Boolean).join(' · ');
 }
 /** Bước cuối của quy trình: Sổ văn thư, bấm để sang tab Chức năng (Sổ văn thư). */
+/** Số văn thư đi đang giữ (của đơn vị đang lọc, năm đang xem): giữ trước số cho văn bản chưa có hồ sơ. */
+function soDangGiu() {
+  return GIU_SO.filter(function (g) { return g.soId && g.soId.split('|')[0] !== 'den' && (S.dv === 'Tất cả' || g.dv === S.dv) && g.nam === S.nam; });
+}
+/** Bước đầu của quy trình văn thư đi: Giữ số, bấm để xem các số giữ trong sổ. */
+function buocGiu() {
+  var n = soDangGiu().length;
+  return '<div class="qt-cap"><button class="qt-buoc giu-buoc" data-qtgiu="1" aria-label="Giữ số: ' + (n ? n + ' số đang giữ' : 'không có số giữ') + ', bấm để xem trong sổ văn thư"><span class="qt-tb"><i class="qt-cham" style="background:var(--brand)"></i><span>Giữ số</span></span><span>Văn thư · chuyên viên</span><span>Giữ trước số cho văn bản chưa có hồ sơ</span>' +
+    '<span class="qt-kq">' + (n ? n + ' số đang giữ năm ' + S.nam + ' →' : 'Không có số giữ năm ' + S.nam) + '</span></button><span class="qt-mt" aria-hidden="true">→</span></div>';
+}
+/** Mở tab Chức năng ở sổ văn thư đi, lọc sẵn trạng thái "Giữ số". */
+function moSoGiu() {
+  var g = soDangGiu()[0];
+  S.chieu = 'di'; datLaiLocSo(); S.locTT = 'giu'; S.tabSo = 'vb';
+  if (g) { S.so = g.soId; S.dvSo = g.soId.split('|')[1]; }
+  chonTab('cn');
+}
 var BUOC_SO = '<div class="qt-cap"><button class="qt-buoc so-buoc" data-qtso="1" aria-label="Sổ văn thư: bấm để mở"><span class="qt-tb"><i class="qt-cham" style="background:var(--brand)"></i><span>Sổ văn thư</span></span><span>Văn thư · chuyên viên</span><span>Cấp số, ghi sổ, soát số</span><span class="qt-kq">Bấm để mở sổ văn thư →</span></button></div>';
 function veQuyTrinh() {
   return (S.chieu === 'tat' ? ['den', 'di'] : [S.chieu]).map(function (c) {
@@ -605,7 +625,7 @@ function veQuyTrinh() {
     return '<section class="the qt"><button class="qt-dau" data-qtthu="' + c + '" aria-expanded="' + !thu + '"><span class="qt-ten"><b>' + q.ten + '</b><span>' + q.mo + '</span></span>' +
         (tong ? '<span class="qt-bao so" aria-label="' + tong + ' phiếu đang kẹt">' + tong + '</span>' : '') + '<span class="qt-mui" aria-hidden="true"></span></button>' +
       (thu ? '' : '<div class="qt-than"><div class="qt-chu">' + vai.map(function (v) { return '<span><i class="qt-cham" style="background:' + VAI_TRO[v][1] + '"></i>' + VAI_TRO[v][0] + '</span>'; }).join('') + '<span>◇ Bước duyệt</span></div>' +
-        '<div class="qt-thoi">' + BUOC[c].map(function (b, i) {
+        '<div class="qt-thoi">' + (c === 'di' ? buocGiu() : '') + BUOC[c].map(function (b, i) {
           var x = dsKet[i], n = x.length, v = VAI_TRO[q.buoc[i][0]], laDuyet = q.duyet.indexOf(i) >= 0;
           var trongHan = dsMo().filter(function (p) { return p.chieu === c && p.b === i && p.tt === 'dung'; }).length;
           var than = '<span class="qt-tb"><i class="qt-cham" style="background:' + v[1] + '"></i><span>' + (laDuyet ? '◇ ' : '') + esc(b[0]) + '</span></span>' +
@@ -1333,7 +1353,7 @@ function dinhTuyen() {
 window.addEventListener('hashchange', dinhTuyen);
 
 document.addEventListener('click', function (e) {
-  var t = e.target.closest('a[href^="#/phieu/"],[data-qtthu],[data-qtmo],[data-dongngan],[data-dv],[data-chieu],[data-kpi],[data-tab],[data-cn],[data-qtso],[data-locphieu],[data-mo],[data-trang],[data-so],[data-tabso],[data-loctt],[data-trangso],[data-cotrang],[data-tabct],[data-nhac],[data-chep],[data-chaylai],[data-fchieu],#xoaLocSo,#nutFile,#guiForm,#huyForm,#taoTiep');
+  var t = e.target.closest('a[href^="#/phieu/"],[data-qtthu],[data-qtmo],[data-dongngan],[data-dv],[data-chieu],[data-kpi],[data-tab],[data-cn],[data-qtso],[data-qtgiu],[data-locphieu],[data-mo],[data-trang],[data-so],[data-tabso],[data-loctt],[data-trangso],[data-cotrang],[data-tabct],[data-nhac],[data-chep],[data-chaylai],[data-fchieu],#xoaLocSo,#nutFile,#guiForm,#huyForm,#taoTiep');
   if (e.target.id === 'thuLai') { napDuLieu(); return; }
   if (e.target.closest && e.target.closest('#taiLaiSo')) { taiLaiSo(); return; }
   if (e.target.closest('.hd-lk')) return;
@@ -1348,6 +1368,7 @@ document.addEventListener('click', function (e) {
   else if (d.kpi) { chonTab(d.kpi.split(':')[0]); }
   else if (d.cn) { S.cn = d.cn; chonTab('cn'); }
   else if (d.qtso) { chonTab('cn'); }
+  else if (d.qtgiu) { moSoGiu(); }
   else if (d.tab) { chonTab(d.tab); }
   else if (d.locphieu) { S.locPhieu = d.locphieu; S.trang = 1; veNoiTab(); }
   else if (d.mo) { location.hash = '#/phieu/' + d.mo; }
