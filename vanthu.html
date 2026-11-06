@@ -13,8 +13,8 @@
 <script>(function () { var t = 'light'; try { t = localStorage.getItem('tclt_theme') || 'light'; } catch (e) {} document.documentElement.setAttribute('data-theme', t); })();</script>
 <link rel="preconnect" href="https://document-search-api-319700450833.us-central1.run.app" crossorigin>
 <link rel="preload" href="https://document-search-api-319700450833.us-central1.run.app/api/vanthu" as="fetch" crossorigin>
-<link rel="stylesheet" href="crck.css?v=6">
-<link rel="stylesheet" href="lich.css?v=14">
+<link rel="stylesheet" href="crck.css?v=8">
+<link rel="stylesheet" href="lich.css?v=16">
 <style>
 /* Tên biến riêng của trang, trỏ sang bộ màu CRCK trong crck.css */
 :root{
@@ -162,6 +162,12 @@ td.lech{background:var(--bad-bg);color:var(--bad-fg);font-weight:600}
 /* ---------- điện thoại ---------- */
 @media (max-width:720px){
   .form{grid-template-columns:1fr}
+  .hang>.seg{width:100%;flex-wrap:nowrap;overflow-x:auto;margin-left:0!important;scrollbar-width:none}
+  .hang>.seg::-webkit-scrollbar{display:none}
+  .hang>.seg button{flex:1 0 auto;padding:0 12px}
+  .tabs,.ck-tabs{overflow-x:auto;scrollbar-width:none}
+  .noi{padding:12px}
+  .the-dem{padding:12px 14px}
   .sla-hang{flex-wrap:wrap;gap:4px}.sla-hang>span:first-child{width:100%}.sla-hang>span:last-child{width:auto}
   .so-bo>aside{max-width:none}
   .an-dt{display:none}
@@ -397,6 +403,29 @@ dl.tt{font-size:14px;gap:7px 12px;grid-template-columns:132px minmax(0,1fr)}
   .ct-nut>*{width:44px;height:44px}
   .nut{min-height:44px}.seg button{min-height:44px}
   .ck-tabs button{min-height:44px}
+}
+@media (max-width:720px){
+  /* Sổ văn thư trên điện thoại: mỗi dòng là một thẻ (trích yếu trên cùng, số, ngày, đơn vị bên dưới), không phải cuộn ngang */
+  .sv-dinh{position:static;box-shadow:none}
+  #dsSoVb .bang,.bang-cuon{max-height:none;overflow:visible;border:0;border-radius:0}
+  table.sv-bang,table.sv-bang tbody{display:block;table-layout:auto;min-width:0!important;width:100%!important}
+  table.sv-bang thead{display:none}
+  table.sv-bang tbody tr{display:flex;flex-wrap:wrap;align-items:baseline;gap:3px 12px;padding:11px 4px;border-top:1px solid var(--vien-2)}
+  table.sv-bang tbody td{display:block;flex:0 0 auto;max-width:100%;padding:0;border:0;font-size:13px;color:var(--chu-2)}
+  table.sv-bang tbody td:empty{display:none}
+  table.sv-bang tbody td:has(.ten){order:-1;flex:1 1 100%;font-size:14.5px;color:var(--chu)}
+  table.sv-bang tbody td:has(.hd-lk){margin-left:auto}
+  table.sv-bang td:first-child,table.sv-bang td:last-child{padding:0}
+  table.sv-bang tbody td:has(.hd-lk){align-self:center}
+  /* Phiếu: tờ giấy gọn hơn, nhãn trên giá trị dưới để giá trị dài không bị bóp hẹp */
+  .to-the{border-left-width:3px}
+  .to-nhan{padding:10px 10px 0 12px}
+  .to-giay{margin:8px 8px 10px;padding:12px}
+  dl.tt{grid-template-columns:minmax(0,1fr);gap:0}
+  dl.tt dt{margin-top:9px;font-size:12px}
+  dl.tt dd{font-size:14px}
+  .dau-phieu h1{font-size:19px}
+  .ct-dau{padding:12px 14px}
 }
 </style>
 </head>
@@ -668,7 +697,7 @@ var NUT_TAO = '<a class="ck-btn chinh" href="https://service.base.vn" target="_b
 function datDau(ten, hinh, moTa, gon, nutRieng) {
   var NUT = nutRieng != null ? nutRieng : NUT_TAO;
   $('#phTrang').innerHTML = gon ? '<div class="ck-ph gon"><div class="ck-ph-chu"><h1>' + ten + '</h1></div><div class="ck-ph-nut">' + NUT + '</div></div>'
-    : '<div class="ck-ph"><div class="ck-ph-ico" aria-hidden="true">' + hinhVt(hinh) + '</div><div class="ck-ph-chu"><h1>' + ten + '</h1><p>' + moTa + '<br><span id="capNhat" style="font-size:13px">' + esc(CAP_NHAT) + '</span></p></div><div class="ck-ph-nut">' + NUT + '</div></div>';
+    : '<div class="ck-ph"><div class="ck-ph-ico" aria-hidden="true">' + hinhVt(hinh) + '</div><div class="ck-ph-chu"><h1>' + ten + '</h1><p><span class="an-dt">' + moTa + '<br></span><span id="capNhat" style="font-size:13px">' + esc(CAP_NHAT) + '</span></p></div><div class="ck-ph-nut">' + NUT + '</div></div>';
 }
 /** Vẽ lại trang đang mở sau khi đổi đơn vị, Đến/Đi. */
 function veManLoc() { veTongQuan(); }

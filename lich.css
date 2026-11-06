@@ -171,6 +171,20 @@ dl.lc-ct dt{color:var(--muted)}dl.lc-ct dd{margin:0;overflow-wrap:anywhere;white
 .lc-link{width:100%;margin-top:8px;padding:8px 10px;border:1px solid var(--mau-line);border-radius:9px;background:var(--soft);color:var(--mau-ink);font-size:13px}
 .lc-trong{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
 .lc-toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:90;max-width:min(560px,92vw);padding:11px 18px;border-radius:12px;background:var(--mau-ink);color:var(--mau-card);box-shadow:var(--sh-2);font-size:14.5px}
+@media (max-width:767px){
+  /* Điện thoại: lịch lên trước, ghi chú dữ liệu mẫu xuống cuối, dòng loại lịch cuộn ngang một hàng */
+  #lcGoc{display:flex;flex-direction:column}
+  #lcGoc>*{order:2}
+  #lcGoc>.lc-thanh{order:0}#lcGoc>.lc-hang2{order:1}#lcGoc>.lc-demo{margin:10px 0 0}
+  #lcGoc>.lc-vt{order:3}
+  #lcGoc>.lc-bo{order:2}
+  #lcGoc>.lc-demo{order:5}
+  .lc-xem{scrollbar-width:none}.lc-xem::-webkit-scrollbar{display:none}
+  .lc-hang2 .lc-loai{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+  .lc-loai::-webkit-scrollbar{display:none}
+  .lc-kind{flex:none}
+  .lc-cu{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;width:100%}
+}
 @media (max-width:900px){
   .lc-bo{grid-template-columns:1fr}
   .lc-ben{display:none}

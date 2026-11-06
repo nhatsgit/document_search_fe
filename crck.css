@@ -140,3 +140,24 @@ button.ck-o:hover { background: var(--row-hover); }
 .ck-b.sau { color: var(--muted); }
 .ck-b.sau i { box-shadow: inset 0 0 0 1.5px var(--border-strong); color: var(--muted); }
 @media (max-width: 720px) { .ck-b { width: 100%; border-radius: 14px; min-height: 44px; } }
+
+/* Điện thoại: đầu trang gọn (biểu tượng cạnh tên), dải số liệu hai cột, nút chính rộng hết hàng */
+@media (max-width: 720px) {
+  .ck-ph { gap: 8px 12px; margin-bottom: 12px; }
+  .ck-ph-ico { width: 42px; height: 42px; border-radius: 12px; }
+  .ck-ph-ico svg { width: 22px; height: 22px; }
+  .ck-ph-chu { flex: 1 1 0; }
+  .ck-ph h1 { font-size: 21px; }
+  .ck-ph p { font-size: 13px; }
+  .ck-ph-nut { width: 100%; margin-left: 0; }
+  .ck-ph-nut > .ck-btn { flex: 1 1 auto; justify-content: center; min-height: 44px; }
+  .ck-dai { display: flex; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none; }
+  .ck-dai::-webkit-scrollbar { display: none; }
+  .ck-o { flex: 0 0 148px; scroll-snap-align: start; }
+  .ck-o { padding: 10px 12px; gap: 8px; }
+  .ck-o i { display: none; }
+  .ck-o .nh { font-size: 13px; }
+  .ck-o .gt { font-size: 19px; }
+  .ck-o .ph { font-size: 12px; line-height: 1.35; }
+}
+@media (max-width: 360px) { .ck-ph h1 { font-size: 19px; } .ck-noi { padding-left: 12px; padding-right: 12px; } }
