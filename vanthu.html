@@ -1325,14 +1325,14 @@ var TEN_CTY = { CRCK: 'Công ty CP Cao su Chư Sê - Kampong Thom', CRCK2: 'Côn
 function toPhieu(p) {
   var tt = [['Loại văn thư', p.loai[1]], [p.chieu === 'den' ? 'Mã văn thư đến' : 'Số ký hiệu', maHien(p)], p.chieu === 'den' ? ['Số gốc', p.soGoc] : null,
     ['Ngày văn bản', p.ngayVb ? ngay(p.ngayVb) : ''], [p.chieu === 'den' ? 'Đơn vị ban hành' : 'Đơn vị soạn', p.coQuan],
-    ['Người soạn', p.nguoiSoan], ['Người ký', p.nguoiKy], ['Trích yếu', p.trich], ['Đơn vị nhận', p.donViNhan], ['Đơn vị thực hiện', p.dvThucHien], ['Đơn vị phối hợp', p.dvPhoiHop], ['Đơn vị liên quan', p.dvLienQuan], ['Chủ trì', p.chuTri], ['Người theo dõi', p.nguoiTheoDoi], ['Phân loại', p.phanLoai], ['Thời hạn bảo quản', p.thoiHan], ['Số trang', p.soTrang]]
+    ['Người soạn', p.nguoiSoan], ['Người ký', p.nguoiKy], ['Trích yếu', p.trich], p.chieu === 'di' ? ['Đơn vị nhận', p.donViNhan || '—'] : null, p.chieu === 'den' ? ['Đơn vị chủ trì', p.dvThucHien || '—'] : ['Đơn vị thực hiện', p.dvThucHien], ['Đơn vị phối hợp', p.dvPhoiHop], ['Đơn vị liên quan', p.dvLienQuan], ['Người chủ trì', p.chuTri], ['Người theo dõi', p.nguoiTheoDoi], ['Phân loại', p.phanLoai], ['Thời hạn bảo quản', p.thoiHan], ['Số trang', p.soTrang]]
     .filter(function (x) { return x && x[1] !== '' && x[1] != null; });
   var coLogo = p.dv === 'CRCK' || p.dv === 'CRCK2';
   return '<section class="the to-the"><div class="to-nhan"><span>' + (p.chieu === 'den' ? 'Văn thư đến' : 'Văn thư đi') + '</span>' + nutPhieu(p) + '</div><div class="to-giay">' +
       '<div class="to-dau">' + (coLogo ? '<img src="img/logo-vrg.png" alt="VRG Rubber">' : '') + '<b>' + esc(TEN_CTY[p.dv] || p.dv) + '</b>' +
       '<div class="to-so"><span>Số: <b>' + esc(maHien(p)) + '</b></span><span>' + (p.chieu === 'den' ? 'Ngày nhận' : 'Ngày ban hành') + ': <b>' + (p.ngay ? ngay(p.ngay) : '—') + '</b></span></div></div>' +
       '<h2 class="to-ten">' + (p.chieu === 'den' ? 'Phiếu văn thư đến' : 'Phiếu văn thư đi') + '</h2>' +
-      '<dl class="tt">' + tt.map(function (x) { return '<dt>' + x[0] + '</dt><dd><span>' + esc(x[1]) + '</span>' + (x[1] === 'Chưa cấp' ? '' : nutChep(x[1], x[0])) + '</dd>'; }).join('') + '</dl>' +
+      '<dl class="tt">' + tt.map(function (x) { return '<dt>' + x[0] + '</dt><dd><span>' + esc(x[1]) + '</span>' + (x[1] === 'Chưa cấp' || x[1] === '—' ? '' : nutChep(x[1], x[0])) + '</dd>'; }).join('') + '</dl>' +
       (p.tomTat ? '<div class="to-tom"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px"><b>Tóm tắt</b>' + nutChep(p.tomTat, 'Tóm tắt') + '</div><div style="white-space:pre-line">' + esc(p.tomTat) + '</div></div>' : '') +
     '</div></section>';
 }
