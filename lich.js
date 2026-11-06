@@ -45,7 +45,8 @@ var S = { xem: doc('lich_xem', dienThoai() ? 'ngay' : 'tuan'), moc: homNay(), an
 try { S.an = JSON.parse(doc('lich_an', '{}')) || {}; } catch (e) {}
 try { S.vtAn = JSON.parse(doc('lich_vt_an', '{}')) || {}; } catch (e) {}
 try { S.toiVt = JSON.parse(doc('lich_vt_toi_ds', '[]')) || []; } catch (e) {}
-S.toi = doc('lich_vt_toi', '') === '1'; S.vtMo = doc('lich_vt_mo', '1') !== '0';
+S.toi = doc('lich_vt_toi', '') === '1'; S.vtMo = doc('lich_vt_mo', '0') === '1'; S.vtTim = '';
+try { S.vtNhomMo = JSON.parse(doc('lich_vt_nhom', '{"1":1}')) || {}; } catch (e) { S.vtNhomMo = { 1: 1 }; }
 if (!XEM.some(function (x) { return x[0] === S.xem; })) S.xem = 'tuan';
 
 /* ---------- âm lịch và ngày lễ (thuật toán Hồ Ngọc Đức, múi giờ +7) ---------- */
@@ -432,20 +433,61 @@ function veSapToi() {
     return '<button type="button" class="lc-st" data-id="' + esc(x.id) + '" style="--c:' + mauSk(x) + '"><b>' + esc(x.tieuDe) + '</b><small>' + (k === nay ? 'Hôm nay' : nhanNgay(phanNgay(k))) + ' · ' + (x.caNgay ? 'cả ngày' : x.batDau.slice(11)) + '</small></button>'; }).join('') : '<p class="lc-phu">Không có lịch sắp tới</p>');
 }
 /** Hàng chọn người: bấm một hay nhiều lãnh đạo để chỉ xem lịch của họ. */
-/** Bảng "Lịch đang xem": tick vai trò nào thì hiện lịch của vai trò đó. */
+/** Bảng "Lịch đang xem": một dòng tóm tắt + nút xem nhanh; bấm Tuỳ chọn để chọn từng vai trò. */
 function veVt() {
   var el = $('#lcVt'); if (!el) return;
-  var ds = dsVt(), muc = function (id, ten, mau, on, dam, them) {
-    return '<label class="lc-vt-muc' + (dam ? ' dam' : '') + '"><input type="checkbox" data-vtdoi="' + esc(id) + '"' + (on ? ' checked' : '') + '><i class="lc-o-vuong" style="--c:' + mau + '"></i><span>' + esc(ten) + (vtTheoId(id) && nguoiGon(vtTheoId(id)) ? '<small>' + esc(nguoiGon(vtTheoId(id))) + '</small>' : '') + '</span></label>' + (them || '');
+  var ds = dsVt(), tt = trangThaiVt(), hien = ds.filter(vtHien), chung = !S.vtAn.chung, dem = hien.length + (chung ? 1 : 0);
+  var so = function (c) { return ds.filter(function (v) { return capVt(v) === c; }).length; };
+  var pre = function (k, nhan, n) { return '<button type="button" class="lc-pre' + (tt === k ? ' chon' : '') + '" data-vtpre="' + k + '" aria-pressed="' + (tt === k) + '">' + nhan + (n != null ? '<b>' + n + '</b>' : '') + '</button>'; };
+  var ten = function (a) { var t = a.slice(0, 4).map(function (v) { return v.ten; }).join(', '); return t + (a.length > 4 ? ' … (+' + (a.length - 4) + ')' : ''); };
+  var luu = chung ? ', gồm Lịch chung' : ', không gồm Lịch chung';
+  var tomTat = tt === 'tat' ? 'Đang xem tất cả ' + ds.length + ' vai trò' + luu
+    : tt === '1' ? 'Chỉ nhóm Lãnh đạo (' + hien.length + ' vai trò)' + luu
+    : tt === '2' ? 'Chỉ nhóm Nhân viên (' + hien.length + ' vai trò)' + luu
+    : tt === 'toi' ? 'Chỉ lịch của tôi: ' + ten(ds.filter(function (v) { return S.toiVt.indexOf(v.id) >= 0; })) + luu
+    : ds.length - hien.length > 0 && ds.length - hien.length <= 6 && hien.length > ds.length - hien.length ? 'Đang xem tất cả vai trò, trừ ' + ten(ds.filter(function (v) { return !vtHien(v); })) + luu
+    : 'Đang xem ' + hien.length + '/' + ds.length + ' vai trò' + (hien.length ? ': ' + ten(hien) : '') + luu;
+  el.innerHTML = '<div class="lc-vt-dau"><b class="lc-vt-ten">Lịch đang xem</b><span class="lc-dem">' + dem + '</span>' +
+    '<div class="lc-pres" role="group" aria-label="Xem nhanh">' + pre('tat', 'Tất cả', ds.length) + pre('1', 'Lãnh đạo', so(1)) + pre('2', 'Nhân viên', so(2)) + pre('toi', 'Của tôi') + '</div>' +
+    '<span class="lc-vt-nut"><button type="button" class="lc-nut-chu" id="lcVtGap" aria-expanded="' + S.vtMo + '">Tuỳ chọn <i class="lc-mui' + (S.vtMo ? ' mo' : '') + '">▾</i></button><button type="button" class="lc-nut-chu" id="lcQlVt">Quản lý vai trò</button></span></div>' +
+    '<p class="lc-vt-tt">' + esc(tomTat) + '</p>' +
+    (S.vtMo ? '<div class="lc-vt-mo"><input class="lc-vt-tim" id="lcVtTim" type="search" placeholder="Tìm vai trò hoặc tên người…" autocomplete="off" value="' + esc(S.vtTim) + '"><div id="lcVtDs">' + htmlDsVt() + '</div></div>' : '');
+}
+/** Trạng thái xem hiện tại so với các nút xem nhanh: tat, 1 (Lãnh đạo), 2 (Nhân viên), toi (Của tôi), khac. Lịch chung không tính. */
+function trangThaiVt() {
+  var ds = dsVt(), hien = ds.filter(vtHien), n1 = ds.filter(function (v) { return capVt(v) === 1; }).length, n2 = ds.filter(function (v) { return capVt(v) === 2; }).length;
+  if (S.toi && S.toiVt.length && ds.every(function (v) { return S.vtAn[v.id]; })) return 'toi';
+  if (hien.length === ds.length) return 'tat';
+  if (hien.length && hien.length === n1 && hien.every(function (v) { return capVt(v) === 1; })) return '1';
+  if (hien.length && hien.length === n2 && hien.every(function (v) { return capVt(v) === 2; })) return '2';
+  return 'khac';
+}
+/** Xem nhanh: tất cả, chỉ lãnh đạo, chỉ nhân viên, hoặc chỉ các vai trò của tôi. Lịch chung luôn bật. */
+function datXemVt(kieu) {
+  if (kieu === 'toi' && !S.toiVt.length) { S.choToi = true; moVtToi(); return; }
+  S.vtAn = {}; S.toi = false;
+  if (kieu === '1' || kieu === '2') S.vaiTro.forEach(function (v) { if (capVt(v) !== Number(kieu)) S.vtAn[v.id] = 1; });
+  if (kieu === 'toi') { S.vaiTro.forEach(function (v) { S.vtAn[v.id] = 1; }); S.toi = true; }
+  luuVtTt(); ve();
+}
+/** Danh sách chọn chi tiết: mỗi cấp một khối gập, mỗi vai trò một chip bật tắt (tên người hiện khi rê chuột). */
+function htmlDsVt() {
+  var tim = boDau(S.vtTim || ''), ds = dsVt();
+  var muc = function (id, ten, mau, on, goiY) {
+    return '<label class="lc-vc' + (on ? ' on' : '') + '" title="' + esc(goiY || ten) + '"><input type="checkbox" data-vtdoi="' + esc(id) + '"' + (on ? ' checked' : '') + '><i class="lc-o-vuong nho" style="--c:' + mau + '"></i><span>' + esc(ten) + '</span></label>';
   };
-  var dem = ds.filter(function (v) { return !S.vtAn[v.id]; }).length + (S.vtAn.chung ? 0 : 1) + (S.toi ? 1 : 0);
-  el.innerHTML = '<div class="lc-vt-dau"><button type="button" class="lc-vt-gap" id="lcVtGap" aria-expanded="' + S.vtMo + '"><b>Lịch đang xem</b><span class="lc-dem">' + dem + '</span><i class="lc-mui' + (S.vtMo ? ' mo' : '') + '">▾</i></button>' +
-    '<span class="lc-vt-nut"><button type="button" class="lc-nut-chu" data-vttat="1">Chọn tất cả</button><button type="button" class="lc-nut-chu" data-vttat="0">Bỏ chọn</button><button type="button" class="lc-nut-chu" id="lcQlVt">Quản lý vai trò</button></span></div>' +
-    (S.vtMo ? '<div class="lc-vt-ds">' + muc('toi', 'Lịch của tôi', MAU_CHUNG, S.toi, true, '<button type="button" class="lc-nut-chu nho" id="lcSuaToi" title="Chọn các vai trò của tôi">chọn vai trò</button>') +
-      [1, 2].map(function (c) {
-        var g = ds.filter(function (v) { return capVt(v) === c; });
-        return g.length ? '<div class="lc-vt-nhom"><b>' + TEN_CAP[c] + '</b><span><button type="button" class="lc-nut-chu nho" data-vtnhom="' + c + ':on">chọn nhóm</button><button type="button" class="lc-nut-chu nho" data-vtnhom="' + c + ':off">bỏ nhóm</button></span></div>' + g.map(function (v) { return muc(v.id, v.ten, mauVt(v), !S.vtAn[v.id]); }).join('') : '';
-      }).join('') + muc('chung', 'Lịch chung toàn công ty', MAU_CHUNG, !S.vtAn.chung, true) + '</div>' : '');
+  var khop = function (v) { return !tim || boDau(v.ten + ' ' + tenNguoi(v).join(' ')).indexOf(tim) >= 0; };
+  var nhom = [1, 2].map(function (c) {
+    var g = ds.filter(function (v) { return capVt(v) === c; }), hienNhom = g.filter(khop);
+    if (!g.length || (tim && !hienNhom.length)) return '';
+    var bat = g.filter(vtHien).length, mo = tim ? true : !!S.vtNhomMo[c];
+    return '<div class="lc-vg"><div class="lc-vg-dau"><button type="button" class="lc-vg-gap" data-vtgmo="' + c + '" aria-expanded="' + mo + '"><i class="lc-mui' + (mo ? ' mo' : '') + '">▾</i><b>' + TEN_CAP[c] + '</b><span class="lc-dem nho">' + bat + '/' + g.length + '</span></button>' +
+      '<span><button type="button" class="lc-nut-chu nho" data-vtnhom="' + c + ':on">chọn hết</button><button type="button" class="lc-nut-chu nho" data-vtnhom="' + c + ':off">bỏ hết</button></span></div>' +
+      (mo ? '<div class="lc-vg-ds">' + hienNhom.map(function (v) { return muc(v.id, v.ten, mauVt(v), !S.vtAn[v.id], nguoiGon(v) ? v.ten + ' · ' + tenNguoi(v).join(', ') : v.ten); }).join('') + '</div>' : '') + '</div>';
+  }).join('');
+  var chung = tim ? '' : '<div class="lc-vg"><div class="lc-vg-dau"><b>Chung</b></div><div class="lc-vg-ds">' + muc('toi', 'Lịch của tôi', MAU_CHUNG, S.toi, 'Lịch của các vai trò tôi chọn') + muc('chung', 'Lịch chung toàn công ty', MAU_CHUNG, !S.vtAn.chung) +
+    '<button type="button" class="lc-nut-chu nho" id="lcSuaToi">chọn vai trò của tôi</button></div></div>';
+  return chung + (nhom || (tim ? '<p class="lc-phu">Không có vai trò hoặc người nào khớp.</p>' : ''));
 }
 function doiVt(id, on) {
   if (id === 'toi') { if (on && !S.toiVt.length) { moVtToi(); return; } S.toi = on; }
@@ -644,7 +686,7 @@ function duLieuGui(x) {
 
 /* ---------- hộp thoại ---------- */
 var veTruoc = null;
-function dongHop() { $('#lcHop').innerHTML = ''; document.body.style.overflow = ''; if (veTruoc && veTruoc.isConnected) veTruoc.focus(); veTruoc = null; }
+function dongHop() { S.choToi = false; $('#lcHop').innerHTML = ''; document.body.style.overflow = ''; if (veTruoc && veTruoc.isConnected) veTruoc.focus(); veTruoc = null; }
 function moHop(tieuDe, than, chan) {
   if (!$('#lcHop').innerHTML) veTruoc = document.activeElement;
   $('#lcHop').innerHTML = '<div class="lc-nen" data-dong="1"><div class="lc-hop" role="dialog" aria-modal="true" aria-labelledby="hopTen"><div class="lc-hop-dau"><h3 id="hopTen">' + esc(tieuDe) + '</h3><button type="button" class="ck-btn vuong" data-dongnut="1" aria-label="Đóng">×</button></div><div class="lc-hop-than">' + than + '</div><div class="lc-hop-chan">' + chan + '</div></div></div>';
@@ -1108,11 +1150,13 @@ document.addEventListener('click', function (e) {
   if ((g = t.closest('[data-vtsua]'))) { moQlVt(g.dataset.vtsua); return; }
   if ((g = t.closest('[data-vtxoa]'))) { xoaVt(g.dataset.vtxoa, g); return; }
   if (t.closest('[data-vtmoi]')) { moQlVt(); return; }
+  if ((g = t.closest('[data-vtpre]'))) { datXemVt(g.dataset.vtpre); return; }
+  if ((g = t.closest('[data-vtgmo]'))) { var c = g.dataset.vtgmo; S.vtNhomMo[c] = S.vtNhomMo[c] ? 0 : 1; ghi('lich_vt_nhom', JSON.stringify(S.vtNhomMo)); veVt(); return; }
   if (t.closest('#lcVtGap')) { S.vtMo = !S.vtMo; ghi('lich_vt_mo', S.vtMo ? '1' : '0'); veVt(); return; }
   if ((g = t.closest('[data-vtnhom]'))) { var pn = g.dataset.vtnhom.split(':'); chonNhomCap(Number(pn[0]), pn[1] === 'on'); return; }
   if ((g = t.closest('[data-vttat]'))) { chonTatCaVt(g.dataset.vttat === '1'); return; }
   if (t.closest('#lcSuaToi')) { e.preventDefault(); moVtToi(); return; }
-  if (t.id === 'luuToi') { S.toiVt = Array.from(document.querySelectorAll('#toiBox input:checked')).map(function (i) { return i.value; }); S.toi = S.toiVt.length > 0; luuVtTt(); dongHop(); ve(); return; }
+  if (t.id === 'luuToi') { var tuPre = S.choToi; S.toiVt = Array.from(document.querySelectorAll('#toiBox input:checked')).map(function (i) { return i.value; }); S.toi = S.toiVt.length > 0; luuVtTt(); dongHop(); if (tuPre && S.toi) datXemVt('toi'); else ve(); return; }
   if (t.id === 'tgTim') { chayTimGio(); return; }
   if (t.closest('#lcXuat')) { moXuat(); return; }
   if ((g = t.closest('[data-xcap]'))) { xCap(g.dataset.xcap); return; }
@@ -1182,6 +1226,7 @@ document.addEventListener('change', function (e) {
 document.addEventListener('input', function (e) {
   if (e.target.id === 'lcTim') { S.q = e.target.value.trim(); ve(); return; }
   if (e.target.id === 'xQ') { xCapNhat(); return; }
+  if (e.target.id === 'lcVtTim') { S.vtTim = e.target.value.trim(); var dsEl = $('#lcVtDs'); if (dsEl) dsEl.innerHTML = htmlDsVt(); return; }
   if (e.target.id === 'fVtTim') { var tk = boDau(e.target.value); document.querySelectorAll('#fVtBox .lc-vt-muc').forEach(function (l) { l.style.display = !tk || l.dataset.ten.indexOf(tk) >= 0 ? '' : 'none'; }); return; }
   if ($('#fLuu') && /^(fDiaDiem|fThanhPhan)$/.test(e.target.id)) kiemTrung($('#fLuu').dataset.luu);
 });

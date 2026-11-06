@@ -313,3 +313,30 @@ dl.lc-ct dt{color:var(--muted)}dl.lc-ct dd{margin:0;overflow-wrap:anywhere;white
 .lc-vt-muc span small{margin-left:6px;font-size:12px;font-weight:400;color:var(--muted)}
 .lc-vt-muc span small::before{content:"· "}
 .lc-dau h4 small,.lc-bang thead th small{white-space:normal}
+
+/* ===== Lịch đang xem gọn: nút xem nhanh, tóm tắt, chip bật tắt ===== */
+.lc-vt-ten{font-size:15px}
+.lc-pres{display:inline-flex;overflow:hidden;border:1px solid var(--mau-line);border-radius:10px}
+.lc-pre{display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:0 14px;border:0;border-left:1px solid var(--vach);background:none;color:var(--ink-phu);font-size:14px;font-weight:500;cursor:pointer}
+.lc-pre:first-child{border-left:0}
+.lc-pre:hover{background:var(--soft)}
+.lc-pre b{font-size:11.5px;font-weight:700;color:var(--muted)}
+.lc-pre.chon{background:var(--brand-100);color:var(--brand-700);font-weight:600}
+.lc-pre.chon b{color:var(--brand-700)}
+.lc-vt-tt{margin:6px 0 0;font-size:13px;color:var(--muted)}
+.lc-vt-mo{margin-top:10px;padding-top:10px;border-top:1px solid var(--vach)}
+.lc-vt-tim{width:100%;max-width:360px;min-height:36px;margin-bottom:6px;padding:6px 12px;border:1px solid var(--mau-line);border-radius:9px;background:var(--mau-card);color:var(--mau-ink);font-size:14px}
+.lc-vg{margin-top:6px}
+.lc-vg-dau{display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px;font-size:13px;color:var(--muted)}
+.lc-vg-dau b{color:var(--mau-ink);font-size:14px}
+.lc-vg-dau span{display:inline-flex;gap:10px}
+.lc-vg-gap{display:inline-flex;align-items:center;gap:6px;padding:4px 0;border:0;background:none;color:inherit;cursor:pointer}
+.lc-dem.nho{min-width:0;font-size:11.5px}
+.lc-vg-ds{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;max-height:220px;margin:6px 0 4px;overflow:auto}
+.lc-vc{position:relative;display:inline-flex;align-items:center;gap:7px;min-height:32px;padding:3px 13px 3px 9px;border:1px solid var(--mau-line);border-radius:18px;background:var(--mau-card);color:var(--muted);font-size:13.5px;cursor:pointer}
+.lc-vc input{position:absolute;opacity:0;pointer-events:none}
+.lc-vc .lc-o-vuong{opacity:.45}
+.lc-vc:hover{background:var(--soft)}
+.lc-vc.on{border-color:var(--brand-200);background:var(--brand-50);color:var(--mau-ink);font-weight:500}
+.lc-vc.on .lc-o-vuong{opacity:1}
+.lc-vc:has(input:focus-visible){box-shadow:0 0 0 3px var(--brand-100)}
