@@ -344,3 +344,7 @@ dl.lc-ct dt{color:var(--muted)}dl.lc-ct dd{margin:0;overflow-wrap:anywhere;white
 /* nút xem nhanh có tên dài hơn khi chia ba cấp */
 .lc-pres{flex-wrap:wrap}
 .lc-xcap button{padding:0 6px;font-size:13px}
+
+.lc-nl{grid-column:1/-1;margin-top:10px;padding:8px 10px;border:1px solid var(--vien,#d9dee7);border-radius:8px;font-size:13px;max-height:140px;overflow:auto}
+.lc-nl b{display:block;margin-bottom:4px}
+.lc-nl div{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:2px 0}
