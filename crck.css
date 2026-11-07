@@ -151,9 +151,7 @@ button.ck-o:hover { background: var(--row-hover); }
   .ck-ph p { font-size: 13px; }
   .ck-ph-nut { width: 100%; margin-left: 0; }
   .ck-ph-nut > .ck-btn { flex: 1 1 auto; justify-content: center; min-height: 44px; }
-  .ck-dai { display: flex; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none; }
-  .ck-dai::-webkit-scrollbar { display: none; }
-  .ck-o { flex: 0 0 148px; scroll-snap-align: start; }
+  .ck-dai { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .ck-o { padding: 10px 12px; gap: 8px; }
   .ck-o i { display: none; }
   .ck-o .nh { font-size: 13px; }
