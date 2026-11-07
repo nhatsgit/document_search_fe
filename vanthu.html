@@ -1548,6 +1548,37 @@ document.addEventListener('change', function (e) {
   else if (t.id === 'mbSo') { S.so = t.value; S.dvSo = t.value.split('|')[1]; S.trangSo = 1; datLaiLocSo(); veSo(); }
 });
 
+/* Các hàng nút cuộn ngang (tab, Đến/Đi, đơn vị, dạng xem lịch): bấm xong vẽ lại thì giữ chỗ cuộn cũ rồi trượt mượt để nút đang chọn nằm giữa hàng */
+var CUON_SEL = '.ck-tabs,.tabs,.seg,.hang,.lc-xem,.lc-seg';
+function cuonChon(luu) {
+  document.querySelectorAll(CUON_SEL).forEach(function (c, i) {
+    if (c.scrollWidth <= c.clientWidth + 1) return;
+    if (luu && luu[i] != null) { c.style.scrollBehavior = 'auto'; c.scrollLeft = luu[i]; }
+    var b = c.querySelector('.chon,[aria-selected="true"]'); if (!b) return;
+    var cr = c.getBoundingClientRect(), br = b.getBoundingClientRect();
+    var dich = Math.max(0, c.scrollLeft + (br.left - cr.left) - (cr.width - br.width) / 2);
+    truot(c, dich);
+  });
+}
+/** Trượt ngang mượt tới vị trí đích (tự tính từng bước, không phụ thuộc cuộn mượt của trình duyệt). */
+function truot(c, dich) {
+  var tu = c.scrollLeft, t0 = Date.now(), T = 280;
+  if (Math.abs(dich - tu) < 2) return;
+  if (c._truot) clearInterval(c._truot);
+  c.style.scrollBehavior = 'auto';
+  c._truot = setInterval(function () {
+    var k = Math.min(1, (Date.now() - t0) / T), e = 1 - Math.pow(1 - k, 3);
+    c.scrollLeft = tu + (dich - tu) * e;
+    if (k >= 1) { clearInterval(c._truot); c._truot = null; }
+  }, 16);
+}
+document.addEventListener('click', function () {
+  var luu = Array.prototype.map.call(document.querySelectorAll(CUON_SEL), function (c) { return c.scrollLeft; });
+  setTimeout(function () { cuonChon(luu); }, 40);
+}, true);
+window.addEventListener('hashchange', function () { setTimeout(function () { cuonChon(null); }, 150); });
+setTimeout(function () { cuonChon(null); }, 1200);
+
 napDuLieu();
 </script>
 </body>
