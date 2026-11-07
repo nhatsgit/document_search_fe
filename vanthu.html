@@ -1572,7 +1572,20 @@ function truot(c, dich) {
     if (k >= 1) { clearInterval(c._truot); c._truot = null; }
   }, 16);
 }
-document.addEventListener('click', function () {
+/** Đổi tab / chức năng: trang tự cuộn dọc để hàng nút tab nằm sát đầu màn hình, nội dung mới hiện ngay bên dưới. */
+function veDauTab() {
+  var t = document.querySelector('.ck-tabs'); if (!t) return;
+  var dich = Math.max(0, Math.round(t.getBoundingClientRect().top + window.scrollY - 8)), tu = window.scrollY, t0 = Date.now(), T = 300;
+  if (Math.abs(dich - tu) < 3) return;
+  if (window._truotDoc) clearInterval(window._truotDoc);
+  window._truotDoc = setInterval(function () {
+    var k = Math.min(1, (Date.now() - t0) / T);
+    window.scrollTo(0, tu + (dich - tu) * (1 - Math.pow(1 - k, 3)));
+    if (k >= 1) { clearInterval(window._truotDoc); window._truotDoc = null; }
+  }, 16);
+}
+document.addEventListener('click', function (e) {
+  if (e.target.closest && e.target.closest('[data-tab],[data-cn],[data-kpi]')) setTimeout(veDauTab, 80);
   var luu = Array.prototype.map.call(document.querySelectorAll(CUON_SEL), function (c) { return c.scrollLeft; });
   setTimeout(function () { cuonChon(luu); }, 40);
 }, true);
