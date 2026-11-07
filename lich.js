@@ -1337,5 +1337,23 @@ function gan(el) {
   nap();
   if (!S.hen) S.hen = setInterval(kiemNhac, 30000);
 }
-window.LICH = { gan: gan, am: doiAm, le: leNgay, ics: taoIcs, trong: function (ten, dai, tu, den) { return tinhTrong(ten, dai, phanNgay(tu), phanNgay(den)); }, _S: S };
+/** Lịch hôm nay (mọi vai trò) cho thẻ ở trang Tổng quan: tự đọc dữ liệu nếu chưa đọc; trả về { demo, ngay, ds, soLich, cap } */
+function homNayLay() {
+  return (S.goc.length ? Promise.resolve() : nap()).then(function () {
+    var h = homNay(), k = ymd(h), n = new Date(), bayGio = k + ' ' + dongHo(n.getHours() * 60 + n.getMinutes()), ds = [];
+    S.goc.forEach(function (x) {
+      (x.lap && TEN_LAP[x.lap] ? moLap(x, h, h) : [x]).forEach(function (y) { if (y.batDau.slice(0, 10) <= k && y.ketThuc.slice(0, 10) >= k && y.trangThai !== 'tuchoi') ds.push(y); });
+    });
+    ds.forEach(function (y) { y._trung = []; });
+    for (var i = 0; i < ds.length; i++) for (var j = i + 1; j < ds.length; j++) if (dangTrung(ds[i], ds[j])) { ds[i]._trung.push(ds[j]); ds[j]._trung.push(ds[i]); }
+    ds.sort(function (a, b) { return (b.caNgay ? 1 : 0) - (a.caNgay ? 1 : 0) || (a.batDau < b.batDau ? -1 : a.batDau > b.batDau ? 1 : 0); });
+    var cap = [];
+    ds.forEach(function (y) { y._trung.forEach(function (z) { if (y.id < z.id) cap.push([y.tieuDe, z.tieuDe]); }); });
+    return { demo: S.demo, ngay: k, soLich: S.goc.length, cap: cap, ds: ds.map(function (y) {
+      return { id: y.id, tieuDe: y.tieuDe, loai: TEN_LOAI[y.loai] || '', caNgay: !!y.caNgay, tu: y.batDau.slice(11), den: y.ketThuc.slice(11), diaDiem: y.diaDiem || '', ai: vtTen(y), mau: mauSk(y),
+        qua: !y.caNgay && y.ketThuc <= bayGio, dang: !y.caNgay && y.batDau <= bayGio && bayGio < y.ketThuc, trung: y._trung.length };
+    }) };
+  });
+}
+window.LICH = { homNay: homNayLay, gan: gan, am: doiAm, le: leNgay, ics: taoIcs, trong: function (ten, dai, tu, den) { return tinhTrong(ten, dai, phanNgay(tu), phanNgay(den)); }, _S: S };
 })();
