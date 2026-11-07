@@ -772,22 +772,12 @@ function veTheTongQuan() {
   var mo = dsMo(), the = function (t, phu, than, nut) { return '<section class="tq-the"><h3>' + t + '</h3><p class="tq-phu">' + phu + '</p>' + than + (nut || '') + '</section>'; };
   var ket = mo.filter(function (p) { return p.tt !== 'dung'; }).sort(function (a, b) { return THU_TU_TT[a.tt] - THU_TU_TT[b.tt] || b.gio / b.sla - a.gio / a.sla; });
   var dot = function (ds, f, kpi) { return ds.length > f ? '<button class="tq-them" data-kpi="' + kpi + '">Xem tất cả ' + ds.length + '</button>' : ''; };
-  var d0 = new Date(BAY_GIO), trongThang = function (p) { var d = new Date(p.tao); return d.getMonth() === d0.getMonth() && d.getFullYear() === d0.getFullYear(); };
-  var thang = DS.filter(function (p) { return (S.dv === 'Tất cả' || p.dv === S.dv) && p.root && !p.huy && trongThang(p); });
-  var thanh = function (ten, c) {
-    var x = thang.filter(function (p) { return p.chieu === c; }), xong = x.filter(function (p) { return p.tt === 'xong'; }).length, tl = x.length ? Math.round(xong / x.length * 100) : 0;
-    return '<div class="tq-tien"><div><span>' + ten + ' · ' + x.length + ' phiếu</span><span class="so">' + tl + '% · ' + xong + ' hoàn tất</span></div><div class="thanh"><i style="width:' + tl + '%;background:var(--brand)"></i></div></div>';
-  };
   var soChu = DS_SO.filter(function (x) { return (S.dv === 'Tất cả' || x.dv === S.dv) && (S.chieu === 'tat' || x.chieu === S.chieu); }).map(function (x) { return [x, chiSoSo(x.id)]; })
     .filter(function (x) { return x[1].lo.length || x[1].trung.length || x[1].sai.length; }).sort(function (a, b) { return (b[1].lo.length + b[1].trung.length + b[1].sai.length) - (a[1].lo.length + a[1].trung.length + a[1].sai.length); });
   var giu = GIU_SO.filter(function (g) { return (S.dv === 'Tất cả' || g.dv === S.dv) && g.nam === S.nam; }).slice().reverse();
   $('#noiTab').innerHTML =
     the('Đang kẹt', 'Lỗi, treo lâu, lệch dữ liệu; nặng nhất trước', ket.length ? ket.slice(0, 5).map(function (p) {
       return '<a class="tq-dong" href="#/phieu/' + esc(p.id) + '"><b>' + esc(p.trich) + '</b><small>' + esc(p.dv) + ' · ' + esc(tenBuoc(p)) + '</small>' + chipTT(p.tt) + '</a>'; }).join('') : '<p class="tq-on">Không có phiếu nào đang kẹt</p>', dot(ket, 5, 'qt:')) +
-    the('Trong tháng ' + (d0.getMonth() + 1), 'Phiếu trên hệ thống Base đã hoàn tất (có Base Office)', thanh('Văn thư đến', 'den') + thanh('Văn thư đi', 'di')) +
-    the('Theo đơn vị', 'Phiếu đang xử lý và phiếu đang kẹt', DV.map(function (dv) {
-      var x = DS.filter(function (p) { return p.dv === dv && p.tt !== 'xong' && p.tt !== 'giu' && (S.chieu === 'tat' || p.chieu === S.chieu); }), k = x.filter(function (p) { return p.tt !== 'dung'; }).length;
-      return '<button class="tq-hang" data-dv="' + esc(dv) + '"><span>' + esc(dv) + '</span><span class="so">' + x.length + ' đang xử lý' + (k ? ' · <b>' + k + ' kẹt</b>' : '') + '</span></button>'; }).join('')) +
     the('Sổ cần soát', 'Sổ có nhảy số, trùng số hoặc sai thời gian năm ' + S.nam, soChu.length ? soChu.slice(0, 5).map(function (x) {
       return '<a class="tq-dong" href="#/so" data-so="' + esc(x[0].id) + '"><b>' + esc(x[0].ten) + ' · ' + esc(x[0].dv) + '</b><small>' + [x[1].lo.length ? x[1].lo.length + ' nhảy số' : '', x[1].trung.length ? x[1].trung.length + ' trùng' : '', x[1].sai.length ? x[1].sai.length + ' sai thời gian' : ''].filter(Boolean).join(' · ') + '</small></a>'; }).join('') : '<p class="tq-on">Không có sổ nào cần soát</p>', dot(soChu, 5, 'cn:')) +
     the('Giữ số chưa dùng', 'Số đã giữ trong năm ' + S.nam + ', mới nhất trước', giu.length ? giu.slice(0, 5).map(function (g) {
