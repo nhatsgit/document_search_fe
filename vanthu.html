@@ -1585,11 +1585,12 @@ function veDauTab() {
   }, 16);
 }
 document.addEventListener('click', function (e) {
-  if (e.target.closest && e.target.closest('[data-tab],[data-cn],[data-kpi]')) setTimeout(veDauTab, 80);
+  if (e.target.closest && e.target.closest('[data-tab],[data-cn],[data-kpi],[data-so],[data-dv],[data-chieu]')) setTimeout(veDauTab, 80);
   var luu = Array.prototype.map.call(document.querySelectorAll(CUON_SEL), function (c) { return c.scrollLeft; });
   setTimeout(function () { cuonChon(luu); }, 40);
 }, true);
 window.addEventListener('hashchange', function () { setTimeout(function () { cuonChon(null); }, 150); });
+document.addEventListener('change', function (e) { if (/^(mbSo|mbDv|mbChieu|chonNam)$/.test(e.target.id)) setTimeout(function () { veDauTab(); cuonChon(null); }, 80); });
 setTimeout(function () { cuonChon(null); }, 1200);
 
 napDuLieu();
