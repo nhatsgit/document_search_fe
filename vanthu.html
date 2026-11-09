@@ -556,13 +556,40 @@ function apDuLieu(d) {
   }).sort(function (a, b) { return (a.chieu === 'den' ? 0 : 1) - (b.chieu === 'den' ? 0 : 1) || b.n - a.n; });
   NHAT_KY = d.nhatKy;
   S.nam = layNam(d.luc);
-  datLaiLocSo();
-  chonSoDau();
+  // Đọc lại dữ liệu (tải lại sổ, dữ liệu mới về) mà sổ đang xem còn thì giữ nguyên sổ và bộ lọc
+  if (!(S.so && DS_SO.some(function (x) { return x.id === S.so; }))) { datLaiLocSo(); chonSoDau(); }
   var dt = new Date(d.luc), hai = function (n) { return ('0' + n).slice(-2); };
   CAP_NHAT = 'Google Sheet HE THONG BASE · ' + DS.length + ' dòng sổ · cập nhật ' + hai(dt.getHours()) + ':' + hai(dt.getMinutes()) + ' ' + hai(dt.getDate()) + '/' + hai(dt.getMonth() + 1) + '/' + dt.getFullYear();
 }
 /** Các sổ khớp thanh lọc đơn vị, Đến/Đi. */
 function soTheoLoc() { return DS_SO.filter(function (s) { return (S.dv === 'Tất cả' || s.dv === S.dv) && (S.chieu === 'tat' || s.chieu === S.chieu); }); }
+/* Nhớ sổ đang xem: ghi vào địa chỉ (#/so/<sổ>/<năm>, gửi link được) và vào bộ nhớ trình duyệt (mở lại trang không cần chọn lại) */
+var KHO_SO = 'vt_so', KHO_LOC = 'vt_loc', DA_LOC_SO = false, DA_KHOI_PHUC = false, SAN_LUU = false;   // SAN_LUU: chỉ ghi nhớ sau khi đã đọc lại lựa chọn cũ, kẻo bản mặc định đè mất
+function luuSo() {
+  if (!S.so || !SAN_LUU) return;
+  try { localStorage.setItem(KHO_SO, JSON.stringify({ so: S.so, dv: S.dv, chieu: S.chieu, nam: S.nam, tabSo: S.tabSo, locTT: S.locTT, pvSo: S.pvSo, locSo: S.locSo, tuNgay: S.tuNgay, denNgay: S.denNgay, coTrang: S.coTrang, truongSo: S.truongSo })); } catch (e) {}
+  if (S.tab === 'cn') history.replaceState(null, '', '#/so/' + encodeURIComponent(S.so) + '/' + S.nam);
+}
+/** Mở lại sổ từ địa chỉ, không có thì từ lần chọn trước; sổ không còn thì bỏ qua. */
+function khoiPhucSo(phan) {
+  var id = phan[1] ? decodeURIComponent(phan[1]) : '', nam = Number(phan[2]) || 0, luu = null;
+  try { luu = JSON.parse(localStorage.getItem(KHO_SO) || 'null'); } catch (e) { luu = null; }
+  if (!id) {
+    if (!luu || DA_KHOI_PHUC) { DA_KHOI_PHUC = true; return; }
+    DA_KHOI_PHUC = true; id = luu.so; nam = luu.nam;
+  }
+  DA_KHOI_PHUC = true;
+  var x = DS_SO.filter(function (t) { return t.id === id; })[0]; if (!x) return;
+  if (nam && namCoDuLieu().indexOf(nam) >= 0) S.nam = nam;
+  if (S.so !== id) datLaiLocSo();
+  S.so = id; S.dvSo = x.dv; S.dv = x.dv; S.chieu = luu && (luu.chieu === 'tat' || luu.chieu === x.chieu) ? luu.chieu : 'tat'; S.trangSo = 1;
+  // Bộ lọc đã chọn ở sổ này lần trước (tab, trạng thái, phạm vi tìm, bộ lọc chi tiết, khoảng ngày, số dòng mỗi trang)
+  if (luu && luu.so === id && !DA_LOC_SO) {
+    DA_LOC_SO = true;
+    ['tabSo', 'locTT', 'pvSo', 'locSo', 'tuNgay', 'denNgay', 'truongSo'].forEach(function (k) { if (luu[k] != null) S[k] = luu[k]; });
+    if ([20, 100, 500, 2500].indexOf(luu.coTrang) >= 0) S.coTrang = luu.coTrang;
+  }
+}
 function chonSoDau() { var x = soTheoLoc()[0]; S.so = x ? x.id : ''; if (x) S.dvSo = x.dv; }
 /* Dữ liệu lần xem trước lưu trong IndexedDB: mở trang là hiện ngay, trong lúc dữ liệu mới tải ngầm rồi thay vào */
 var KHO = { ten: 'vt_dulieu', bang: 'kv', khoa: 'vanthu' };
@@ -770,7 +797,17 @@ function datDau(ten, hinh, moTa, gon, nutRieng) {
     : '<div class="ck-ph"><div class="ck-ph-ico" aria-hidden="true">' + hinhVt(hinh) + '</div><div class="ck-ph-chu"><h1>' + ten + '</h1><p><span class="an-dt">' + moTa + '<br></span><span id="capNhat" style="font-size:13px">' + esc(CAP_NHAT) + '</span></p></div><div class="ck-ph-nut">' + NUT + '</div></div>';
 }
 /** Vẽ lại trang đang mở sau khi đổi đơn vị, Đến/Đi. */
-function veManLoc() { veTongQuan(); }
+function veManLoc() {
+  try { localStorage.setItem(KHO_LOC, JSON.stringify({ dv: S.dv, chieu: S.chieu })); } catch (e) {}
+  veTongQuan();
+}
+(function () {   // lần mở trang đầu: dùng lại đơn vị, Đến/Đi đã chọn trước đó
+  try {
+    var l = JSON.parse(localStorage.getItem(KHO_LOC) || 'null');
+    if (l && (l.dv === 'Tất cả' || DV.indexOf(l.dv) >= 0)) S.dv = l.dv;
+    if (l && ['tat', 'den', 'di'].indexOf(l.chieu) >= 0) S.chieu = l.chieu;
+  } catch (e) {}
+})();
 function veTongQuan() {
   var mo = dsMo(), dem = function (tt) { return mo.filter(function (p) { return p.tt === tt; }).length; };
   var thangNay = new Date(BAY_GIO).getMonth();
@@ -809,6 +846,7 @@ function hangChucNang() {
 /** Đổi tab; Chức năng (Sổ văn thư) và Lịch giữ địa chỉ riêng để tải lại trang vẫn ở đúng tab. */
 function chonTab(tab) {
   S.tab = tab;
+  if (tab === 'cn' && !DA_KHOI_PHUC) khoiPhucSo(['so']);
   history.replaceState(null, '', tab === 'cn' ? '#/so' : tab === 'lich' ? '#/lich' : '#/');
   veTongQuan();
 }
@@ -954,6 +992,7 @@ function veSo() {
         return '<button role="tab" aria-selected="' + (S.tabSo === t[0]) + '" class="' + (S.tabSo === t[0] ? 'chon' : '') + '" data-tabso="' + t[0] + '">' + t[1] +
           (t[2] != null ? '<span class="dem' + (t[3] && t[2] ? ' do' : '') + '">' + t[2] + '</span>' : '') + '</button>'; }).join('') + '</div>' +
       '<div class="noi" id="noiSo"></div></section></div>';
+  luuSo();
   var dsMoi = $('#dsSo'), dangChon = dsMoi.querySelector('button.chon');
   if (cuonCu != null) dsMoi.scrollTop = cuonCu;
   // Mới mở tab, hoặc sổ đang chọn nằm ngoài vùng đang thấy thì cuộn tới sổ đó
@@ -1199,6 +1238,7 @@ function goiYRong() {
   return kq.length ? '<div class="sv-goi-y">' + kq.join('') + '</div>' : '';
 }
 function veDsSoVb() {
+  luuSo();
   var ds = sapHang(locHang()), tong = nguonSo().length, co = S.coTrang, soTrang = Math.max(1, Math.ceil(ds.length / co));
   S.trangSo = Math.min(S.trangSo, soTrang);
   var cot = cotSoHien().slice(), khac = S.pvSo !== 'so', rongTong = 0;
@@ -1482,8 +1522,9 @@ function dinhTuyen() {
   // Link cũ tới Quy trình, Danh sách phiếu giờ là tab của trang
   if (phan[0] === 'quytrinh' || (phan[0] === 'phieu' && !phan[1])) { S.tab = 'qt'; history.replaceState(null, '', '#/'); phan = ['']; }
   if (phan[0] === 'lich') S.tab = 'lich';
-  else if (phan[0] === 'so') S.tab = 'cn';
+  else if (phan[0] === 'so') { S.tab = 'cn'; khoiPhucSo(phan); }
   else if (phan[0] !== 'phieu' && (S.tab === 'cn' || S.tab === 'lich')) S.tab = 'tq';   // bấm Văn thư trên menu
+  SAN_LUU = true;
   if (phan[0] === 'phieu') { veChiTiet(decodeURIComponent(phan[1])); document.title = 'Chi tiết phiếu · Văn thư'; }
   else { CRCK.vet(['Văn thư']); veTongQuan(); document.title = 'Văn thư'; }
   CRCK.chon('vanthu', 'vanthu'); CRCK.thuGon();
