@@ -1627,7 +1627,7 @@ function giuCao() {
 /** Đổi tab / chức năng: trang tự cuộn dọc để hàng nút tab nằm sát đầu màn hình, nội dung mới hiện ngay bên dưới. */
 function veDauTab() {
   var t = document.querySelector('.ck-tabs'); if (!t) return;
-  var dich = Math.max(0, Math.round(t.getBoundingClientRect().top + window.scrollY - 8)), tu = window.scrollY, t0 = Date.now(), T = 300;
+  var dich = (S.tab === 'tq' || S.tab === 'qt') ? 0 : Math.max(0, Math.round(t.getBoundingClientRect().top + window.scrollY - 8)), tu = window.scrollY, t0 = Date.now(), T = 300;
   if (Math.abs(dich - tu) < 3) return;
   if (window._truotDoc) clearInterval(window._truotDoc);
   window._truotDoc = setInterval(function () {
