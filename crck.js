@@ -34,8 +34,7 @@
       { id: 'tong', ten: 'Tổng quan kho', hinh: 'tq', link: function () { return linkTra('tong'); } },
       { id: 'tc2', ten: 'Tra cứu 2.0', hinh: 'ds', nhan: 'thử', link: function () { return 'tracuu2.html'; } }] },
     { id: 'vanthu', ten: 'Văn thư', hinh: 'thu', link: function () { return 'vanthu.html#/'; } },
-    { id: 'ai', ten: 'Chạy AI', hinh: 'ai', muc: [
-      { id: 'ai', ten: 'Theo dõi, điều khiển', hinh: 'ai', link: function () { return 'index.html#/ai'; } }] }
+    { id: 'ai', ten: 'Chạy AI', hinh: 'ai', link: function () { return 'index.html#/ai'; } }
   ];
   var S = { ph: '', muc: '', moNhom: '' };
   var top = document.getElementById('ckTop'), ben = document.getElementById('ckBen');
