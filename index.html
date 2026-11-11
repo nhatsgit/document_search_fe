@@ -592,6 +592,8 @@ button.kpi:hover{border-color:var(--leaf)}
 .ai-nk>div:last-child{border-bottom:none}
 .ai-nk code{font-family:ui-monospace,Consolas,monospace;font-size:12px;color:var(--ink)}
 .ai-nk .loi{color:var(--clay)}
+#aiNoiDung[data-tab="dk"] [data-aitab]:not([data-aitab="dk"]),#aiNoiDung[data-tab="kh"] [data-aitab]:not([data-aitab="kh"]),#aiNoiDung[data-tab="lu"] [data-aitab]:not([data-aitab="lu"]),#aiNoiDung[data-tab="tk"] [data-aitab]:not([data-aitab="tk"]){display:none}
+#aiTabs{margin:4px 0 14px}
 .ai-tk>div{align-items:center;gap:6px 14px}
 .ai-tk .tk-ngay{flex:0 0 150px;color:var(--ink)}
 .ai-tk .tk-ngay small{display:block;color:var(--ink-3);font-size:12px}
@@ -881,9 +883,15 @@ th{background:var(--soft);color:var(--muted);font-size:13.5px;text-transform:non
         <button class="btn nho" id="aiDong" type="button" title="Quên mã trong thẻ này">Khoá</button>
       </div>
     </div>
-    <div class="ai-the" id="aiThe"></div>
-    <div class="ai-ds" id="aiDs"></div>
-    <div class="ai-muc" id="aiMucKq" hidden>
+    <div class="ck-tabs" id="aiTabs" role="tablist" aria-label="Nội dung Chạy AI">
+      <button role="tab" data-aitab-chon="dk" class="chon" aria-selected="true">Điều khiển</button>
+      <button role="tab" data-aitab-chon="kh" aria-selected="false">Khoá API</button>
+      <button role="tab" data-aitab-chon="lu" aria-selected="false">Lượt dùng</button>
+      <button role="tab" data-aitab-chon="tk" aria-selected="false">Thống kê</button>
+    </div>
+    <div class="ai-the" id="aiThe" data-aitab="dk"></div>
+    <div class="ai-ds" id="aiDs" data-aitab="dk"></div>
+    <div class="ai-muc" id="aiMucKq" data-aitab="dk" hidden>
       <h2 id="aiTieuDeKq"></h2>
       <div class="ai-loc">
         <select id="aiLocTT" aria-label="Lọc trạng thái"><option value="">Mọi trạng thái</option><option value="can_soat_xet">Cần soát xét</option>
@@ -901,17 +909,17 @@ th{background:var(--soft);color:var(--muted);font-size:13.5px;text-transform:non
         <tbody id="aiThanKq"></tbody></table></div>
       <div class="phan-trang" id="aiPhanTrang"></div>
     </div>
-    <div class="ai-muc">
+    <div class="ai-muc" data-aitab="kh">
       <div class="ai-muc-dau"><h2>Khoá API Gemini</h2><button class="btn nho" id="aiThemKhoa" type="button">+ Thêm khoá</button></div>
       <div class="ai-nk ai-khoa-ds" id="aiKhoaDs"><div>Đang tải…</div></div>
-      <div id="aiLuotBang"></div>
       <div class="goi-y-khoa">Dùng khoá đứng đầu trước; khoá hết hạn mức hoặc không mở được model thì tự chuyển sang khoá sau. Khoá lưu mã hoá trong tab TN_KHOA_API, trang chỉ hiện 4 ký tự cuối.</div>
     </div>
-    <div class="ai-muc">
+    <div class="ai-muc" data-aitab="lu"><div id="aiLuotBang"></div></div>
+    <div class="ai-muc" data-aitab="tk">
       <div class="ai-muc-dau"><h2>Thống kê theo ngày</h2><span class="phu" id="aiTkPhu"></span></div>
       <div class="ai-nk ai-tk" id="aiTk"><div>Đang tải…</div></div>
     </div>
-    <div class="ai-muc">
+    <div class="ai-muc" data-aitab="tk">
       <h2>Nhật ký các lô gần nhất</h2>
       <div class="ai-nk" id="aiNk"></div>
     </div>
@@ -2227,6 +2235,20 @@ function moAi() {
     }
   });
 }
+/* 4 tab của trang Chạy AI: Điều khiển · Khoá API · Lượt dùng · Thống kê (nhớ tab đang xem) */
+(function () {
+  var nd = document.getElementById('aiNoiDung'), tabs = document.getElementById('aiTabs'), HOP = ['dk', 'kh', 'lu', 'tk'];
+  if (!nd || !tabs) return;
+  function chon(t) {
+    if (HOP.indexOf(t) < 0) t = 'dk';
+    nd.setAttribute('data-tab', t);
+    Array.prototype.forEach.call(tabs.children, function (b) { var on = b.getAttribute('data-aitab-chon') === t; b.classList.toggle('chon', on); b.setAttribute('aria-selected', on); });
+    try { localStorage.setItem('ai_tab', t); } catch (e) {}
+  }
+  tabs.addEventListener('click', function (e) { var b = e.target.closest('[data-aitab-chon]'); if (b) chon(b.getAttribute('data-aitab-chon')); });
+  var cu = 'dk'; try { cu = localStorage.getItem('ai_tab') || 'dk'; } catch (e) {}
+  chon(cu);
+})();
 function lamMoiAi() { napKhoaAi(); napThongKeAi(true); return goiAi('tongQuan').then(veAi); }
 /* Thống kê theo ngày hạn mức (15:00 giờ VN đổi ngày): đọc từ nhật ký lô + bảng lượt dùng, làm mới tối đa 5 phút một lần */
 function napThongKeAi(ep) {
