@@ -2245,11 +2245,13 @@ function moAi() {
     Array.prototype.forEach.call(tabs.children, function (b) { var on = b.getAttribute('data-aitab-chon') === t; b.classList.toggle('chon', on); b.setAttribute('aria-selected', on); });
     try { localStorage.setItem('ai_tab', t); } catch (e) {}
   }
-  tabs.addEventListener('click', function (e) { var b = e.target.closest('[data-aitab-chon]'); if (b) chon(b.getAttribute('data-aitab-chon')); });
+  window.nd_tab = function () { return nd.getAttribute('data-tab'); };
+  tabs.addEventListener('click', function (e) { var b = e.target.closest('[data-aitab-chon]'); if (b) { chon(b.getAttribute('data-aitab-chon')); if (b.getAttribute('data-aitab-chon') === 'tk' && AI.du) napThongKeAi(false); } });
   var cu = 'dk'; try { cu = localStorage.getItem('ai_tab') || 'dk'; } catch (e) {}
   chon(cu);
 })();
-function lamMoiAi() { napKhoaAi(); napThongKeAi(true); return goiAi('tongQuan').then(veAi); }
+/* Tải tuần tự thay vì dồn nhiều lệnh đọc Sheet cùng lúc: máy chủ vừa khởi động hoặc lô đang ghi Sheet thì đọc song song làm cả ba cùng chậm */
+function lamMoiAi(ep) { if (ep) AI.tkLuc = 0; return goiAi('tongQuan').then(veAi).then(function () { napKhoaAi(); }); }
 /* Thống kê theo ngày hạn mức (15:00 giờ VN đổi ngày): đọc từ nhật ký lô + bảng lượt dùng, làm mới tối đa 5 phút một lần */
 function napThongKeAi(ep) {
   if (!ep && AI.tkLuc && Date.now() - AI.tkLuc < 300000) return;
@@ -2410,7 +2412,7 @@ function kiemCho(d) {
 
 var TEN_TT_AI = { 'Chạy': 'chay', 'Dừng': 'dung', 'Xong': 'xong' };
 function veAi(d) {
-  AI.du = d; napThongKeAi(false);
+  AI.du = d; if (nd_tab() === 'tk') napThongKeAi(false);
   $('#aiDong').hidden = !d.canMa;   // không yêu cầu mã thì không cần nút Khoá
   kiemCho(d);
   var tongMuc = 0, tongXong = 0, tongVb = 0, tongLoi = 0, tongPhi = 0, tongNs = 0, dangChay = 0, tongVao = 0, tongRa = 0;
@@ -2717,7 +2719,7 @@ function ganSuKienAi() {
     $$('#aiDs [data-tu]').forEach(function (e) { e.textContent = Math.round((Date.now() - Number(e.dataset.tu)) / 1000); });
   }, 1000);
   $('#aiMaVao').onkeydown = function (e) { if (e.key === 'Enter') moKhoa(); };
-  $('#aiLamMoi').onclick = function () { lamMoiAi().then(function () { thongBao('Đã làm mới'); }, function (e) { thongBao(e.message); }); };
+  $('#aiLamMoi').onclick = function () { lamMoiAi(true).then(function () { thongBao('Đã làm mới'); }, function (e) { thongBao(e.message); }); };
   $('#aiThem').onclick = hopThem;
   $('#aiThuLink').onclick = hopThuLink;
   $('#aiThemKhoa').onclick = hopThemKhoa;
