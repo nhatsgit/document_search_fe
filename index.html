@@ -592,6 +592,17 @@ button.kpi:hover{border-color:var(--leaf)}
 .ai-nk>div:last-child{border-bottom:none}
 .ai-nk code{font-family:ui-monospace,Consolas,monospace;font-size:12px;color:var(--ink)}
 .ai-nk .loi{color:var(--clay)}
+.ai-tk>div{align-items:center;gap:6px 14px}
+.ai-tk .tk-ngay{flex:0 0 150px;color:var(--ink)}
+.ai-tk .tk-ngay small{display:block;color:var(--ink-3);font-size:12px}
+.ai-tk .tk-file{flex:1 1 220px;min-width:180px}
+.ai-tk .tk-file b{font-size:15px;color:var(--ink)}
+.ai-tk .tk-thanh{height:6px;margin-top:4px;border-radius:99px;background:var(--line);overflow:hidden}
+.ai-tk .tk-thanh i{display:block;height:100%;background:var(--green,#2f7a3d);border-radius:99px}
+.ai-tk .tk-so{flex:0 0 auto;white-space:nowrap}
+.ai-tk .tk-dong{flex:1 1 100%;color:var(--ink-3);font-size:12.5px}
+.ai-tk .hom-nay .tk-ngay b::after{content:" · đang chạy";color:var(--green,#2f7a3d);font-weight:500;font-size:12px}
+@media(max-width:720px){.ai-tk .tk-ngay{flex:1 1 100%}}
 .ai-loc{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .ai-loc select,.ai-loc input{padding:7px 10px;border:1px solid var(--line-2);background:var(--card);color:var(--ink);border-radius:6px;font-size:13.5px}
 .ai-loc input{flex:1 1 220px;min-width:0}
@@ -895,6 +906,10 @@ th{background:var(--soft);color:var(--muted);font-size:13.5px;text-transform:non
       <div class="ai-nk ai-khoa-ds" id="aiKhoaDs"><div>Đang tải…</div></div>
       <div id="aiLuotBang"></div>
       <div class="goi-y-khoa">Dùng khoá đứng đầu trước; khoá hết hạn mức hoặc không mở được model thì tự chuyển sang khoá sau. Khoá lưu mã hoá trong tab TN_KHOA_API, trang chỉ hiện 4 ký tự cuối.</div>
+    </div>
+    <div class="ai-muc">
+      <div class="ai-muc-dau"><h2>Thống kê theo ngày</h2><span class="phu" id="aiTkPhu"></span></div>
+      <div class="ai-nk ai-tk" id="aiTk"><div>Đang tải…</div></div>
     </div>
     <div class="ai-muc">
       <h2>Nhật ký các lô gần nhất</h2>
@@ -2212,7 +2227,35 @@ function moAi() {
     }
   });
 }
-function lamMoiAi() { napKhoaAi(); return goiAi('tongQuan').then(veAi); }
+function lamMoiAi() { napKhoaAi(); napThongKeAi(true); return goiAi('tongQuan').then(veAi); }
+/* Thống kê theo ngày hạn mức (15:00 giờ VN đổi ngày): đọc từ nhật ký lô + bảng lượt dùng, làm mới tối đa 5 phút một lần */
+function napThongKeAi(ep) {
+  if (!ep && AI.tkLuc && Date.now() - AI.tkLuc < 300000) return;
+  AI.tkLuc = Date.now();
+  return goiAi('thongKeNgay').then(veThongKeAi, function (e) { $('#aiTk').innerHTML = '<div class="loi">' + esc(e.message) + '</div>'; });
+}
+function veThongKeAi(d) {
+  var ten = {}; (AI.du ? AI.du.dong : []).forEach(function (r) { ten[String(r.dong)] = r.phong + ' ' + r.congTy; });
+  var ngay = {};
+  d.theoNgay.forEach(function (e) { (ngay[e.ngay] = ngay[e.ngay] || { dong: [], file: 0, loi: 0, vb: 0, lo: 0, usd: 0, giay: 0, dau: '', cuoi: '' });
+    var x = ngay[e.ngay]; x.dong.push(e); x.file += e.fileXong; x.loi += e.fileLoi; x.vb += e.vanBan; x.lo += e.lo; x.usd += e.chiPhi; x.giay += e.giay;
+    if (!x.dau || e.dau < x.dau) x.dau = e.dau; if (e.cuoi > x.cuoi) x.cuoi = e.cuoi; });
+  d.luot.forEach(function (l) { (ngay[l.ngay] = ngay[l.ngay] || { dong: [], file: 0, loi: 0, vb: 0, lo: 0, usd: 0, giay: 0, dau: '', cuoi: '' }); var x = ngay[l.ngay]; x.goi = (x.goi || 0) + l.goi; x.tc = (x.tc || 0) + l.tuChoi; });
+  var ds = Object.keys(ngay).sort().reverse().slice(0, 14), toiDa = Math.max.apply(null, ds.map(function (k) { return ngay[k].file; }).concat([1]));
+  var homNay = new Date(Date.now() - 8 * 3600000).toISOString().slice(0, 10);
+  var dm = function (iso, g) { var t = new Date(iso + 'T00:00:00Z'); return ('0' + t.getUTCDate()).slice(-2) + '/' + ('0' + (t.getUTCMonth() + 1)).slice(-2); };
+  var mai = function (iso) { var t = new Date(iso + 'T00:00:00Z'); t.setUTCDate(t.getUTCDate() + 1); return t.toISOString().slice(0, 10); };
+  $('#aiTkPhu').textContent = 'Mỗi ngày tính từ 15:00 đến 15:00 hôm sau (giờ VN), khớp lúc Google làm mới hạn mức · ' + so(d.soLo) + ' lô trong nhật ký';
+  $('#aiTk').innerHTML = ds.length ? ds.map(function (k) {
+    var x = ngay[k], dong = x.dong.map(function (e) { return esc(ten[e.dong] || ('dòng ' + (e.dong || '?'))) + ' <b>' + so(e.fileXong) + '</b> file' + (e.chiPhi ? ' (' + usd(e.chiPhi) + ')' : ''); }).join(' · ');
+    return '<div' + (k === homNay ? ' class="hom-nay"' : '') + '><span class="tk-ngay"><b>' + dm(k) + '</b><small>15:00 ' + dm(k) + ' → 15:00 ' + dm(mai(k)) + '</small></span>' +
+      '<span class="tk-file"><b>' + so(x.file) + '</b> file xong' + (x.loi ? ' · <span class="loi">' + so(x.loi) + ' lỗi</span>' : '') + ' · ' + so(x.vb) + ' văn bản<div class="tk-thanh"><i style="width:' + Math.round(x.file / toiDa * 100) + '%"></i></div></span>' +
+      '<span class="tk-so">' + so(x.lo) + ' lô</span><span class="tk-so">' + so(x.goi || 0) + ' lượt gọi' + (x.tc ? ' · ' + so(x.tc) + ' bị từ chối' : '') + '</span>' +
+      '<span class="tk-so">' + (x.usd ? usd(x.usd) : 'miễn phí') + '</span>' +
+      (x.dau ? '<span class="tk-so">' + esc(x.dau.slice(11, 16)) + ' → ' + esc(x.cuoi.slice(11, 16)) + '</span>' : '') +
+      (dong ? '<span class="tk-dong">' + dong + '</span>' : '') + '</div>';
+  }).join('') : '<div>Chưa có dữ liệu.</div>';
+}
 
 /* ---------- Khoá API ---------- */
 var TEN_GOI_KHOA = { mien_phi: 'Miễn phí', tra_phi: 'Trả phí' };
@@ -2345,7 +2388,7 @@ function kiemCho(d) {
 
 var TEN_TT_AI = { 'Chạy': 'chay', 'Dừng': 'dung', 'Xong': 'xong' };
 function veAi(d) {
-  AI.du = d;
+  AI.du = d; napThongKeAi(false);
   $('#aiDong').hidden = !d.canMa;   // không yêu cầu mã thì không cần nút Khoá
   kiemCho(d);
   var tongMuc = 0, tongXong = 0, tongVb = 0, tongLoi = 0, tongPhi = 0, tongNs = 0, dangChay = 0, tongVao = 0, tongRa = 0;
