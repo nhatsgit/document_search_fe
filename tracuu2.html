@@ -404,7 +404,7 @@ a{color:var(--brand-700)}a:hover{color:var(--brand)}
   <div class="tim-trong">
     <div class="tim-hang">
       <label class="nhan">Công ty
-        <select class="chon-cty" id="chonCty"><option value="CRCK2">CRCK2</option><option value="BHCK">BHCK</option></select>
+        <select class="chon-cty" id="chonCty"><option value="tat">Tất cả</option><option value="CRCK2">CRCK2</option><option value="BHCK">BHCK</option></select>
       </label>
       <div class="nhan o-tim">
         <label for="oTim">Tìm văn bản</label>
@@ -563,7 +563,7 @@ var NC_RONG = function () { return { phong: [], loai2: [], tuNgay: '', denNgay: 
 var COT_RONG = function () { return {}; };
 
 var DOCS = [], BO = {}, LOAI_DS = [];
-var S = { q: '', truong: 'tat', cty: 'CRCK2', nam: '', loai: [], kieu: 'tat', nc: NC_RONG(), cot: COT_RONG(), sap: 'ngay', chieu: -1, trang: 1,
+var S = { q: '', truong: 'tat', cty: 'tat', nam: '', loai: [], kieu: 'tat', nc: NC_RONG(), cot: COT_RONG(), sap: 'ngay', chieu: -1, trang: 1,
   sel: null, mo: {}, ct: null, tab: 'tt', xn: null, nhap: null, chepK: '', loaiHet: false, timLoai: '', ncThem: [], ncMoThem: false, ncTimCq: '', ncTimLoai: '', ncTimLoai2: '' };
 var KQ = { kq: [], nhom: [], khop: [] };
 
@@ -786,6 +786,7 @@ function tuHighlight(P) { var t = P.tu.concat(P.cum); P.tu.forEach(function (x) 
 function locVoi(q, truong) {
   var P = phanTich(q);
   return DOCS.filter(function (d) {
+    if (S.cty !== 'tat' && d.cty !== S.cty) return false;
     if (!quaCot(d)) return false;
     if (P.rong) { d._diem = 0; d._khopO = []; return true; }
     var r = chamDiem(d, P, truong); if (!r.ok) return false;
@@ -794,7 +795,7 @@ function locVoi(q, truong) {
 }
 function tinh() {
   var P = phanTich(S.q), tus = tuHighlight(P);
-  var coDuLieu = DOCS.some(function (d) { return d.cty === S.cty; });
+  var coDuLieu = S.cty === 'tat' || DOCS.some(function (d) { return d.cty === S.cty; });
   if (S.sap === 'lq' && P.rong) { S.sap = 'ngay'; S.chieu = -1; }
   var khop = coDuLieu ? locVoi(S.q, S.truong) : [];
   var kq = khop.filter(function (d) { return quaLoc(d, S.nc, S.kieu, ''); }).sort(function (a, b) {
@@ -1014,7 +1015,7 @@ var GOI_Y = [], GY_CHON = -1;
 function veGoiY() {
   var hop = $('#goiYTim'), q = chuan(S.q).trim();
   GOI_Y = []; GY_CHON = -1;
-  if (!q || q.length < 2 || !DOCS.length || !DOCS.some(function (d) { return d.cty === S.cty; })) { hop.hidden = true; return; }
+  if (!q || q.length < 2 || !DOCS.length || S.cty !== 'tat' && !DOCS.some(function (d) { return d.cty === S.cty; })) { hop.hidden = true; return; }
   var nhom = [], them = function (ten, ds) { if (ds.length) nhom.push([ten, ds]); };
   var dau = function (s) { return chuan(s).indexOf(q) === 0 ? 0 : 1; };
   var so = {}; DOCS.forEach(function (d) { if (d.so && d._c.so.indexOf(q) >= 0) so[d.so] = (so[d.so] || 0) + 1; });
