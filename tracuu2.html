@@ -1046,6 +1046,8 @@ function chonGoiY(i) {
   S.sapTay = false; S.sap = S.q ? 'lq' : 'ngay'; S.chieu = -1;
   $('#goiYTim').hidden = true; datTrang1(); ve();
 }
+/** Văn bản chiếm một phần của file PDF: "trang 2–4 / 8 trang của file". Rỗng nếu văn bản là cả file. */
+function viTri(d) { return d.trangTu && d.tongTrangFile > d.soTrang ? 'trang ' + d.trangTu + (d.trangDen > d.trangTu ? '–' + d.trangDen : '') + ' / ' + d.tongTrangFile + ' trang của file' : ''; }
 function timDoc(id) { for (var i = 0; i < DOCS.length; i++) if (DOCS[i].id === id) return DOCS[i]; return null; }
 function vePhai() {
   var el = $('#cotPhai');
@@ -1070,7 +1072,7 @@ function vePhai() {
     '<div style="display:flex;gap:8px;align-items:flex-start"><h2 style="flex:1">' + esc(d.trich) + '</h2>' + nutChep('xem-trich', d.trich) + '</div>' +
     dl([['Ngày', hienNgay(d)], ['Cơ quan', d.cq], ['Đối tác', d.doiTac], ['Giá trị', d.gia], ['Hồ sơ', d.hoSo], ['File', d.file]], 'xem-') +
     '<div style="display:flex;flex-direction:column;gap:8px"><button type="button" class="nut-to" data-ct="' + esc(d.id) + '">Xem đầy đủ chi tiết</button>' +
-    '<button type="button" class="nut-to vien" data-xn="' + esc(d.id) + '">' + IC.mat + 'Xem nhanh · ' + (d.soTrang || '?') + ' trang</button></div></div>';
+    '<button type="button" class="nut-to vien" data-xn="' + esc(d.id) + '">' + IC.mat + 'Xem nhanh · ' + (d.soTrang || '?') + ' trang' + (viTri(d) ? ' (mở file ' + d.tongTrangFile + ' trang)' : '') + '</button></div></div>';
 }
 
 /* ---------- popup: lọc nâng cao, chi tiết, xem nhanh ---------- */
@@ -1220,7 +1222,7 @@ function popupXN() {
     : '<iframe title="Xem nhanh ' + esc(d.file) + '" src="https://drive.google.com/file/d/' + encodeURIComponent(d.driveId) + '/preview" allow="autoplay"></iframe>';
   return '<div class="phu-nen xn" data-nen="xn"><div class="hop-thoai" role="dialog" aria-modal="true" aria-label="Xem nhanh" style="max-width:1200px;overflow:hidden">' +
     '<div class="hop-dau" style="flex-wrap:wrap;padding:12px 16px"><div style="flex:1 1 320px;min-width:0"><b style="font-size:16px;display:block">' + esc(b ? b.ten : d.loai + (d.so ? ' ' + d.so : '')) + '</b>' +
-    '<span style="font-size:12.5px;color:var(--chu-4)">' + (caBo ? 'Cả bộ · ' + b.nFile + ' file · ' + soVN(b.soTrang) + ' trang' : esc(d.file) + ' · ' + (d.soTrang || '?') + ' trang' + (b ? ' · văn bản ' + (i + 1) + '/' + ds.length + ' trong bộ' : '')) + '</span></div>' +
+    '<span style="font-size:12.5px;color:var(--chu-4)">' + (caBo ? 'Cả bộ · ' + b.nFile + ' file · ' + soVN(b.soTrang) + ' trang' : esc(d.file) + ' · ' + (d.soTrang || '?') + ' trang' + (viTri(d) ? ' · file có ' + d.tongTrangFile + ' trang, văn bản này ở ' + viTri(d) : '') + (b ? ' · văn bản ' + (i + 1) + '/' + ds.length + ' trong bộ' : '')) + '</span></div>' +
     (b ? '<button type="button" class="nut-vuong" data-act="xnTruoc" aria-label="Văn bản trước"' + (i <= 0 ? ' disabled' : '') + '>‹</button><button type="button" class="nut-vuong" data-act="xnSau" aria-label="Văn bản sau"' + (i >= ds.length - 1 ? ' disabled' : '') + '>›</button>' : '') +
     '<button type="button" class="nut-dong" data-act="dongXN" aria-label="Đóng xem nhanh">×</button></div>' +
     '<div class="xem-than">' + khung + '<div class="xem-ben" id="xemBen">' + benXN() + '</div></div></div></div>';
