@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lịch làm việc</title>
+<!-- Bản nhúng của Lịch làm việc: dùng trong <iframe> của trang khác. Dữ liệu lấy từ API lịch (CORS mở), không cần đăng nhập để xem. -->
+<link rel="stylesheet" href="crck.css?v=10">
+<link rel="stylesheet" href="lich.css?v=16">
+<style>
+:root{
+  --nen:var(--page); --the:var(--mau-card); --vien:var(--mau-line); --vien-2:var(--vach); --o:var(--border-strong);
+  --chu:var(--mau-ink); --chu-2:var(--ink-phu); --chu-3:var(--muted); --chu-4:var(--faint);
+  --navy:var(--brand-700); --xanh:var(--brand-700); --xanh-dam:var(--brand); --nut:var(--brand); --xanh-nhat:var(--brand-100);
+  --seg:var(--gray-bg); --nhat:var(--soft); --nen-o:var(--soft);
+  --lua:var(--brand); --cam:var(--gold); --do:var(--bad-fg);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--nen);color:var(--chu);font-family:var(--font);font-size:14.5px;line-height:1.5}
+a{color:var(--xanh)}a:hover{color:var(--brand)}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3{margin:0;line-height:1.3}
+.so{font-variant-numeric:tabular-nums}
+#lichNhung{padding:12px}
+</style>
+</head>
+<body>
+<div id="lichNhung"></div>
+<script src="lich.js?v=14"></script>
+<script>
+// Bản nhúng xem lịch thật ngay (không để chế độ dữ liệu mẫu); người xem vẫn bật lại được bằng nút "Dữ liệu mẫu"
+LICH._S.demo = false;
+LICH.gan(document.getElementById('lichNhung'));
+</script>
+</body>
+</html>
