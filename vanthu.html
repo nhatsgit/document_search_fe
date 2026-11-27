@@ -20,6 +20,7 @@
 <link rel="preconnect" href="https://document-search-api-319700450833.us-central1.run.app" crossorigin>
 <link rel="preload" href="https://document-search-api-319700450833.us-central1.run.app/api/vanthu" as="fetch" crossorigin>
 <link rel="stylesheet" href="crck.css?v=10">
+<link rel="stylesheet" href="tim_chung.css?v=1">
 <link rel="stylesheet" href="lich.css?v=16">
 <style>
 /* Tên biến riêng của trang, trỏ sang bộ màu CRCK trong crck.css */
@@ -502,6 +503,7 @@ dl.tt{font-size:14px;gap:7px 12px;grid-template-columns:132px minmax(0,1fr)}
 
 <script src="crck.js?v=10"></script>
 <script src="lich.js?v=14"></script>
+<script src="tim_chung.js?v=1"></script>
 <script>
 'use strict';
 /* =====================================================================
@@ -577,7 +579,7 @@ function khoiPhucSo(phan) {
   var x = DS_SO.filter(function (t) { return t.id === id; })[0]; if (!x) return;
   if (nam && namCoDuLieu().indexOf(nam) >= 0) S.nam = nam;
   if (S.so !== id) datLaiLocSo();
-  S.so = id; S.dvSo = x.dv; S.dv = x.dv; S.chieu = luu && (luu.chieu === 'tat' || luu.chieu === x.chieu) ? luu.chieu : 'tat'; S.trangSo = 1;
+  S.so = id; S.dvSo = x.dv; S.dv = x.dv; if (phan[1]) S.chieu = x.chieu; S.trangSo = 1;
   // Bộ lọc đã chọn ở sổ này lần trước (tab, trạng thái, phạm vi tìm, bộ lọc chi tiết, khoảng ngày, số dòng mỗi trang)
   if (luu && luu.so === id && !DA_LOC_SO) {
     DA_LOC_SO = true;
@@ -769,18 +771,22 @@ function veNgan() {
 }
 
 function hangLocChung() {
-  var cn = S.tab === 'cn', sh = dangSoHoa();
-  var chonMb = '<div class="chon-mb"><select class="o" id="mbChieu" aria-label="Loại văn thư">' + [['tat', 'Tất cả văn thư'], ['den', 'Văn thư đến'], ['di', 'Văn thư đi']].concat(cn ? [['sohoa', 'Văn thư số hóa']] : []).map(function (c) {
+  var cn = S.tab === 'cn', sh = dangSoHoa(), an = sh || dangTimChung();   // an: hai chế độ tìm kiếm tự có ô lọc công ty
+  var chonMb = '<div class="chon-mb"><select class="o" id="mbChieu" aria-label="Loại văn thư">' + [['tat', cn ? 'Tất cả (sổ và số hóa)' : 'Tất cả văn thư'], ['den', 'Văn thư đến'], ['di', 'Văn thư đi']].concat(cn ? [['sohoa', 'Văn thư số hóa']] : []).map(function (c) {
       return '<option value="' + c[0] + '"' + ((sh ? 'sohoa' : S.chieu) === c[0] ? ' selected' : '') + '>' + c[1] + '</option>'; }).join('') + '</select>' +
-    (sh ? '' : '<select class="o" id="mbDv" aria-label="Đơn vị">' + DV.concat(['Tất cả']).map(function (d) {
+    (an ? '' : '<select class="o" id="mbDv" aria-label="Đơn vị">' + DV.concat(['Tất cả']).map(function (d) {
       return '<option value="' + esc(d) + '"' + (S.dv === d ? ' selected' : '') + '>' + (d === 'Tất cả' ? 'Mọi đơn vị' : esc(d)) + '</option>'; }).join('') + '</select>') + '</div>';
-  return chonMb + '<div class="hang' + (cn ? '' : ' loc-pc') + (sh ? ' loc-pc' : '') + '" style="gap:8px 16px"><div class="seg loc-pc" role="group" aria-label="Loại văn thư">' + [['tat', 'Tất cả'], ['den', 'Văn thư đến'], ['di', 'Văn thư đi']].map(function (c) {
+  return chonMb + '<div class="hang' + (cn ? '' : ' loc-pc') + (an ? ' loc-pc' : '') + '" style="gap:8px 16px"><div class="seg loc-pc" role="group" aria-label="Loại văn thư">' + [['tat', 'Tất cả'], ['den', 'Văn thư đến'], ['di', 'Văn thư đi']].map(function (c) {
         return '<button class="' + (!sh && S.chieu === c[0] ? 'chon' : '') + '" data-chieu="' + c[0] + '">' + c[1] + '</button>'; }).join('') +
       (cn ? '<button class="' + (sh ? 'chon' : '') + '" data-sohoa="1">Văn thư số hóa</button>' : '') + '</div>' +
-      (sh ? '' : (cn ? '<div class="loc-so" id="locSo"></div>' : '') +
+      (an ? '' : (cn ? '<div class="loc-so" id="locSo"></div>' : '') +
       '<div class="seg loc-pc" role="group" aria-label="Đơn vị" style="margin-left:auto">' + DV.concat(['Tất cả']).map(function (d) {
         return '<button class="' + (S.dv === d ? 'chon' : '') + '" data-dv="' + esc(d) + '">' + esc(d) + '</button>'; }).join('') + '</div>') + '</div>';
 }
+/* ---------- Tất cả: tìm chung (tim_chung.js). Sổ từng quyển chỉ mở khi chọn Đến hoặc Đi ---------- */
+function dangTimChung() { return S.tab === 'cn' && !S.soHoa && S.chieu === 'tat'; }
+/** Lối tắt dẫn tới sổ (thẻ số liệu, bước cuối quy trình): đang ở Tất cả thì chuyển sang nhánh của sổ xem gần nhất. */
+function moCheDoSo() { S.soHoa = false; if (S.chieu === 'tat') S.chieu = (timSo(S.so) || {}).chieu || 'di'; }
 /* ---------- Văn thư số hóa ---------- */
 function dangSoHoa() { return S.tab === 'cn' && S.soHoa; }
 /** Khung Tra cứu 2.0 nằm ngoài #man nên vẽ lại trang (đổi tab, sổ tải xong) không làm mất từ khoá và bộ lọc đang xem. Chỉ tải khi mở lần đầu. */
@@ -853,10 +859,11 @@ function veTongQuan() {
         (t[2] != null ? '<span class="dem' + (t[3] && t[2] ? ' do' : '') + '">' + t[2] + '</span>' : '') + '</button>'; }).join('') + '</div>' +
     (cn ? hangChucNang() : '') + (lich ? '' : hangLocChung()) +
     '<div class="' + (S.tab === 'tq' ? 'tq-luoi' : S.tab === 'qt' ? 'khung' : (cn || lich) ? '' : 'the noi') + '" id="noiTab"></div>';
-  document.body.classList.toggle('trang-so', cn && !S.soHoa);
+  document.body.classList.toggle('trang-so', cn && !S.soHoa && S.chieu !== 'tat');
   if (cn) { window.scrollTo(0, 0); doChoTrang(); }
   veNoiTab();
   veSoHoa(dangSoHoa());
+  TIMCHUNG.hien(dangTimChung());
 }
 /** Hàng chọn chức năng của tab Chức năng. Tạm thời chỉ có Sổ văn thư; thêm chức năng mới thì thêm vào danh sách này. */
 var CHUC_NANG = [['so', 'Sổ văn thư']];
@@ -932,7 +939,7 @@ function veNoiTab() {
   var el = $('#noiTab');
   if (S.tab === 'tq') { veTheTongQuan(); napLichHomNay(); }
   else if (S.tab === 'qt') el.innerHTML = veQuyTrinh();
-  else if (S.tab === 'cn') { if (!S.soHoa) veSo(); }
+  else if (S.tab === 'cn') { if (!S.soHoa && S.chieu !== 'tat') veSo(); }
   else if (S.tab === 'lich') LICH.gan(el);
 }
 
@@ -1530,7 +1537,7 @@ function dinhTuyen() {
   else if (phan[0] === 'so-hoa') { S.tab = 'cn'; S.soHoa = true; }
   else if (phan[0] !== 'phieu' && (S.tab === 'cn' || S.tab === 'lich')) S.tab = 'tq';   // bấm Văn thư trên menu
   SAN_LUU = true;
-  if (phan[0] === 'phieu') { veSoHoa(false); veChiTiet(decodeURIComponent(phan[1])); document.title = 'Chi tiết phiếu · Văn thư'; }
+  if (phan[0] === 'phieu') { veSoHoa(false); TIMCHUNG.hien(false); veChiTiet(decodeURIComponent(phan[1])); document.title = 'Chi tiết phiếu · Văn thư'; }
   else { CRCK.vet(['Văn thư']); veTongQuan(); document.title = 'Văn thư'; }
   CRCK.chon('vanthu', 'vanthu'); CRCK.thuGon();
   doChoTrang();
@@ -1551,17 +1558,17 @@ document.addEventListener('click', function (e) {
   else if (d.qtmo) { var qb = d.qtmo.split(':'); S.ngan = [qb[0], Number(qb[1])]; S.nganTu = d.qtmo; veNgan(); }
   else if (d.dongngan) { S.ngan = null; veNgan(); var vl = $('[data-qtmo="' + S.nganTu + '"]'); if (vl) vl.focus(); }
   else if (d.dv) { S.dv = d.dv; S.trang = 1; veManLoc(); }
-  else if (d.chieu) { var tuSh = dangSoHoa(); S.soHoa = false; if (tuSh) { khoiPhucSo(['so']); history.replaceState(null, '', '#/so'); } S.chieu = d.chieu; S.trang = 1; veManLoc(); }
+  else if (d.chieu) { S.soHoa = false; if (S.tab === 'cn') { khoiPhucSo(['so']); history.replaceState(null, '', '#/so'); } S.chieu = d.chieu; S.trang = 1; veManLoc(); }
   else if (d.sohoa) { S.soHoa = true; history.replaceState(null, '', '#/so-hoa'); veManLoc(); }
-  else if (d.kpi) { chonTab(d.kpi.split(':')[0]); }
+  else if (d.kpi) { var tabKpi = d.kpi.split(':')[0]; if (tabKpi === 'cn') moCheDoSo(); chonTab(tabKpi); }
   else if (d.cn) { S.cn = d.cn; chonTab('cn'); }
-  else if (d.qtso) { S.soHoa = false; chonTab('cn'); }
+  else if (d.qtso) { moCheDoSo(); chonTab('cn'); }
   else if (d.qtgiu) { moSoGiu(); }
   else if (d.tab) { chonTab(d.tab); }
   else if (d.locphieu) { S.locPhieu = d.locphieu; S.trang = 1; veNoiTab(); }
   else if (d.mo) { location.hash = '#/phieu/' + d.mo; }
   else if (d.trang) { S.trang = Number(d.trang); veNoiTab(); }
-  else if (d.so) { e.preventDefault(); S.soHoa = false; S.so = d.so; S.dvSo = d.so.split('|')[1]; S.trangSo = 1; datLaiLocSo(); if ($('.so-bo')) veSo(); else chonTab('cn'); }
+  else if (d.so) { e.preventDefault(); S.soHoa = false; S.chieu = d.so.split('|')[0]; S.so = d.so; S.dvSo = d.so.split('|')[1]; S.trangSo = 1; datLaiLocSo(); if ($('.so-bo')) veManLoc(); else chonTab('cn'); }
   else if (d.tabso) { S.tabSo = d.tabso; veSo(); }
   else if (d.loctt != null) { S.locTT = d.loctt; S.trangSo = 1; veNoiSo(); }
   else if (d.trangso) { S.trangSo = Number(d.trangso); veDsSoVb(); }
@@ -1591,8 +1598,8 @@ document.addEventListener('change', function (e) {
   var t = e.target;
   if (t.id === 'chonNam') { S.nam = Number(t.value); S.trangSo = 1; datLaiLocSo(); veSo(); }
   else if (t.id === 'mbChieu') {
-    var tuSh = dangSoHoa(); S.soHoa = t.value === 'sohoa'; S.trang = 1;
-    if (S.soHoa) history.replaceState(null, '', '#/so-hoa'); else { if (tuSh) { khoiPhucSo(['so']); history.replaceState(null, '', '#/so'); } S.chieu = t.value; }
+    S.soHoa = t.value === 'sohoa'; S.trang = 1;
+    if (S.soHoa) history.replaceState(null, '', '#/so-hoa'); else { if (S.tab === 'cn') { khoiPhucSo(['so']); history.replaceState(null, '', '#/so'); } S.chieu = t.value; }
     veManLoc();
   }
   else if (t.id === 'mbDv') { S.dv = t.value; S.trang = 1; veManLoc(); }
