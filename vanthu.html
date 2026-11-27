@@ -986,7 +986,7 @@ function veSo() {
   luuSo();
   veNoiSo();
 }
-/** Bộ chọn sổ ở hàng lọc: ô xổ xuống chọn sổ (nhóm theo Đến / Đi, kèm số văn bản và chỗ cần soát), năm, nút tải lại. */
+/** Bộ chọn sổ ở hàng lọc: ô xổ xuống chọn sổ (loại văn bản · đơn vị ban hành, nhóm theo Đến / Đi), năm, nút tải lại. */
 function veLocSo() {
   var el = $('#locSo'); if (!el) return;
   var o = document.activeElement, dangO = o && el.contains(o) ? o.id : '';
@@ -999,9 +999,7 @@ function dsChonSo() {
   var ds = soTheoLoc(), og = function (c, t) {
     var x = ds.filter(function (s) { return s.chieu === c; });
     return x.length ? '<optgroup label="' + t + '">' + x.map(function (s) {
-      var cs = chiSoSo(s.id);
-      var phu = [cs.vb.length ? cs.vb.length + ' văn bản · số cuối ' + cs.cuoi : 'chưa có số năm ' + S.nam, cs.lo.length ? 'nhảy ' + cs.lo.length : '', cs.giu.length ? 'giữ ' + cs.giu.length : '', cs.trung.length ? 'trùng ' + cs.trung.length : ''].filter(Boolean).join(' · ');
-      return '<option value="' + esc(s.id) + '"' + (S.so === s.id ? ' selected' : '') + '>' + esc(s.ten + (S.dv === 'Tất cả' ? ' · ' + s.dv : '') + (s.donViSo ? ' · ' + s.donViSo : '') + ' — ' + phu) + '</option>'; }).join('') + '</optgroup>' : '';
+      return '<option value="' + esc(s.id) + '"' + (S.so === s.id ? ' selected' : '') + '>' + esc(s.ten + (S.dv === 'Tất cả' ? ' · ' + s.dv : '') + (s.donViSo ? ' · ' + s.donViSo : '')) + '</option>'; }).join('') + '</optgroup>' : '';
   };
   return ds.length ? og('den', 'Văn thư đến') + og('di', 'Văn thư đi') : '<option value="">Không có sổ khớp</option>';
 }
