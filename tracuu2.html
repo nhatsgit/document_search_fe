@@ -17,6 +17,13 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Khmer:wght@400;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <script>(function () { var t = 'light'; try { t = localStorage.getItem('tclt_theme') || 'light'; } catch (e) {} document.documentElement.setAttribute('data-theme', t); })();</script>
+<script>
+/* ?nhung=1: nhúng vào trang khác (Văn thư số hóa) nên bỏ khung trang; đổi sáng, tối ở trang ngoài thì đổi theo */
+if (/[?&]nhung=1/.test(location.search)) {
+  document.documentElement.classList.add('nhung');
+  window.addEventListener('storage', function (e) { if (e.key === 'tclt_theme') document.documentElement.setAttribute('data-theme', e.newValue || 'light'); });
+}
+</script>
 <link rel="stylesheet" href="crck.css?v=10">
 <style>
 /* Tên biến riêng của trang, trỏ sang bộ màu CRCK trong crck.css */
@@ -391,6 +398,11 @@ a{color:var(--brand-700)}a:hover{color:var(--brand)}
 .nut-nhanh button.on{background:var(--brand);border-color:var(--brand)}
 .ma{color:var(--brand-700)}
 .bang thead tr{background:var(--soft)}
+/* bản nhúng: chỉ còn thanh tìm và kết quả */
+.nhung .ck-top,.nhung .ck-ben,.nhung .ck-man,.nhung .ck-offline,.nhung .ck-ph{display:none!important}
+.nhung .ck-khung{display:block}
+.nhung .ck-noi{padding:0 2px 2px}
+@media (max-width:900px){.nhung .khung{padding-left:0;padding-right:0}}
 </style>
 </head>
 <body>
