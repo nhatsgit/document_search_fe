@@ -448,6 +448,7 @@ dl.tt{font-size:14px;gap:7px 12px;grid-template-columns:132px minmax(0,1fr)}
 }
 /* Văn thư số hóa: Tra cứu 2.0 nhúng nguyên trang, cuộn bên trong khung */
 .khung-so-hoa{display:block;width:100%;height:var(--sh-cao,80dvh);min-height:480px;margin-top:10px;border:0;background:transparent}
+.khung-so-hoa[hidden]{display:none}   /* display:block ở trên đè thuộc tính hidden */
 .chon-mb{display:none}
 @media (max-width:720px){
   /* Điện thoại: bộ lọc là ô chọn thả xuống; sổ chọn bằng một ô; thanh tìm sổ gọn lại */
