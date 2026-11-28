@@ -42,6 +42,19 @@
 .tc-an{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .tc-trang{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;margin-top:10px;font-size:13px;color:var(--muted)}
 .tc-cho{opacity:.55}
+/* bộ hồ sơ */
+.tc-bang tbody tr.tc-bo{background:var(--brand-50)}
+.tc-bang tbody tr.tc-bo:hover{background:var(--brand-100)}
+.tc-bang tbody tr.tc-con{background:var(--soft);border-top:1px dashed var(--mau-line)}
+.tc-bang tbody tr.tc-con td:first-child{padding-left:46px;background:linear-gradient(var(--brand-200),var(--brand-200)) no-repeat 25px 0/2px 100%,linear-gradient(var(--brand-200),var(--brand-200)) no-repeat 25px 21px/13px 2px}
+.tc-con .tc-c2 b{font-weight:500}
+.tc-them{cursor:default!important}
+.tc-bang tbody tr.tc-them td:first-child{padding-left:46px}
+.tc-mui{float:left;display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;margin:0 8px 18px 0;border:1px solid var(--brand-200);border-radius:7px;background:var(--mau-card);color:var(--brand-700);cursor:pointer}
+.tc-mui svg{width:14px;height:14px;transition:transform .15s}
+.tc-mui.mo svg{transform:rotate(90deg)}
+.tc-nhanbo{display:inline-block;padding:2px 8px;border-radius:6px;background:var(--brand);color:#fff;font-size:11.5px;font-weight:600;white-space:nowrap}
+.tc-dembo{display:block;margin-top:3px;font-size:12px;font-weight:600;color:var(--brand-700)}
 /* xem nhanh */
 .tc-nen{position:fixed;inset:0;z-index:70;display:flex;align-items:center;justify-content:center;padding:24px 16px;background:rgba(16,26,20,.5)}
 .tc-hop{width:min(1100px,100%);height:min(820px,100%);display:flex;flex-direction:column;background:var(--mau-card);border-radius:16px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.28)}
@@ -71,6 +84,10 @@
   .tc-bang td.tc-c1{grid-column:1;grid-row:1}
   .tc-bang td.tc-nut{grid-column:2;grid-row:1}
   .tc-bang td[data-nhan]::before{content:attr(data-nhan) ": ";font-weight:600;color:var(--muted);font-size:12px}
+  .tc-bang tbody tr.tc-bo{background:var(--brand-50);border-color:var(--brand-200)}
+  .tc-bang tbody tr.tc-con{margin-left:16px;border:1px solid var(--mau-line);border-left:3px solid var(--brand-200);background:var(--mau-card)}
+  .tc-bang tbody tr.tc-con td:first-child{background:none}
+  .tc-bang tbody tr.tc-them td{grid-column:1/-1}
   .tc-nen{padding:0}
   .tc-hop{height:100%;border-radius:0}
   .tc-hop-than{flex-direction:column;overflow-y:auto}
