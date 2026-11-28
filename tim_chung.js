@@ -1,7 +1,7 @@
 /* =====================================================================
    Văn thư › Chức năng › "Tất cả": một ô tìm, một danh sách kết quả gộp từ cả hai nguồn.
    - Sổ văn thư: lọc ngay trên dữ liệu sổ trang đã tải (DS, các hàm tìm của vanthu.html).
-   - Số hóa: tìm trong toàn kho lưu trữ trên máy chủ (GET /api/exec?action=timKiem).
+   - Số hóa: tìm trong kho kết quả AI 2.0 trên máy chủ (GET /api/exec?action=timKiem&kho=ai2); các phòng đã chạy xong.
    Khung nằm ngoài #man nên vẽ lại trang không làm mất từ khoá, con trỏ và trang đang xem.
    ===================================================================== */
 (function () {
@@ -73,7 +73,7 @@
 
   /* ---------- số hóa (máy chủ) ---------- */
   function urlKho(trang) {
-    var p = new URLSearchParams({ action: 'timKiem', trang: trang, co: CO_MAY });
+    var p = new URLSearchParams({ action: 'timKiem', kho: 'ai2', trang: trang, co: CO_MAY });
     var q = T.q.split(/\s+/).filter(function (t) { return !(t.length > 1 && t[0] === '-'); }).join(' ').trim();   // máy chủ không hiểu "-từ"
     if (q) { p.set('q', q); if (T.truong !== 'tat') p.set('truong', T.truong); }
     if (CTY_KHO[T.ct]) p.set('phamVi', CTY_KHO[T.ct]);
@@ -111,12 +111,14 @@
     }).catch(function (e) { K.dang = false; if (e.bo || K !== KHO) return; K.loi = e.message; ve(); });
   }
   function ngayKho(d) { var m = /^(\d{4})-(\d\d)-(\d\d)/.exec(d.ngayIso || ''); return m ? m[3] + '/' + m[2] + '/' + m[1] : (d.ngay || (d.nam ? String(d.nam) : '—')); }
+  /** Văn bản nằm trong file PDF nhiều văn bản: ghi rõ trang nào (Google Drive mở cả file). */
+  function trangFile(d) { return d.trangTu ? 'Trang ' + d.trangTu + (d.trangDen > d.trangTu ? '–' + d.trangDen : '') + ' trong file' : ''; }
   function nutKho(d) {
     return d.driveId ? '<button type="button" class="tc-ic" data-tcxem="' + esc(d.id) + '" title="Xem nhanh" aria-label="Xem nhanh">' + IC_XEM + '</button>' +
       '<a class="tc-ic" href="' + linkTai(d.driveId) + '" target="_blank" rel="noopener" title="Tải xuống" aria-label="Tải ' + esc(d.tenFile) + '">' + IC_TAI + '</a>' : '';
   }
   function dongKho(d) {
-    var ghi = [d.tenHoSo ? 'Hồ sơ: ' + d.tenHoSo : '', d.thung ? 'Thùng ' + d.thung : '', d.phong].filter(Boolean).join(' · ');
+    var ghi = [d.tenHoSo ? 'Hồ sơ: ' + d.tenHoSo : '', d.thung ? 'Thùng ' + d.thung : '', trangFile(d), d.phong].filter(Boolean).join(' · ');
     return '<tr data-tcxem="' + esc(d.id) + '"><td class="tc-c1"><span class="chip tc-nguon">Số hóa</span> ' + (d.loai ? '<span class="tc-loai" title="' + esc(d.loai) + '">' + esc(d.loai) + '</span>' : '') +
       '<span class="tc-so">' + (d.soKyHieu ? to(d.soKyHieu, 'so') : 'Không có số') + '</span></td>' +
       '<td class="tc-c2"><b>' + to(d.trichYeu || d.tenFile || 'Chưa có dữ liệu', 'trich') + '</b>' + (ghi ? '<span class="tc-phu">' + esc(ghi) + '</span>' : '') + '</td>' +
@@ -179,11 +181,11 @@
     var h = $k('#tcXem');
     if (!XEM) { h.innerHTML = ''; document.body.style.overflow = ''; return; }
     var d = XEM, ten = [d.loai, d.soKyHieu].filter(Boolean).join(' ') || d.tenFile;
-    var tt = [['Trích yếu', d.trichYeu], ['Ngày', ngayKho(d)], ['Cơ quan ban hành', d.coQuan], ['Đối tác', d.doiTacB], ['Giá trị', d.giaTri], ['Tên hồ sơ', d.tenHoSo], ['Thùng', d.thung], ['Công ty · Phòng', [d.congTy, d.phong].filter(Boolean).join(' · ')], ['Số trang', d.soTrang], ['File', d.tenFile]]
+    var tt = [['Trích yếu', d.trichYeu], ['Ngày', ngayKho(d)], ['Cơ quan ban hành', d.coQuan], ['Đối tác', d.doiTacB], ['Giá trị', d.giaTri], ['Tên hồ sơ', d.tenHoSo], ['Thùng', d.thung], ['Công ty · Phòng', [d.congTy, d.phong].filter(Boolean).join(' · ')], ['Số trang', d.soTrang], ['Vị trí trong file', trangFile(d)], ['File', d.tenFile], ['Kiểm tra', d.canSoatXet ? 'AI đọc, cần soát xét lại' : '']]
       .filter(function (x) { return x[1]; }).map(function (x) { return '<dt>' + x[0] + '</dt><dd>' + esc(x[1]) + '</dd>'; }).join('');
     h.innerHTML = '<div class="tc-nen" data-tcdong="1"><div class="tc-hop" role="dialog" aria-modal="true" aria-label="' + esc(ten) + '"><div class="tc-hop-dau"><h2>' + esc(ten) + '</h2><button type="button" class="tc-dong" data-tcdong="1" aria-label="Đóng">×</button></div>' +
       '<div class="tc-hop-than"><iframe src="' + linkXem(d.driveId, 'preview') + '" title="Xem file ' + esc(d.tenFile) + '" allow="autoplay"></iframe><div class="tc-hop-ben"><dl>' + tt + '</dl>' +
-      '<a class="nut chinh" href="index.html#/tat-ca/tim?vb=' + encodeURIComponent(d.id) + '" target="_blank" rel="noopener">Chi tiết trong kho</a><a class="nut" href="' + linkXem(d.driveId) + '" target="_blank" rel="noopener">Mở trên Drive</a><a class="nut" href="' + linkTai(d.driveId) + '" target="_blank" rel="noopener">Tải xuống</a>' +
+      '<a class="nut chinh" href="' + linkXem(d.driveId) + '" target="_blank" rel="noopener">Mở trên Drive</a><a class="nut" href="' + linkTai(d.driveId) + '" target="_blank" rel="noopener">Tải xuống</a>' +
       '<small>Xem và tải qua Google Drive: cần đăng nhập tài khoản có quyền xem thư mục lưu trữ.</small></div></div></div></div>';
     document.body.style.overflow = 'hidden';
     h.querySelector('.tc-dong').focus();
@@ -198,7 +200,7 @@
       '<label class="tc-nhan">Năm<select class="o" id="tcNam">' + chon([['', 'Mọi năm']].concat(nam.map(function (x) { return [String(x), String(x)]; })), T.nam) + '</select></label>' +
       '<div class="tc-nhan tc-lon"><label for="tcQ">Tìm văn bản</label><div class="tc-o"><select id="tcTruong" aria-label="Tìm trong trường">' + chon(TRUONG, T.truong) + '</select>' +
       '<input id="tcQ" type="search" autocomplete="off" placeholder="Số ký hiệu, trích yếu, cơ quan, đối tác…"></div></div></div>' +
-      '<div class="tc-goi">Tìm cùng lúc trong sổ văn thư và kho số hóa. Gõ không dấu cũng được; đặt "cụm từ" trong ngoặc kép để khớp nguyên cụm.</div></section>' +
+      '<div class="tc-goi">Tìm cùng lúc trong sổ văn thư và kho số hóa. Gõ không dấu cũng được; đặt "cụm từ" trong ngoặc kép để khớp nguyên cụm. Số hóa: dữ liệu AI 2.0 của TCHC, KHĐT, KTNN (chưa có TCKT).</div></section>' +
       '<div class="tc-thanh"><span class="tc-dem" id="tcDem" role="status"></span><span class="tc-ghi" id="tcGhi" role="status"></span><select class="o" id="tcSx" aria-label="Sắp xếp"><option value="lq">Liên quan nhất</option><option value="moi">Mới nhất</option><option value="cu">Cũ nhất</option></select></div>' +
       '<div id="tcKq"></div><div id="tcXem"></div>';
     document.getElementById('man').parentNode.appendChild(khung);

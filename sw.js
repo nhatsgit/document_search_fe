@@ -1,8 +1,8 @@
 /* Chạy offline cho khung trang: trang, CSS, JS, ảnh cùng nguồn.
    Mở lần nào cũng dùng bản đã lưu trước rồi cập nhật ngầm cho lần sau.
    Dữ liệu (API) không lưu ở đây: trang Văn thư tự giữ bản sổ gần nhất trong IndexedDB. */
-var PHIEN_BAN = 'crck-v4';
-var KHUNG = ['./', 'index.html', 'vanthu.html', 'tracuu2.html', 'lich.html', 'crck.css', 'crck.js', 'lich.css', 'lich.js', 'tim_chung.css?v=2', 'tim_chung.js?v=2', 'img/logo-vrg.png', 'img/base-service.png', 'img/base-office.png', 'img/icon-192.png'];
+var PHIEN_BAN = 'crck-v5';
+var KHUNG = ['./', 'index.html', 'vanthu.html', 'tracuu2.html', 'lich.html', 'crck.css', 'crck.js', 'lich.css', 'lich.js', 'tim_chung.css?v=2', 'tim_chung.js?v=3', 'img/logo-vrg.png', 'img/base-service.png', 'img/base-office.png', 'img/icon-192.png'];
 
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(PHIEN_BAN).then(function (c) { return Promise.all(KHUNG.map(function (u) { return c.add(u).catch(function () {}); })); }).then(function () { return self.skipWaiting(); }));
